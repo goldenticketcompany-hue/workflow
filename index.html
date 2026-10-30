@@ -74,7 +74,8 @@
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
-    .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1px solid var(--status-fuchsia); }
+    .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
 
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
@@ -284,16 +285,8 @@
           <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
         </div>
         <div class="form-group">
-          <label>Reparto di Riferimento</label>
-          <select id="todoSit" class="form-control">
-            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-            <option value="Servizi Tecnici">Servizi Tecnici</option>
-            <option value="Amministrazione">Amministrazione</option>
-            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-            <option value="Legale">Legale</option>
-            <option value="Promo">Promo</option>
-            <option value="Logistica">Logistica</option>
-          </select>
+          <label>Reparto di Riferimento / Nota</label>
+          <input type="text" id="todoSit" class="form-control" placeholder="Es. Legale o Contratto Beatrice">
         </div>
         <div class="form-group">
           <label>Azione da fare *</label>
@@ -320,16 +313,8 @@
           <input type="text" id="editTodoTitle" class="form-control" required>
         </div>
         <div class="form-group">
-          <label>Reparto di Riferimento</label>
-          <select id="editTodoSit" class="form-control">
-            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-            <option value="Servizi Tecnici">Servizi Tecnici</option>
-            <option value="Amministrazione">Amministrazione</option>
-            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-            <option value="Legale">Legale</option>
-            <option value="Promo">Promo</option>
-            <option value="Logistica">Logistica</option>
-          </select>
+          <label>Reparto di Riferimento / Nota</label>
+          <input type="text" id="editTodoSit" class="form-control">
         </div>
         <div class="form-group">
           <label>Azione / Note *</label>
@@ -356,7 +341,7 @@
       </div>
       <div style="display: flex; justify-content: space-between; margin-top: 18px; gap: 10px;">
         <button type="button" class="btn-secondary-outline" style="flex:1;" onclick="addTodoCommentOnly()">💬 Aggiungi Nota</button>
-        <button type="button" class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px;" onclick="resolveManualTodoWithComment()">✅ Risolto</button>
+        <button type="button" class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px;" onclick="resolveManualTodoWithComment()">✅ Segna Risolto</button>
       </div>
     </div>
   </div>
@@ -445,6 +430,8 @@
         if (data && data.data) {
           pratiche = data.data.pratiche || [];
           manualTodos = data.data.manualTodos || [];
+          
+          manualTodos.forEach(t => t.isManual = true);
         } else {
           pratiche = getDemoData();
           manualTodos = [];
@@ -500,24 +487,15 @@
 
         if (filter === 'ALL') return true;
 
-        // Filtro avanzato: se è selezionato un reparto specifico, mostra la pratica SOLO se ha uno stato attivo (non verde/spento) per quel reparto
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
-        const deptIndex = ROUTE_STEPS.findIndex(s => s.label === filter);
 
         const isCurrent = (currentDeptLabel === filter);
-        const isApproved = (p.approvedSteps && p.approvedSteps.includes(deptIndex));
-        
         const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filter);
         const hasAlertHere = (p.alertsList || []).some(al => al.target === filter);
         const hasMailHere = (p.mailDepts || []).includes(filter);
 
-        // Deve mostrare se è il current (fucsia) oppure ha stallo (viola), blocco/avviso (rosso/giallo) o mail in arrivo (blu)
-        if (isCurrent || hasStatusHere || hasAlertHere || hasMailHere) {
-          return true;
-        }
-
-        return false;
+        return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
       });
 
       filteredPratiche.forEach((p) => {
@@ -684,6 +662,21 @@
       const search = (document.getElementById('searchTodoInput')?.value || '').toLowerCase();
       const filterDept = document.getElementById('filterTodoDept')?.value || 'ALL';
 
+      // Ordiniamo i task manuali: prima i non risolti, poi i risolti in fondo
+      const formattedManuals = [];
+      const resolvedManuals = [];
+
+      manualTodos.forEach(m => {
+        const item = { ...m, isManual: true };
+        if (item.isResolved) {
+          resolvedManuals.push(item);
+        } else {
+          formattedManuals.push(item);
+        }
+      });
+
+      const sortedManuals = [...formattedManuals, ...resolvedManuals];
+
       let autoTasks = [];
 
       pratiche.forEach(p => {
@@ -741,14 +734,17 @@
         }
       });
 
-      const allTasks = [...manualTodos, ...autoTasks];
+      const allTasks = [...sortedManuals, ...autoTasks];
 
-      // Filtra per ricerca e reparto
       const filteredTasks = allTasks.filter(t => {
-        const matchSearch = t.title.toLowerCase().includes(search) || t.action.toLowerCase().includes(search) || t.situation.toLowerCase().includes(search);
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filterDept === 'ALL') return true;
+        
+        if (t.isManual) {
+          return (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
+        }
         return (t.dept || '').toLowerCase() === filterDept.toLowerCase();
       });
 
@@ -759,31 +755,34 @@
 
       filteredTasks.forEach((t, idx) => {
         let badgeClass = 'todo-badge';
-        if (t.situation.includes('BLOCCATO')) badgeClass += ' red';
-        else if (t.situation.includes('DA:')) badgeClass += ' amber';
-        else if (t.situation.includes('POSTA IN ARRIVO')) badgeClass += ' amber';
-        else if (t.situation.includes('IN ATTESA')) badgeClass += ' fuchsia';
+        if (t.isResolved) badgeClass += ' green';
+        else if (t.situation && t.situation.includes('BLOCCATO')) badgeClass += ' red';
+        else if (t.situation && t.situation.includes('DA:')) badgeClass += ' amber';
+        else if (t.situation && t.situation.includes('POSTA IN ARRIVO')) badgeClass += ' amber';
+        else if (t.situation && t.situation.includes('IN ATTESA')) badgeClass += ' fuchsia';
 
         const item = document.createElement('div');
         item.className = 'todo-card';
+        if (t.isResolved) item.style.opacity = '0.75';
+
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
             ${t.isManual ? `
             <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
               <button type="button" class="btn-priority" onclick="moveManualTodo('${t.id}', -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button type="button" class="btn-priority" onclick="moveManualTodo('${t.id}', 1)" ${idx === manualTodos.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button type="button" class="btn-priority" onclick="moveManualTodo('${t.id}', 1)" ${idx === sortedManuals.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
             ` : `<div style="width: 32px;"></div>`}
             <div style="flex: 1;">
-              <span class="${badgeClass}">${t.situation}</span>
+              <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
               <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
             </div>
             ${t.isManual ? `
               <div style="display: flex; gap: 6px; align-items: center;">
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${t.id}')">✏️</button>
-                <button type="button" class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬 / ✅</button>
-                <button type="button" onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px;" title="Elimina task">✕</button>
+                <button type="button" class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬</button>
+                <button type="button" onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               </div>
             ` : ''}
           </div>
@@ -811,19 +810,21 @@
 
     function saveManualTodo(e) {
       e.preventDefault();
-      const sitVal = document.getElementById('todoSit').value;
+      const sitVal = document.getElementById('todoSit').value.trim();
       manualTodos.unshift({
-        id: 'mt_' + Date.now(),
+        id: 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         title: document.getElementById('todoTitle').value,
         dept: sitVal,
         situation: sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE',
         action: document.getElementById('todoAction').value,
-        isManual: true
+        isManual: true,
+        isResolved: false
       });
       renderTodoList();
       saveData();
       closeTodoModal();
       document.getElementById('todoTitle').value = '';
+      document.getElementById('todoSit').value = '';
       document.getElementById('todoAction').value = '';
     }
 
@@ -831,12 +832,10 @@
       const item = manualTodos.find(t => t.id === id);
       if (!item) return;
       document.getElementById('editTodoId').value = item.id;
-      document.getElementById('editTodoTitle').value = item.title;
-      let cleanSit = (item.situation || '').replace(/^[📌🟣✉️❌⚠️⏳]\s*/, '').replace(/\s*-\s*.*$/, '');
-      if (document.getElementById('editTodoSit').querySelector(`option[value="${cleanSit}"]`)) {
-        document.getElementById('editTodoSit').value = cleanSit;
-      }
-      document.getElementById('editTodoAction').value = item.action;
+      document.getElementById('editTodoTitle').value = item.title || '';
+      let cleanSit = (item.situation || '').replace(/^[📌🟣✉️❌⚠️⏳✅]\s*/, '');
+      document.getElementById('editTodoSit').value = item.dept || cleanSit;
+      document.getElementById('editTodoAction').value = item.action || '';
       document.getElementById('editTodoModal').classList.remove('hidden');
     }
 
@@ -850,9 +849,11 @@
       const item = manualTodos.find(t => t.id === id);
       if (item) {
         item.title = document.getElementById('editTodoTitle').value;
-        const sitVal = document.getElementById('editTodoSit').value;
+        const sitVal = document.getElementById('editTodoSit').value.trim();
         item.dept = sitVal;
-        item.situation = sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE';
+        if (!item.isResolved) {
+          item.situation = sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE';
+        }
         item.action = document.getElementById('editTodoAction').value;
         renderTodoList();
         saveData();
@@ -895,10 +896,15 @@
       const id = document.getElementById('todoCommentId').value;
       const text = document.getElementById('todoCommentText').value.trim();
       const item = manualTodos.find(t => t.id === id);
-      if (item && text) {
-        item.action += ` | Nota risolutiva: ${text}`;
+      if (item) {
+        if (text) {
+          item.action += ` | Risolto: ${text}`;
+        }
+        item.isResolved = true;
+        // Spostiamo il task risolto in fondo alla lista dei manuali
+        manualTodos = manualTodos.filter(t => t.id !== id);
+        manualTodos.push(item);
       }
-      manualTodos = manualTodos.filter(t => t.id !== id);
       renderTodoList();
       saveData();
       closeTodoCommentModal();
@@ -1034,6 +1040,7 @@
         select.appendChild(option);
       });
 
+      document.getElementById('interveneModal').classList.add('hidden');
       document.getElementById('interveneModal').classList.remove('hidden');
     }
 
