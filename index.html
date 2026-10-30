@@ -62,6 +62,7 @@
     .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
     .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 20px !important; }
     .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
+    .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
 
     @keyframes pulse-warn {
       0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
@@ -457,6 +458,17 @@
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
 
+        // Raccoglie i reparti che hanno ricevuto messaggi in chat (per mostrare la letterina ✉️)
+        const mailDepts = [];
+        if (p.notesHistory) {
+          p.notesHistory.forEach(n => {
+            if (n.dept && n.dept !== 'Sistema' && n.dept !== 'Modifica') {
+              // Se un reparto scrive un messaggio, lo consideriamo come notifica o attività per gli altri/aggiornamento
+              // Per farlo apparire come "posta in arrivo" su tutti i reparti tranne chi ha scritto l'ultimo, oppure semplicemente se c'è un messaggio recente
+            }
+          });
+        }
+
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
           let symbol = idx + 1;
@@ -470,6 +482,9 @@
           } else if (warnedTargets.includes(s.label)) {
             cls += ' warning-alert';
             symbol = '⚠️';
+          } else if (p.hasMail && p.hasMail === s.label) {
+            cls += ' has-mail';
+            symbol = '✉️';
           } else if (p.approvedSteps.includes(idx)) {
             cls += ' done';
             symbol = '✓';
@@ -613,6 +628,14 @@
           });
         }
 
+        if (p.hasMail) {
+          autoTasks.push({
+            title: `${p.client} - ${p.title}`,
+            situation: `✉️ ${p.hasMail} - POSTA IN ARRIVO`,
+            action: `Nuovo messaggio o comunicazione ricevuta in chat.`
+          });
+        }
+
         if (p.alertsList && p.alertsList.length > 0) {
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
@@ -624,7 +647,7 @@
           });
         }
 
-        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0)) {
+        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && !p.hasMail) {
           autoTasks.push({
             title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
@@ -644,6 +667,7 @@
         let badgeClass = 'todo-badge';
         if (t.situation.includes('BLOCCATO')) badgeClass += ' red';
         else if (t.situation.includes('DA:')) badgeClass += ' amber';
+        else if (t.situation.includes('POSTA IN ARRIVO')) badgeClass += ' amber';
         else if (t.situation.includes('IN ATTESA')) badgeClass += ' fuchsia';
 
         const item = document.createElement('div');
@@ -706,6 +730,13 @@
       if (!activeItem) return;
       selectedStepIdx = idx;
       const deptLabel = ROUTE_STEPS[idx].label;
+
+      // Se il reparto cliccato aveva la letterina della posta, la azzeriamo (letta!)
+      if (activeItem.hasMail === deptLabel) {
+        activeItem.hasMail = null;
+        saveData();
+      }
+
       document.getElementById('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
       document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
 
@@ -758,15 +789,18 @@
 
       if (!activeItem.statusMessages) activeItem.statusMessages = [];
 
-      // RIMUOVI SEMPRE LO STALLO DAL REPARTO MITTENTE QUANDO SI RIMANDA AD UN ALTRO
       activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
 
-      // Aggiunge il nuovo stallo sul reparto destinatario scelto
       activeItem.statusMessages.push({
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         dept: targetDept,
         text: text
       });
+
+      // Imposta la notifica di posta/comunicazione in arrivo sul reparto destinatario se è diverso dal mittente
+      if (senderDept !== targetDept) {
+        activeItem.hasMail = targetDept;
+      }
 
       activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
 
@@ -785,6 +819,10 @@
 
       if (activeItem.statusMessages) {
         activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
+      }
+
+      if (activeItem.hasMail === deptLabel) {
+        activeItem.hasMail = null;
       }
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
@@ -841,6 +879,8 @@
       };
 
       activeItem.alertsList.push(newAlert);
+      activeItem.hasMail = targetDept; // Accende la letterina sul reparto destinatario
+
       activeItem.notesHistory.push({ 
         date: getNow(), 
         dept: activeSenderDept, 
@@ -849,7 +889,6 @@
 
       saveData();
       closeInterveneModal();
-      document.getElementById('interveneNote').value = '';
     }
 
     function openChatFromStepClick() {
@@ -982,6 +1021,7 @@
         approvedSteps: [],
         statusMessages: [],
         alertsList: [],
+        hasMail: null,
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
       saveData();
