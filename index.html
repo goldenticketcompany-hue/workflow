@@ -129,10 +129,21 @@
     </div>
 
     <div id="sectionTodo" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="font-size: 18px; color: var(--gold-light);">Attività Quotidiane & Scadenze Bloccate</h3>
+      <div class="toolbar">
+        <input type="text" id="searchTodoInput" class="search-input" oninput="renderApp()" placeholder="Cerca task o attività...">
+        <select id="filterTodoDept" class="select-filter" onchange="renderApp()">
+          <option value="ALL">Tutti i Reparti</option>
+          <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+          <option value="Servizi Tecnici">Servizi Tecnici</option>
+          <option value="Amministrazione">Amministrazione</option>
+          <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+          <option value="Legale">Legale</option>
+          <option value="Promo">Promo</option>
+          <option value="Logistica">Logistica</option>
+        </select>
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
       </div>
+
       <div id="todoList"></div>
     </div>
   </div>
@@ -273,8 +284,16 @@
           <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
         </div>
         <div class="form-group">
-          <label>Reparto / Situazione</label>
-          <input type="text" id="todoSit" class="form-control" placeholder="Es. Logistica">
+          <label>Reparto di Riferimento</label>
+          <select id="todoSit" class="form-control">
+            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+            <option value="Servizi Tecnici">Servizi Tecnici</option>
+            <option value="Amministrazione">Amministrazione</option>
+            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+            <option value="Legale">Legale</option>
+            <option value="Promo">Promo</option>
+            <option value="Logistica">Logistica</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Azione da fare *</label>
@@ -282,6 +301,42 @@
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICA TASK MANUALE -->
+  <div class="modal-overlay hidden" id="editTodoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Task Manuale</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeEditTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedManualTodo(event)">
+        <input type="hidden" id="editTodoId">
+        <div class="form-group">
+          <label>Titolo Attività *</label>
+          <input type="text" id="editTodoTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Reparto di Riferimento</label>
+          <select id="editTodoSit" class="form-control">
+            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+            <option value="Servizi Tecnici">Servizi Tecnici</option>
+            <option value="Amministrazione">Amministrazione</option>
+            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+            <option value="Legale">Legale</option>
+            <option value="Promo">Promo</option>
+            <option value="Logistica">Logistica</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Azione / Note *</label>
+          <textarea id="editTodoAction" class="form-control" rows="3" required></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Modifiche</button>
         </div>
       </form>
     </div>
@@ -441,9 +496,28 @@
 
       const filteredPratiche = pratiche.filter(p => {
         const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search);
-        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
-        const matchDept = (filter === 'ALL') || currentDept.includes(filter);
-        return matchSearch && matchDept;
+        if (!matchSearch) return false;
+
+        if (filter === 'ALL') return true;
+
+        // Filtro avanzato: se è selezionato un reparto specifico, mostra la pratica SOLO se ha uno stato attivo (non verde/spento) per quel reparto
+        const stepIdx = p.currentStepIdx || 0;
+        const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
+        const deptIndex = ROUTE_STEPS.findIndex(s => s.label === filter);
+
+        const isCurrent = (currentDeptLabel === filter);
+        const isApproved = (p.approvedSteps && p.approvedSteps.includes(deptIndex));
+        
+        const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filter);
+        const hasAlertHere = (p.alertsList || []).some(al => al.target === filter);
+        const hasMailHere = (p.mailDepts || []).includes(filter);
+
+        // Deve mostrare se è il current (fucsia) oppure ha stallo (viola), blocco/avviso (rosso/giallo) o mail in arrivo (blu)
+        if (isCurrent || hasStatusHere || hasAlertHere || hasMailHere) {
+          return true;
+        }
+
+        return false;
       });
 
       filteredPratiche.forEach((p) => {
@@ -607,6 +681,9 @@
       if(!container) return;
       container.innerHTML = '';
 
+      const search = (document.getElementById('searchTodoInput')?.value || '').toLowerCase();
+      const filterDept = document.getElementById('filterTodoDept')?.value || 'ALL';
+
       let autoTasks = [];
 
       pratiche.forEach(p => {
@@ -617,6 +694,7 @@
             autoTasks.push({
               id: 'st_auto_' + st.id,
               title: `${p.client} - ${p.title}`,
+              dept: st.dept,
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
               isManual: false
@@ -627,8 +705,9 @@
         if (p.mailDepts && p.mailDepts.length > 0) {
           p.mailDepts.forEach(dept => {
             autoTasks.push({
-              id: 'mail_auto_' + dept,
+              id: 'mail_auto_' + dept + '_' + p.id,
               title: `${p.client} - ${p.title}`,
+              dept: dept,
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
               isManual: false
@@ -642,6 +721,7 @@
             autoTasks.push({
               id: 'al_auto_' + al.id,
               title: `${p.client} - ${p.title}`,
+              dept: al.target,
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
               isManual: false
@@ -653,6 +733,7 @@
           autoTasks.push({
             id: 'wait_auto_' + p.id,
             title: `${p.client} - ${p.title}`,
+            dept: currentDept,
             situation: `⏳ ${currentDept} - IN ATTESA`,
             action: `Pratica ferma in attesa di approvazione o avanzamento.`,
             isManual: false
@@ -662,12 +743,21 @@
 
       const allTasks = [...manualTodos, ...autoTasks];
 
-      if (allTasks.length === 0) {
+      // Filtra per ricerca e reparto
+      const filteredTasks = allTasks.filter(t => {
+        const matchSearch = t.title.toLowerCase().includes(search) || t.action.toLowerCase().includes(search) || t.situation.toLowerCase().includes(search);
+        if (!matchSearch) return false;
+
+        if (filterDept === 'ALL') return true;
+        return (t.dept || '').toLowerCase() === filterDept.toLowerCase();
+      });
+
+      if (filteredTasks.length === 0) {
         container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna attività in sospeso.</div>`;
         return;
       }
 
-      allTasks.forEach((t, idx) => {
+      filteredTasks.forEach((t, idx) => {
         let badgeClass = 'todo-badge';
         if (t.situation.includes('BLOCCATO')) badgeClass += ' red';
         else if (t.situation.includes('DA:')) badgeClass += ' amber';
@@ -691,6 +781,7 @@
             </div>
             ${t.isManual ? `
               <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${t.id}')">✏️</button>
                 <button type="button" class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬 / ✅</button>
                 <button type="button" onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px;" title="Elimina task">✕</button>
               </div>
@@ -720,10 +811,12 @@
 
     function saveManualTodo(e) {
       e.preventDefault();
+      const sitVal = document.getElementById('todoSit').value;
       manualTodos.unshift({
         id: 'mt_' + Date.now(),
         title: document.getElementById('todoTitle').value,
-        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
+        dept: sitVal,
+        situation: sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE',
         action: document.getElementById('todoAction').value,
         isManual: true
       });
@@ -731,8 +824,40 @@
       saveData();
       closeTodoModal();
       document.getElementById('todoTitle').value = '';
-      document.getElementById('todoSit').value = '';
       document.getElementById('todoAction').value = '';
+    }
+
+    function openEditTodoModal(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      document.getElementById('editTodoId').value = item.id;
+      document.getElementById('editTodoTitle').value = item.title;
+      let cleanSit = (item.situation || '').replace(/^[📌🟣✉️❌⚠️⏳]\s*/, '').replace(/\s*-\s*.*$/, '');
+      if (document.getElementById('editTodoSit').querySelector(`option[value="${cleanSit}"]`)) {
+        document.getElementById('editTodoSit').value = cleanSit;
+      }
+      document.getElementById('editTodoAction').value = item.action;
+      document.getElementById('editTodoModal').classList.remove('hidden');
+    }
+
+    function closeEditTodoModal() {
+      document.getElementById('editTodoModal').classList.add('hidden');
+    }
+
+    function saveEditedManualTodo(e) {
+      e.preventDefault();
+      const id = document.getElementById('editTodoId').value;
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.title = document.getElementById('editTodoTitle').value;
+        const sitVal = document.getElementById('editTodoSit').value;
+        item.dept = sitVal;
+        item.situation = sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE';
+        item.action = document.getElementById('editTodoAction').value;
+        renderTodoList();
+        saveData();
+      }
+      closeEditTodoModal();
     }
 
     function deleteManualTodoItem(id) {
@@ -768,6 +893,11 @@
 
     function resolveManualTodoWithComment() {
       const id = document.getElementById('todoCommentId').value;
+      const text = document.getElementById('todoCommentText').value.trim();
+      const item = manualTodos.find(t => t.id === id);
+      if (item && text) {
+        item.action += ` | Nota risolutiva: ${text}`;
+      }
       manualTodos = manualTodos.filter(t => t.id !== id);
       renderTodoList();
       saveData();
