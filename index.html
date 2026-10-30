@@ -59,8 +59,15 @@
 
     .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
     .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
+    .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
     .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 20px !important; }
     .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
+
+    @keyframes pulse-warn {
+      0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+    }
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
@@ -141,7 +148,7 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
         
-        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #86198f; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">📝 Inserisci Motivo dello Stallo / Stato</button>
+        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Metti in Attesa (Viola)</button>
 
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
@@ -149,20 +156,24 @@
     </div>
   </div>
 
-  <!-- MODAL INSERIMENTO MOTIVO / STATO DEL REPARTO -->
+  <!-- MODAL INSERIMENTO MOTIVO / STALLO (VIOLA) CON SCELTA DESTINATARIO -->
   <div class="modal-overlay hidden" id="statusModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">Motivo dello Stallo / Stato Attuale</div>
+        <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStatusModal()">✕</button>
       </div>
       <form onsubmit="saveDepartmentStatus(event)">
+        <div class="form-group" id="statusTargetGroup">
+          <label>Invia Stallo a quale Reparto?</label>
+          <select id="statusTargetSelect" class="form-control"></select>
+        </div>
         <div class="form-group">
-          <label>Spiega perché il reparto è in attesa *</label>
-          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di consegnare scheda tecnica..."></textarea>
+          <label>Motivo dello Stallo / Attesa *</label>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. Manca chiarimento su rider tecnico, rimandato indietro..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
-          <button type="submit" class="btn-gold">Pubblica Comunicazione</button>
+          <button type="submit" class="btn-gold">Conferma Stallo</button>
         </div>
       </form>
     </div>
@@ -283,7 +294,6 @@
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeChatModal()">✕</button>
       </div>
 
-      <!-- AGGIUNGI NUOVO MESSAGGIO IN CHAT -->
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
         <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi un commento o integrazione</div>
         <div class="form-group" style="margin-bottom: 10px;">
@@ -375,7 +385,6 @@
       } catch(e) {}
     }
 
-    // Sincronizzazione in tempo reale automatica ogni 4 secondi da Supabase
     setInterval(async () => {
       try {
         const { data } = await client
@@ -404,10 +413,12 @@
         owner: 'Fabrizio R.',
         currentStepIdx: 1,
         approvedSteps: [0],
-        statusMessage: null,
+        statusMessages: [
+          { id: 'st_1', dept: 'Servizi Tecnici', text: 'In attesa di chiarimenti sul rider.' }
+        ],
         alertsList: [],
         notesHistory: [
-          { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserito blocco/annullamento.' }
+          { date: '30/10 09:00', dept: 'Servizi Tecnici', text: 'Impostato stallo su Servizi Tecnici.' }
         ]
       }];
     }
@@ -431,6 +442,7 @@
       });
 
       filteredPratiche.forEach((p, index) => {
+        if (!p.statusMessages) p.statusMessages = [];
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
 
@@ -439,6 +451,7 @@
 
         const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
+        const statusDepts = p.statusMessages.map(st => st.dept);
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -447,6 +460,9 @@
           if (rejectedTargets.includes(s.label)) {
             cls += ' rejected';
             symbol = '✕';
+          } else if (statusDepts.includes(s.label)) {
+            cls += ' status-purple';
+            symbol = '🟣';
           } else if (warnedTargets.includes(s.label)) {
             cls += ' warning-alert';
             symbol = '⚠️';
@@ -468,17 +484,19 @@
 
         let bannersHTML = '';
 
-        if (p.statusMessage && p.statusMessage.text) {
+        // BANNER STATI / STALLI MULTIPLI (Cornice Viola)
+        p.statusMessages.forEach(st => {
           bannersHTML += `
             <div class="alert-banner alert-status">
               <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
-                🟣 <strong>Stato (${p.statusMessage.dept}):</strong> "${p.statusMessage.text}"
+                🟣 <strong>Stato (${st.dept}):</strong> "${st.text}"
               </span>
-              <button class="btn-solve-sm" onclick="removeStatusMessage('${p.id}')">✅ Risolto</button>
+              <button class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
             </div>
           `;
-        }
+        });
 
+        // BANNER SEGNALAZIONI E PROBLEMI / BLOCCHI
         p.alertsList.forEach((al) => {
           const isReject = al.type === 'REJECT';
           const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
@@ -544,11 +562,16 @@
       saveData();
     }
 
-    function removeStatusMessage(praticaId) {
+    function removeStatusMessage(praticaId, statusId) {
       const item = pratiche.find(p => p.id === praticaId);
-      if (!item) return;
-      item.statusMessage = null;
-      item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: '✅ Risolto e rimosso lo stato di stallo del reparto.' });
+      if (!item || !item.statusMessages) return;
+      
+      const removed = item.statusMessages.find(st => st.id === statusId);
+      item.statusMessages = item.statusMessages.filter(st => st.id !== statusId);
+
+      if (removed) {
+        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto stallo su ${removed.dept}: "${removed.text}"` });
+      }
       saveData();
     }
 
@@ -578,11 +601,13 @@
       pratiche.forEach(p => {
         const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
 
-        if (p.statusMessage && p.statusMessage.text) {
-          autoTasks.push({
-            title: `${p.client} - ${p.title}`,
-            situation: `🟣 ${p.statusMessage.dept} - IN ATTESA`,
-            action: `Motivo: ${p.statusMessage.text}`
+        if (p.statusMessages && p.statusMessages.length > 0) {
+          p.statusMessages.forEach(st => {
+            autoTasks.push({
+              title: `${p.client} - ${p.title}`,
+              situation: `🟣 ${st.dept} - IN ATTESA`,
+              action: `Motivo: ${st.text}`
+            });
           });
         }
 
@@ -597,7 +622,7 @@
           });
         }
 
-        if ((!p.statusMessage || !p.statusMessage.text) && (!p.alertsList || p.alertsList.length === 0)) {
+        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0)) {
           autoTasks.push({
             title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
@@ -640,7 +665,7 @@
       e.preventDefault();
       manualTodos.unshift({
         title: document.getElementById('todoTitle').value,
-        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
+        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit'].value}` : '📌 TASK MANUALE',
         action: document.getElementById('todoAction').value,
         isManual: true
       });
@@ -668,18 +693,15 @@
       const btnApprove = document.getElementById('btnApproveNext');
       const btnSetStatus = document.getElementById('btnSetStatusModal');
 
-      if (isCurrentStep) {
-        if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
-          btnApprove.style.display = 'block';
-          btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
-        } else {
-          btnApprove.style.display = 'none';
-        }
-        btnSetStatus.style.display = 'block';
+      if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        btnApprove.style.display = 'block';
+        btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
       } else {
         btnApprove.style.display = 'none';
-        btnSetStatus.style.display = 'none';
       }
+      
+      // Ora qualsiasi reparto può accendersi di viola (sia il corrente che un altro)
+      btnSetStatus.style.display = 'block';
 
       document.getElementById('stepClickModal').classList.remove('hidden');
     }
@@ -688,6 +710,20 @@
 
     function openStatusModal() {
       closeStepClickModal();
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      document.getElementById('statusModalTitle').innerText = `Segnala Stallo / Metti in Attesa da "${currentDeptLabel}"`;
+
+      const select = document.getElementById('statusTargetSelect');
+      select.innerHTML = '';
+
+      ROUTE_STEPS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.label;
+        opt.innerText = s.label + (s.label === currentDeptLabel ? ' (Questo reparto)' : ' (Rimanda a questo reparto)');
+        if (s.label === currentDeptLabel) opt.selected = true;
+        select.appendChild(opt);
+      });
+
       document.getElementById('statusNoteInput').value = '';
       document.getElementById('statusModal').classList.remove('hidden');
     }
@@ -697,11 +733,20 @@
     function saveDepartmentStatus(e) {
       e.preventDefault();
       if (!activeItem || selectedStepIdx === null) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetDept = document.getElementById('statusTargetSelect').value;
       const text = document.getElementById('statusNoteInput').value.trim();
 
-      activeItem.statusMessage = { dept: deptLabel, text: text };
-      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `🟣 [Stato Stallo]: ${text}` });
+      if (!activeItem.statusMessages) activeItem.statusMessages = [];
+
+      // Aggiunge il nuovo stallo sul reparto scelto (permette stalli multipli)
+      activeItem.statusMessages.push({
+        id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        dept: targetDept,
+        text: text
+      });
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
 
       saveData();
       closeStatusModal();
@@ -716,7 +761,10 @@
         activeItem.approvedSteps.push(selectedStepIdx);
       }
 
-      activeItem.statusMessage = null;
+      // Rimuovi eventuali stalli relativi a questo reparto approvato
+      if (activeItem.statusMessages) {
+        activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
+      }
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
@@ -793,7 +841,6 @@
       if (!activeItem) return;
       document.getElementById('chatModalTitle').innerText = 'Chat & Storico: ' + activeItem.title;
 
-      // Popola il menu a tendina dei reparti per il mittente del nuovo messaggio
       const senderSelect = document.getElementById('chatSenderDept');
       senderSelect.innerHTML = '';
       ROUTE_STEPS.forEach(s => {
@@ -911,7 +958,7 @@
         owner: document.getElementById('formOwner').value,
         currentStepIdx: 0,
         approvedSteps: [],
-        statusMessage: null,
+        statusMessages: [],
         alertsList: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
