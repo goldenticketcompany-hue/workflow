@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Golden Ticket Company - Workflow Manager</title>
+  <title>Golden Ticket Company - Workflow & To-Do Manager</title>
   
   <style>
     :root {
@@ -64,6 +64,13 @@
     .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
     .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
 
+    /* To-Do List Styling */
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .todo-card.completed { opacity: 0.5; }
+    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
+    .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
+    .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+
     .btn-sm { padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
@@ -92,10 +99,11 @@
   </header>
 
   <div class="container">
+    <!-- TAB 1: FLUSSI -->
     <div id="sectionFlussi">
       <div class="toolbar">
-        <input type="text" id="searchInput" class="search-input" oninput="renderFeed()" placeholder="Cerca spettacolo o teatro...">
-        <select id="filterDept" class="select-filter" onchange="renderFeed()">
+        <input type="text" id="searchInput" class="search-input" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterDept" class="select-filter" onchange="renderApp()">
           <option value="ALL">Tutti i Reparti</option>
           <option value="Proposta (commerciale)">Proposta (commerciale)</option>
           <option value="Servizi Tecnici">Servizi Tecnici</option>
@@ -111,9 +119,10 @@
       <div id="feedList"></div>
     </div>
 
+    <!-- TAB 2: TO-DO LIST -->
     <div id="sectionTodo" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="font-size: 18px; color: var(--gold-light);">Attività Quotidiane & Notifiche</h3>
+        <h3 style="font-size: 18px; color: var(--gold-light);">Attività Quotidiane & Scadenze Bloccate</h3>
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
       </div>
       <div id="todoList"></div>
@@ -191,6 +200,33 @@
     </div>
   </div>
 
+  <!-- MODAL TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Aggiungi Task Manuale</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveManualTodo(event)">
+        <div class="form-group">
+          <label>Titolo Attività *</label>
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
+        </div>
+        <div class="form-group">
+          <label>Reparto / Situazione</label>
+          <input type="text" id="todoSit" class="form-control" placeholder="Es. Logistica">
+        </div>
+        <div class="form-group">
+          <label>Azione da fare *</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CHAT -->
   <div class="modal-overlay hidden" id="chatModal">
     <div class="modal-card">
@@ -214,10 +250,12 @@
     ];
 
     let pratiche = [];
+    let manualTodos = [];
     let activeItem = null;
     let selectedStepIdx = null;
 
-    const STORAGE_KEY_P = 'gt_pratiche_cloud_v32';
+    const STORAGE_KEY_P = 'gt_pratiche_cloud_v33';
+    const STORAGE_KEY_T = 'gt_todos_cloud_v33';
 
     function loadData() {
       const savedP = localStorage.getItem(STORAGE_KEY_P);
@@ -226,12 +264,19 @@
       } else {
         pratiche = getDemoData();
       }
-      renderFeed();
+
+      const savedT = localStorage.getItem(STORAGE_KEY_T);
+      if (savedT) {
+        try { manualTodos = JSON.parse(savedT); } catch(e) { manualTodos = []; }
+      }
+
+      renderApp();
     }
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY_P, JSON.stringify(pratiche));
-      renderFeed();
+      localStorage.setItem(STORAGE_KEY_T, JSON.stringify(manualTodos));
+      renderApp();
     }
 
     function getDemoData() {
@@ -250,13 +295,22 @@
       }];
     }
 
+    function renderApp() {
+      renderFeed();
+      renderTodoList();
+    }
+
     function renderFeed() {
       const container = document.getElementById('feedList');
       const search = document.getElementById('searchInput').value.toLowerCase();
+      const filter = document.getElementById('filterDept').value;
       container.innerHTML = '';
 
       pratiche.filter(p => {
-        return p.title.toLowerCase().includes(search) || p.client.toLowerCase().includes(search);
+        const matchSearch = p.title.toLowerCase().includes(search) || p.client.toLowerCase().includes(search);
+        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
+        const matchDept = (filter === 'ALL') || currentDept.includes(filter);
+        return matchSearch && matchDept;
       }).forEach(p => {
         if (!p.rejectedDepts) p.rejectedDepts = [];
         if (!p.warningSenders) p.warningSenders = {};
@@ -329,6 +383,103 @@
         `;
         container.appendChild(card);
       });
+    }
+
+    function renderTodoList() {
+      const container = document.getElementById('todoList');
+      container.innerHTML = '';
+
+      let autoTasks = [];
+
+      // Generazione automatica dei task basati sui blocchi giornalieri dei flussi
+      pratiche.forEach(p => {
+        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
+
+        // Se ci sono problemi bloccanti (X)
+        if (p.rejectedDepts && p.rejectedDepts.length > 0) {
+          p.rejectedDepts.forEach(dept => {
+            autoTasks.push({
+              title: `${p.title} (${p.client})`,
+              situation: `❌ ${dept} - PROBLEMA BLOCCANTE`,
+              action: `Pratica bloccata per problema attivo su questo reparto.`,
+              isManual: false
+            });
+          });
+        }
+
+        // Se ci sono segnalazioni con triangolo (⚠️)
+        if (p.warningSenders && Object.keys(p.warningSenders).length > 0) {
+          Object.keys(p.warningSenders).forEach(targetDept => {
+            const sender = p.warningSenders[targetDept];
+            autoTasks.push({
+              title: `${p.title} (${p.client})`,
+              situation: `⚠️ ${targetDept} - SEGNALAZIONE IN ATTESA`,
+              action: `Promemoria: Avviso ricevuto da parte di ${sender}.`,
+              isManual: false
+            });
+          });
+        }
+
+        // Se la pratica è semplicemente in attesa sul reparto attuale
+        if ((!p.rejectedDepts || p.rejectedDepts.length === 0) && (!p.warningSenders || Object.keys(p.warningSenders).length === 0)) {
+          autoTasks.push({
+            title: `${p.title} (${p.client})`,
+            situation: `⏳ ${currentDept} - IN ATTESA`,
+            action: `Pratica ferma in attesa di approvazione o avanzamento.`,
+            isManual: false
+          });
+        }
+      });
+
+      const allTasks = [...manualTodos, ...autoTasks];
+
+      if (allTasks.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna attività in sospeso.</div>`;
+        return;
+      }
+
+      allTasks.forEach((t, idx) => {
+        let badgeClass = 'todo-badge';
+        if (t.situation.includes('PROBLEMA')) badgeClass += ' red';
+        else if (t.situation.includes('SEGNALAZIONE')) badgeClass += ' amber';
+
+        const item = document.createElement('div');
+        item.className = 'todo-card';
+        item.innerHTML = `
+          <div>
+            <span class="${badgeClass}">${t.situation}</span>
+            <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
+            <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
+          </div>
+          ${t.isManual ? `<button onclick="deleteManualTodo(${idx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;">✕</button>` : ''}
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function openTodoModal() { document.getElementById('todoModal').classList.remove('hidden'); }
+    function closeTodoModal() { document.getElementById('todoModal').classList.add('hidden'); }
+
+    function saveManualTodo(e) {
+      e.preventDefault();
+      manualTodos.unshift({
+        title: document.getElementById('todoTitle').value,
+        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
+        action: document.getElementById('todoAction').value,
+        isManual: true
+      });
+      saveData();
+      closeTodoModal();
+      document.getElementById('todoTitle').value = '';
+      document.getElementById('todoSit').value = '';
+      document.getElementById('todoAction').value = '';
+    }
+
+    function deleteManualTodo(idx) {
+      const manualIdx = idx - (manualTodos.length > 0 ? 0 : 0); 
+      // Semplice rimozione dal vettore dei manuali
+      manualTodos.splice(0, 1);
+      saveData();
     }
 
     function openStepClickModal(id, idx) {
