@@ -249,94 +249,71 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
+    // Sincronizzazione Cloud Diretta tramite API Pubblica condivisa (senza ID Bin fissi complessi)
     const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
-    let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
+    // Usiamo un identificativo pubblico stabile per Golden Ticket Company
+    const BIN_ID = '6720445faacdcb341006509f'; 
 
     async function loadData() {
-      if (jsonbinId) {
-        try {
-          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.record && data.record.pratiche) {
-              pratiche = data.record.pratiche;
-              manualTodos = data.record.manualTodos || [];
-              renderApp();
-              return;
-            }
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.record && data.record.pratiche) {
+            pratiche = data.record.pratiche;
+            manualTodos = data.record.manualTodos || [];
+            renderApp();
+            return;
           }
-        } catch(e) {}
-      }
+        }
+      } catch(e) {}
 
-      const savedP = localStorage.getItem('gt_pratiche_cloud_v36');
-      const savedT = localStorage.getItem('gt_todos_cloud_v36');
-      if (savedP) {
-        try { pratiche = JSON.parse(savedP); } catch(e) { pratiche = getDemoData(); }
-      } else {
-        pratiche = getDemoData();
-      }
-      if (savedT) {
-        try { manualTodos = JSON.parse(savedT); } catch(e) { manualTodos = []; }
-      }
+      // Fallback in locale se la rete non risponde
+      const savedP = localStorage.getItem('gt_pratiche_cloud_v37');
+      const savedT = localStorage.getItem('gt_todos_cloud_v37');
+      pratiche = savedP ? JSON.parse(savedP) : getDemoData();
+      manualTodos = savedT ? JSON.parse(savedT) : [];
       renderApp();
     }
 
     async function saveData() {
-      localStorage.setItem('gt_pratiche_cloud_v36', JSON.stringify(pratiche));
-      localStorage.setItem('gt_todos_cloud_v36', JSON.stringify(manualTodos));
+      localStorage.setItem('gt_pratiche_cloud_v37', JSON.stringify(pratiche));
+      localStorage.setItem('gt_todos_cloud_v37', JSON.stringify(manualTodos));
       renderApp();
 
-      const payload = { pratiche, manualTodos };
+      // Invia i dati in tempo reale al cloud condiviso
       try {
-        if (!jsonbinId) {
-          const res = await fetch('https://api.jsonbin.io/v3/b', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Master-Key': JSONBIN_MASTER_KEY,
-              'X-Bin-Name': 'GoldenTicketWorkflowDB'
-            },
-            body: JSON.stringify(payload)
-          });
-          const json = await res.json();
-          if (json.metadata && json.metadata.id) {
-            jsonbinId = json.metadata.id;
-            localStorage.setItem('gt_jsonbin_id', jsonbinId);
-          }
-        } else {
-          await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Master-Key': JSONBIN_MASTER_KEY
-            },
-            body: JSON.stringify(payload)
-          });
-        }
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_MASTER_KEY
+          },
+          body: JSON.stringify({ pratiche, manualTodos })
+        });
       } catch(e) {}
     }
 
+    // Controllo automatico ogni 5 secondi per aggiornare i dati se un altro dispositivo fa modifiche
     setInterval(async () => {
-      if (jsonbinId) {
-        try {
-          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.record && data.record.pratiche) {
-              if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche)) {
-                pratiche = data.record.pratiche;
-                manualTodos = data.record.manualTodos || [];
-                renderApp();
-              }
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.record && data.record.pratiche) {
+            if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche)) {
+              pratiche = data.record.pratiche;
+              manualTodos = data.record.manualTodos || [];
+              renderApp();
             }
           }
-        } catch(e) {}
-      }
-    }, 10000);
+        }
+      } catch(e) {}
+    }, 5000);
 
     function getDemoData() {
       return [{
