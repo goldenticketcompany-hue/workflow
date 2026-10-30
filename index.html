@@ -41,9 +41,7 @@
 
     .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
     
-    /* STILE IN EVIDENZA PER IL TEATRO/COMMITTENTE SOPRA */
     .client-title-main { font-size: 24px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
-    /* TITOLO SPETTACOLO SOTTO, PIÙ PULITO E MISURATO */
     .card-show-title { font-size: 16px; color: var(--text-muted); font-weight: bold; margin-bottom: 14px; }
 
     .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -68,9 +66,10 @@
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
-    .btn-sm { padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
-    .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
-    .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
+    .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
+    .btn-priority { background: #331015; color: var(--gold-light); border: 1.5px solid var(--border-color); padding: 8px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.hidden { display: none; }
@@ -367,12 +366,14 @@
       const filter = document.getElementById('filterDept').value;
       container.innerHTML = '';
 
-      pratiche.filter(p => {
+      const filteredPratiche = pratiche.filter(p => {
         const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search);
         const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
         const matchDept = (filter === 'ALL') || currentDept.includes(filter);
         return matchSearch && matchDept;
-      }).forEach(p => {
+      });
+
+      filteredPratiche.forEach((p, index) => {
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
 
@@ -427,10 +428,19 @@
           `;
         });
 
+        // Trova l'indice reale nell'array globale per lo spostamento
+        const globalIndex = pratiche.findIndex(item => item.id === p.id);
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <div class="client-title-main">${p.client}</div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div class="client-title-main">${p.client}</div>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button class="btn-priority" onclick="movePratica(${globalIndex}, 1)" ${globalIndex === pratiche.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+            </div>
+          </div>
           <div class="card-show-title">${p.title}</div>
           ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
@@ -445,14 +455,26 @@
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; gap: 8px;">
-              <button class="btn-danger-outline" onclick="deletePratica('${p.id}')">Elimina</button>
-              <button class="btn-secondary-outline" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
+              <button class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
+              <button class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
             </div>
             <button class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
           </div>
         `;
         container.appendChild(card);
       });
+    }
+
+    function movePratica(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= pratiche.length) return;
+      
+      // Scambia gli elementi nell'array
+      const temp = pratiche[index];
+      pratiche[index] = pratiche[targetIndex];
+      pratiche[targetIndex] = temp;
+
+      saveData();
     }
 
     function removeSingleAlert(praticaId, alertId) {
