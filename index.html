@@ -148,7 +148,7 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
         
-        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Metti in Attesa (Viola)</button>
+        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Rimanda a Reparto (Viola)</button>
 
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
@@ -170,7 +170,7 @@
         </div>
         <div class="form-group">
           <label>Motivo dello Stallo / Attesa *</label>
-          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. Manca chiarimento su rider tecnico, rimandato indietro..."></textarea>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a servizi tecnici per chiarimenti su rider..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Conferma Stallo</button>
@@ -441,7 +441,6 @@
 
       filteredPratiche.forEach((p, index) => {
         if (!p.statusMessages) {
-          // Compatibilità con vecchi dati al singolare
           if (p.statusMessage && p.statusMessage.text) {
             p.statusMessages = [{ id: 'st_old', dept: p.statusMessage.dept, text: p.statusMessage.text }];
           } else {
@@ -650,15 +649,32 @@
         const item = document.createElement('div');
         item.className = 'todo-card';
         item.innerHTML = `
-          <div>
-            <span class="${badgeClass}">${t.situation}</span>
-            <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
-            <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
+          <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+              <button class="btn-priority" onclick="moveManualTodoIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button class="btn-priority" onclick="moveManualTodoIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+            </div>
+            <div style="flex: 1;">
+              <span class="${badgeClass}">${t.situation}</span>
+              <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
+            </div>
+            ${t.isManual ? `<button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;">✕</button>` : ''}
           </div>
-          ${t.isManual ? `<button onclick="deleteManualTodo(${idx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;">✕</button>` : ''}
         `;
         container.appendChild(item);
       });
+    }
+
+    function moveManualTodoIndex(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= manualTodos.length) return;
+      
+      const temp = manualTodos[index];
+      manualTodos[index] = manualTodos[targetIndex];
+      manualTodos[targetIndex] = temp;
+
+      saveData();
     }
 
     function openTodoModal() { document.getElementById('todoModal').classList.remove('hidden'); }
@@ -667,6 +683,7 @@
     function saveManualTodo(e) {
       e.preventDefault();
       manualTodos.unshift({
+        id: 'mt_' + Date.now(),
         title: document.getElementById('todoTitle').value,
         situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
         action: document.getElementById('todoAction').value,
@@ -679,8 +696,8 @@
       document.getElementById('todoAction').value = '';
     }
 
-    function deleteManualTodo(idx) {
-      manualTodos.splice(0, 1);
+    function deleteManualTodoItem(id) {
+      manualTodos = manualTodos.filter(t => t.id !== id);
       saveData();
     }
 
@@ -741,6 +758,12 @@
 
       if (!activeItem.statusMessages) activeItem.statusMessages = [];
 
+      // Se il mittente aveva uno stallo attivo su di sé e lo sta rimandando altrove, rimuoviamo il suo stallo
+      if (senderDept !== targetDept) {
+        activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
+      }
+
+      // Aggiunge lo stallo sul reparto destinatario
       activeItem.statusMessages.push({
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         dept: targetDept,
@@ -852,6 +875,7 @@
       document.getElementById('chatNewMsgText').value = '';
 
       renderChatMessages();
+      document.getElementById('chatModal').classList.add('hidden');
       document.getElementById('chatModal').classList.remove('hidden');
     }
 
