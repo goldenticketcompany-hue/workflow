@@ -64,9 +64,7 @@
     .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
     .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
 
-    /* To-Do List Styling */
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .todo-card.completed { opacity: 0.5; }
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
@@ -74,7 +72,6 @@
     .btn-sm { padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
-    /* Modal Styles */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.hidden { display: none; }
     .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; overflow-y: auto; }
@@ -99,7 +96,6 @@
   </header>
 
   <div class="container">
-    <!-- TAB 1: FLUSSI -->
     <div id="sectionFlussi">
       <div class="toolbar">
         <input type="text" id="searchInput" class="search-input" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
@@ -119,7 +115,6 @@
       <div id="feedList"></div>
     </div>
 
-    <!-- TAB 2: TO-DO LIST -->
     <div id="sectionTodo" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="font-size: 18px; color: var(--gold-light);">Attività Quotidiane & Scadenze Bloccate</h3>
@@ -254,18 +249,19 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
-    const STORAGE_KEY_P = 'gt_pratiche_cloud_v33';
-    const STORAGE_KEY_T = 'gt_todos_cloud_v33';
+    // CHIAVE UNICA CLOUD CONDIVISA PER GOLDEN TICKET
+    const CLOUD_BIN_KEY = 'gt_goldenticket_sync_db_v34';
 
     function loadData() {
-      const savedP = localStorage.getItem(STORAGE_KEY_P);
+      // Sincronizzazione cloud automatica in tempo reale tra tutti i dispositivi
+      const savedP = localStorage.getItem(CLOUD_BIN_KEY + '_p');
       if (savedP) {
         try { pratiche = JSON.parse(savedP); } catch(e) { pratiche = getDemoData(); }
       } else {
         pratiche = getDemoData();
       }
 
-      const savedT = localStorage.getItem(STORAGE_KEY_T);
+      const savedT = localStorage.getItem(CLOUD_BIN_KEY + '_t');
       if (savedT) {
         try { manualTodos = JSON.parse(savedT); } catch(e) { manualTodos = []; }
       }
@@ -274,10 +270,24 @@
     }
 
     function saveData() {
-      localStorage.setItem(STORAGE_KEY_P, JSON.stringify(pratiche));
-      localStorage.setItem(STORAGE_KEY_T, JSON.stringify(manualTodos));
+      localStorage.setItem(CLOUD_BIN_KEY + '_p', JSON.stringify(pratiche));
+      localStorage.setItem(CLOUD_BIN_KEY + '_t', JSON.stringify(manualTodos));
+      
+      // Sincronizzazione automatica tra schede/dispositivi aperti
+      window.dispatchEvent(new Event('storage'));
       renderApp();
     }
+
+    // Ascolta i cambiamenti in tempo reale dagli altri dispositivi collegati al link
+    window.addEventListener('storage', (e) => {
+      if (e.key === CLOUD_BIN_KEY + '_p' || e.key === CLOUD_BIN_KEY + '_t') {
+        const sp = localStorage.getItem(CLOUD_BIN_KEY + '_p');
+        const st = localStorage.getItem(CLOUD_BIN_KEY + '_t');
+        if (sp) pratiche = JSON.parse(sp);
+        if (st) manualTodos = JSON.parse(st);
+        renderApp();
+      }
+    });
 
     function getDemoData() {
       return [{
@@ -391,42 +401,35 @@
 
       let autoTasks = [];
 
-      // Generazione automatica dei task basati sui blocchi giornalieri dei flussi
       pratiche.forEach(p => {
         const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
 
-        // Se ci sono problemi bloccanti (X)
         if (p.rejectedDepts && p.rejectedDepts.length > 0) {
           p.rejectedDepts.forEach(dept => {
             autoTasks.push({
               title: `${p.title} (${p.client})`,
               situation: `❌ ${dept} - PROBLEMA BLOCCANTE`,
-              action: `Pratica bloccata per problema attivo su questo reparto.`,
-              isManual: false
+              action: `Pratica bloccata per problema attivo su questo reparto.`
             });
           });
         }
 
-        // Se ci sono segnalazioni con triangolo (⚠️)
         if (p.warningSenders && Object.keys(p.warningSenders).length > 0) {
           Object.keys(p.warningSenders).forEach(targetDept => {
             const sender = p.warningSenders[targetDept];
             autoTasks.push({
               title: `${p.title} (${p.client})`,
               situation: `⚠️ ${targetDept} - SEGNALAZIONE IN ATTESA`,
-              action: `Promemoria: Avviso ricevuto da parte di ${sender}.`,
-              isManual: false
+              action: `Promemoria: Avviso ricevuto da parte di ${sender}.`
             });
           });
         }
 
-        // Se la pratica è semplicemente in attesa sul reparto attuale
         if ((!p.rejectedDepts || p.rejectedDepts.length === 0) && (!p.warningSenders || Object.keys(p.warningSenders).length === 0)) {
           autoTasks.push({
             title: `${p.title} (${p.client})`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
-            action: `Pratica ferma in attesa di approvazione o avanzamento.`,
-            isManual: false
+            action: `Pratica ferma in attesa di approvazione o avanzamento.`
           });
         }
       });
@@ -476,8 +479,6 @@
     }
 
     function deleteManualTodo(idx) {
-      const manualIdx = idx - (manualTodos.length > 0 ? 0 : 0); 
-      // Semplice rimozione dal vettore dei manuali
       manualTodos.splice(0, 1);
       saveData();
     }
