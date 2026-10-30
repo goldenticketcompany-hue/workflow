@@ -300,8 +300,8 @@
         <textarea id="todoCommentText" class="form-control" rows="3" placeholder="Scrivi qui eventuali sviluppi..."></textarea>
       </div>
       <div style="display: flex; justify-content: space-between; margin-top: 18px; gap: 10px;">
-        <button class="btn-secondary-outline" style="flex:1;" onclick="addTodoCommentOnly()">💬 Aggiungi Nota</button>
-        <button class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px;" onclick="resolveManualTodoWithComment()">✅ Risolto</button>
+        <button type="button" class="btn-secondary-outline" style="flex:1;" onclick="addTodoCommentOnly()">💬 Aggiungi Nota</button>
+        <button type="button" class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px;" onclick="resolveManualTodoWithComment()">✅ Risolto</button>
       </div>
     </div>
   </div>
@@ -329,7 +329,7 @@
           <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento o i chiarimenti..."></textarea>
         </div>
         <div style="text-align: right;">
-          <button class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
+          <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
         </div>
       </div>
 
@@ -402,7 +402,6 @@
     }
 
     async function saveData() {
-      renderApp();
       try {
         await client
           .from('workflow')
@@ -429,7 +428,7 @@
           }
         }
       } catch(e) {}
-    }, 4000);
+    }, 5000);
 
     function getDemoData() {
       return [{
@@ -466,7 +465,7 @@
         return matchSearch && matchDept;
       });
 
-      filteredPratiche.forEach((p, index) => {
+      filteredPratiche.forEach((p) => {
         if (!p.statusMessages) p.statusMessages = [];
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
@@ -519,7 +518,7 @@
               <span onclick="openChatModal('${p.id}', '${st.dept}')" style="cursor:pointer; flex: 1;">
                 🟣 <strong>Stato (${st.dept}):</strong> "${st.text}"
               </span>
-              <button class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
+              <button type="button" class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
             </div>
           `;
         });
@@ -537,7 +536,7 @@
               <span onclick="openChatModal('${p.id}', '${al.target}')" style="cursor:pointer; flex: 1;">
                 ${icon} <strong>${isReject ? `Bloccato (${al.target}):` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
               </span>
-              <button class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
+              <button type="button" class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
             </div>
           `;
         });
@@ -550,8 +549,8 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div class="client-title-main">${p.client}</div>
             <div style="display: flex; gap: 4px;">
-              <button class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button class="btn-priority" onclick="movePratica(${globalIndex}, 1)" ${globalIndex === pratiche.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, 1)" ${globalIndex === pratiche.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
           </div>
           <div class="card-show-title">${p.title}</div>
@@ -568,10 +567,10 @@
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; gap: 8px;">
-              <button class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
-              <button class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
+              <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
+              <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
             </div>
-            <button class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+            <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
           </div>
         `;
         container.appendChild(card);
@@ -586,6 +585,7 @@
       pratiche[index] = pratiche[targetIndex];
       pratiche[targetIndex] = temp;
 
+      renderApp();
       saveData();
     }
 
@@ -599,6 +599,7 @@
       if (removed) {
         item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto stallo su ${removed.dept}: "${removed.text}"` });
       }
+      renderApp();
       saveData();
     }
 
@@ -616,6 +617,7 @@
           text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` 
         });
       }
+      renderApp();
       saveData();
     }
 
@@ -695,8 +697,8 @@
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
             <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
-              <button class="btn-priority" onclick="moveTaskIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button class="btn-priority" onclick="moveTaskIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button type="button" class="btn-priority" onclick="moveTaskIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button type="button" class="btn-priority" onclick="moveTaskIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
             <div style="flex: 1;">
               <span class="${badgeClass}">${t.situation}</span>
@@ -705,8 +707,8 @@
             </div>
             ${t.isManual ? `
               <div style="display: flex; gap: 6px; align-items: center;">
-                <button class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬 / ✅</button>
-                <button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px;" title="Elimina task">✕</button>
+                <button type="button" class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬 / ✅</button>
+                <button type="button" onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px;" title="Elimina task">✕</button>
               </div>
             ` : ''}
           </div>
@@ -722,6 +724,7 @@
       const temp = manualTodos[index];
       manualTodos[index] = manualTodos[targetIndex];
       manualTodos[targetIndex] = temp;
+      renderTodoList();
       saveData();
     }
 
@@ -737,6 +740,7 @@
         action: document.getElementById('todoAction').value,
         isManual: true
       });
+      renderTodoList();
       saveData();
       closeTodoModal();
       document.getElementById('todoTitle').value = '';
@@ -746,6 +750,7 @@
 
     function deleteManualTodoItem(id) {
       manualTodos = manualTodos.filter(t => t.id !== id);
+      renderTodoList();
       saveData();
     }
 
@@ -768,6 +773,7 @@
       const item = manualTodos.find(t => t.id === id);
       if (item && text) {
         item.action += ` | Note: ${text}`;
+        renderTodoList();
         saveData();
       }
       closeTodoCommentModal();
@@ -775,7 +781,13 @@
 
     function resolveManualTodoWithComment() {
       const id = document.getElementById('todoCommentId').value;
+      const text = document.getElementById('todoCommentText').value.trim();
+      const item = manualTodos.find(t => t.id === id);
+      if (item && text) {
+        item.action += ` | Nota risoluiva: ${text}`;
+      }
       manualTodos = manualTodos.filter(t => t.id !== id);
+      renderTodoList();
       saveData();
       closeTodoCommentModal();
     }
@@ -858,6 +870,7 @@
 
       activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
 
+      renderApp();
       saveData();
       closeStatusModal();
     }
@@ -887,6 +900,7 @@
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
       }
 
+      renderApp();
       saveData();
       closeStepClickModal();
     }
@@ -943,6 +957,7 @@
         text: `[${actionType === 'REJECT' ? 'PROBLEMA BLOCCATO / ANNULLATO ❌' : 'SEGNALAZIONE ⚠️ a ' + targetDept}]: ${note}` 
       });
 
+      renderApp();
       saveData();
       closeInterveneModal();
     }
@@ -991,7 +1006,7 @@
               <span>${n.dept}</span>
               <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
-                <button class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditChatMsgModal(${index})">✏️ Modifica</button>
+                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditChatMsgModal(${index})">✏️ Modifica</button>
               </div>
             </div>
             <div style="color: #fff; line-height: 1.4;">${n.text}</div>
@@ -1020,6 +1035,7 @@
       }
 
       document.getElementById('chatNewMsgText').value = '';
+      renderApp();
       saveData();
       renderChatMessages();
     }
@@ -1043,6 +1059,7 @@
       
       if (activeItem && activeItem.notesHistory[index]) {
         activeItem.notesHistory[index].text = newText;
+        renderApp();
         saveData();
         renderChatMessages();
       }
@@ -1075,6 +1092,7 @@
         item.title = document.getElementById('editTitle').value;
         item.owner = document.getElementById('editOwner').value;
         item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
+        renderApp();
         saveData();
       }
       closeEditModal();
@@ -1094,6 +1112,7 @@
         mailDepts: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
+      renderApp();
       saveData();
       closeNewModal();
       document.getElementById('formClient').value = '';
@@ -1104,6 +1123,7 @@
     function deletePratica(id) {
       if (confirm('Confermi l\'eliminazione della pratica?')) {
         pratiche = pratiche.filter(p => p.id !== id);
+        renderApp();
         saveData();
       }
     }
