@@ -249,70 +249,100 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
-    // Sincronizzazione Cloud Diretta tramite API Pubblica condivisa (senza ID Bin fissi complessi)
     const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
-    // Usiamo un identificativo pubblico stabile per Golden Ticket Company
-    const BIN_ID = '6720445faacdcb341006509f'; 
+    let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
 
     async function loadData() {
+      // Se abbiamo già un ID salvato sul browser, proviamo a scaricarlo
+      if (jsonbinId) {
+        try {
+          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.record && data.record.pratiche) {
+              pratiche = data.record.pratiche;
+              manualTodos = data.record.manualTodos || [];
+              renderApp();
+              return;
+            }
+          }
+        } catch(e) {}
+      }
+
+      // Se non esiste ancora un bin o fallisce, creiamone uno al volo sul tuo account JSONBin
       try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+        const demo = { pratiche: getDemoData(), manualTodos: [] };
+        const createRes = await fetch('https://api.jsonbin.io/v3/b', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_MASTER_KEY,
+            'X-Bin-Name': 'GoldenTicketCloudDB'
+          },
+          body: JSON.stringify(demo)
         });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.record && data.record.pratiche) {
-            pratiche = data.record.pratiche;
-            manualTodos = data.record.manualTodos || [];
+        if (createRes.ok) {
+          const createData = await createRes.json();
+          if (createData.metadata && createData.metadata.id) {
+            jsonbinId = createData.metadata.id;
+            localStorage.setItem('gt_jsonbin_id', jsonbinId);
+            pratiche = createData.record.pratiche;
+            manualTodos = createData.record.manualTodos || [];
             renderApp();
             return;
           }
         }
       } catch(e) {}
 
-      // Fallback in locale se la rete non risponde
-      const savedP = localStorage.getItem('gt_pratiche_cloud_v37');
-      const savedT = localStorage.getItem('gt_todos_cloud_v37');
-      pratiche = savedP ? JSON.parse(savedP) : getDemoData();
-      manualTodos = savedT ? JSON.parse(savedT) : [];
+      // Estremo fallback locale se manca internet
+      pratiche = getDemoData();
+      manualTodos = [];
       renderApp();
     }
 
     async function saveData() {
-      localStorage.setItem('gt_pratiche_cloud_v37', JSON.stringify(pratiche));
-      localStorage.setItem('gt_todos_cloud_v37', JSON.stringify(manualTodos));
       renderApp();
 
-      // Invia i dati in tempo reale al cloud condiviso
+      const payload = { pratiche, manualTodos };
       try {
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_MASTER_KEY
-          },
-          body: JSON.stringify({ pratiche, manualTodos })
-        });
+        if (!jsonbinId) {
+          await loadData(); // Riprova a creare/trovare il bin se mancava
+        }
+        if (jsonbinId) {
+          await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': JSONBIN_MASTER_KEY
+            },
+            body: JSON.stringify(payload)
+          });
+        }
       } catch(e) {}
     }
 
-    // Controllo automatico ogni 5 secondi per aggiornare i dati se un altro dispositivo fa modifiche
+    // Sincronizzazione automatica in tempo reale ogni 5 secondi da cloud
     setInterval(async () => {
-      try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.record && data.record.pratiche) {
-            if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche)) {
-              pratiche = data.record.pratiche;
-              manualTodos = data.record.manualTodos || [];
-              renderApp();
+      if (jsonbinId) {
+        try {
+          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.record && data.record.pratiche) {
+              if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche) || 
+                  JSON.stringify(data.record.manualTodos) !== JSON.stringify(manualTodos)) {
+                pratiche = data.record.pratiche;
+                manualTodos = data.record.manualTodos || [];
+                renderApp();
+              }
             }
           }
-        }
-      } catch(e) {}
+        } catch(e) {}
+      }
     }, 5000);
 
     function getDemoData() {
