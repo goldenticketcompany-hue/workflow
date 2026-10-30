@@ -758,12 +758,10 @@
 
       if (!activeItem.statusMessages) activeItem.statusMessages = [];
 
-      // Se il mittente aveva uno stallo attivo su di sé e lo sta rimandando altrove, rimuoviamo il suo stallo
-      if (senderDept !== targetDept) {
-        activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
-      }
+      // RIMUOVI SEMPRE LO STALLO DAL REPARTO MITTENTE QUANDO SI RIMANDA AD UN ALTRO
+      activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
 
-      // Aggiunge lo stallo sul reparto destinatario
+      // Aggiunge il nuovo stallo sul reparto destinatario scelto
       activeItem.statusMessages.push({
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         dept: targetDept,
