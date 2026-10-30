@@ -129,7 +129,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GESTIONE PALLINO REPARTO -->
+  <!-- MODAL: GESTIONE REPARTO & APPROVAZIONE -->
   <div class="modal-overlay hidden" id="stepClickModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -139,10 +139,12 @@
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
+        
         <button class="btn-sm" id="btnClearReject" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearRejectStatus()">✅ Risolto: Rimuovi Problema (X)</button>
         <button class="btn-sm" id="btnClearWarn" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearWarnStatus()">✅ Risolto: Rimuovi Segnalazione (⚠️)</button>
         
-        <button class="btn-gold" style="text-align: left; padding: 14px; font-size:15px;" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
+        <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema ad altro reparto</button>
       </div>
     </div>
@@ -553,6 +555,16 @@
         document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
       }
 
+      // Mostra il pulsante "Approva e Passa Avanti" solo se si clicca sul reparto corrente della pratica
+      const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
+      const btnApprove = document.getElementById('btnApproveNext');
+      if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        btnApprove.style.display = 'block';
+        btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
+      } else {
+        btnApprove.style.display = 'none';
+      }
+
       const isRejected = activeItem.rejectedDepts && activeItem.rejectedDepts.includes(deptLabel);
       const isWarned = activeItem.warningSenders && activeItem.warningSenders[deptLabel];
 
@@ -563,6 +575,27 @@
     }
 
     function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
+
+    function approveAndNext() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+      if (!activeItem.approvedSteps.includes(selectedStepIdx)) {
+        activeItem.approvedSteps.push(selectedStepIdx);
+      }
+
+      if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
+        const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
+      } else {
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
+      }
+
+      saveData();
+      closeStepClickModal();
+    }
 
     function clearRejectStatus() {
       if (!activeItem || selectedStepIdx === null) return;
@@ -704,7 +737,7 @@
 
     function deletePratica(id) {
       if (confirm('Confermi l\'eliminazione della pratica?')) {
-        pratiche = pratiche.filter(p => p.id !== id);
+        pratiche = pricate = pratiche.filter(p => p.id !== id);
         saveData();
       }
     }
