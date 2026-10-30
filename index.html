@@ -144,7 +144,7 @@
         <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStepClickModal()">✕</button>
       </div>
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per este reparto:</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
@@ -728,7 +728,6 @@
       selectedStepIdx = idx;
       const deptLabel = ROUTE_STEPS[idx].label;
 
-      // Quando apri il reparto, se aveva posta in arrivo, la marchiamo come letta rimuovendola
       if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
         activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
         saveData();
@@ -920,9 +919,9 @@
 
       document.getElementById('chatNewMsgText').value = '';
 
-      renderChatMessages();
-      document.getElementById('chatModal').classList.add('hidden');
+      // Mostra prima il modale per permettere il calcolo corretto dell'altezza
       document.getElementById('chatModal').classList.remove('hidden');
+      renderChatMessages();
     }
 
     function renderChatMessages() {
@@ -944,6 +943,9 @@
           </div>
         `;
       });
+
+      // Posiziona lo scroll in fondo al caricamento dei messaggi
+      box.scrollTop = box.scrollHeight;
     }
 
     function addChatMessage() {
@@ -959,7 +961,6 @@
         text: `[Messaggio a ${targetDept}]: ${text}`
       });
 
-      // Accende la letterina sul reparto destinatario del messaggio
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
       if (!activeItem.mailDepts.includes(targetDept)) {
         activeItem.mailDepts.push(targetDept);
