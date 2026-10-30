@@ -131,7 +131,7 @@
         <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStepClickModal()">✕</button>
       </div>
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per este reparto:</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-sm" id="btnClearReject" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearRejectStatus()">✅ Risolto: Rimuovi Problema (X)</button>
@@ -249,9 +249,7 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
-    // CONFIGURAZIONE JSONBIN.IO CON LA TUA MASTER KEY
     const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
-    // ID della pillola cloud (verrà creato automaticamente al primo salvataggio o puoi impostarlo)
     let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
 
     async function loadData() {
@@ -269,14 +267,11 @@
               return;
             }
           }
-        } catch(e) {
-          console.log('Errore di connessione cloud, uso fallback locale', e);
-        }
+        } catch(e) {}
       }
 
-      // Fallback locale se non c'è ancora un bin su jsonbin
-      const savedP = localStorage.getItem('gt_pratiche_cloud_v35');
-      const savedT = localStorage.getItem('gt_todos_cloud_v35');
+      const savedP = localStorage.getItem('gt_pratiche_cloud_v36');
+      const savedT = localStorage.getItem('gt_todos_cloud_v36');
       if (savedP) {
         try { pratiche = JSON.parse(savedP); } catch(e) { pratiche = getDemoData(); }
       } else {
@@ -289,16 +284,13 @@
     }
 
     async function saveData() {
-      // Salva in locale per reattività immediata
-      localStorage.setItem('gt_pratiche_cloud_v35', JSON.stringify(pratiche));
-      localStorage.setItem('gt_todos_cloud_v35', JSON.stringify(manualTodos));
+      localStorage.setItem('gt_pratiche_cloud_v36', JSON.stringify(pratiche));
+      localStorage.setItem('gt_todos_cloud_v36', JSON.stringify(manualTodos));
       renderApp();
 
-      // Sincronizza sul cloud JSONBin in tempo reale per tutti i dispositivi
       const payload = { pratiche, manualTodos };
       try {
         if (!jsonbinId) {
-          // Crea un nuovo Bin su JSONBin se non esiste
           const res = await fetch('https://api.jsonbin.io/v3/b', {
             method: 'POST',
             headers: {
@@ -314,7 +306,6 @@
             localStorage.setItem('gt_jsonbin_id', jsonbinId);
           }
         } else {
-          // Aggiorna il Bin esistente
           await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
             method: 'PUT',
             headers: {
@@ -324,12 +315,9 @@
             body: JSON.stringify(payload)
           });
         }
-      } catch(e) {
-        console.log('Errore salvataggio cloud', e);
-      }
+      } catch(e) {}
     }
 
-    // Polling periodico ogni 10 secondi per aggiornare i dati da altri dispositivi in tempo reale
     setInterval(async () => {
       if (jsonbinId) {
         try {
@@ -339,7 +327,6 @@
           if (res.ok) {
             const data = await res.json();
             if (data.record && data.record.pratiche) {
-              // Aggiorna solo se ci sono differenze di dati
               if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche)) {
                 pratiche = data.record.pratiche;
                 manualTodos = data.record.manualTodos || [];
