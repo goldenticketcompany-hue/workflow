@@ -40,8 +40,11 @@
     .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
 
     .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
-    .client-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); font-size: 13px; padding: 4px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 8px; display: inline-block; }
-    .card-title { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 14px; }
+    
+    /* STILE IN EVIDENZA PER IL TEATRO/COMMITTENTE SOPRA */
+    .client-title-main { font-size: 24px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
+    /* TITOLO SPETTACOLO SOTTO, PIÙ PULITO E MISURATO */
+    .card-show-title { font-size: 16px; color: var(--text-muted); font-weight: bold; margin-bottom: 14px; }
 
     .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .alert-rejected { background: rgba(229, 62, 62, 0.25); color: #fc8181; border: 1.5px solid var(--danger-red); }
@@ -376,7 +379,6 @@
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
 
-        // Reparti con blocchi o segnalazioni
         const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
 
@@ -406,7 +408,6 @@
           `;
         }).join('');
 
-        // Generazione Banner Segnalazioni Singole con Anteprima Testo e Tasto Risolvi
         let alertBannersHTML = '';
         p.alertsList.forEach((al) => {
           const isReject = al.type === 'REJECT';
@@ -429,8 +430,8 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <span class="client-badge">${p.client}</span>
-          <div class="card-title">${p.title}</div>
+          <div class="client-title-main">${p.client}</div>
+          <div class="card-show-title">${p.title}</div>
           ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
           ${alertBannersHTML}
@@ -484,7 +485,7 @@
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
             autoTasks.push({
-              title: `${p.title} (${p.client})`,
+              title: `${p.client} - ${p.title}`,
               situation: isReject ? `❌ ${al.target} - PROBLEMA` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`
             });
@@ -493,7 +494,7 @@
 
         if (!p.alertsList || p.alertsList.length === 0) {
           autoTasks.push({
-            title: `${p.title} (${p.client})`,
+            title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
             action: `Pratica ferma in attesa di approvazione o avanzamento.`
           });
