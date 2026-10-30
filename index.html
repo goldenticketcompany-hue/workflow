@@ -81,6 +81,9 @@
     .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
     .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 15px; }
   </style>
+
+  <!-- SUPABASE JS CLIENT -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -234,6 +237,12 @@
   </div>
 
   <script>
+    // INIZIALIZZAZIONE SUPABASE
+    const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
+    
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const ROUTE_STEPS = [
       { id: 'Vendite', label: 'Proposta (commerciale)' },
       { id: 'Servizi Tecnici', label: 'Servizi Tecnici' },
@@ -249,104 +258,57 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
-    // CREDENZIALI CLOUD DEDICATE E FISSE PER GOLDEN TICKET
-    const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
-    // Se non c'è ancora un ID memorizzato nel browser, ne usiamo uno pre-configurato
-    let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
-
     async function loadData() {
-      // 1. Prova a scaricare dal cloud con l'ID salvato
-      if (jsonbinId) {
-        try {
-          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.record && data.record.pratiche) {
-              pratiche = data.record.pratiche;
-              manualTodos = data.record.manualTodos || [];
-              renderApp();
-              return;
-            }
-          }
-        } catch(e) {}
-      }
-
-      // 2. Se è la prima volta in assoluto, crea il magazzino dati sul cloud e salva l'ID
       try {
-        const initialData = { pratiche: getDemoData(), manualTodos: [] };
-        const res = await fetch('https://api.jsonbin.io/v3/b', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_MASTER_KEY,
-            'X-Bin-Name': 'GoldenTicketCloudSync'
-          },
-          body: JSON.stringify(initialData)
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.metadata && json.metadata.id) {
-            jsonbinId = json.metadata.id;
-            localStorage.setItem('gt_jsonbin_id', jsonbinId);
-            pratiche = json.record.pratiche;
-            manualTodos = json.record.manualTodos || [];
-            renderApp();
-            return;
-          }
-        }
-      } catch(e) {}
+        const { data, error } = await client
+          .from('workflow')
+          .select('data')
+          .eq('id', 'main')
+          .single();
 
-      // Fallback per emergenza offline
-      pratiche = getDemoData();
-      manualTodos = [];
+        if (data && data.data) {
+          pratiche = data.data.pratiche || [];
+          manualTodos = data.data.manualTodos || [];
+        } else {
+          pratiche = getDemoData();
+          manualTodos = [];
+        }
+      } catch(e) {
+        pratiche = getDemoData();
+        manualTodos = [];
+      }
       renderApp();
     }
 
     async function saveData() {
       renderApp();
-      const payload = { pratiche, manualTodos };
-
-      if (!jsonbinId) {
-        await loadData();
-      }
-
-      if (jsonbinId) {
-        try {
-          await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Master-Key': JSONBIN_MASTER_KEY
-            },
-            body: JSON.stringify(payload)
-          });
-        } catch(e) {}
-      }
+      try {
+        await client
+          .from('workflow')
+          .update({ data: { pratiche, manualTodos } })
+          .eq('id', 'main');
+      } catch(e) {}
     }
 
-    // Polling periodico: ogni 4 secondi legge dal cloud per mostrare i cambiamenti fatti dagli altri soci
+    // Sincronizzazione in tempo reale automatica ogni 4 secondi da Supabase
     setInterval(async () => {
-      if (jsonbinId) {
-        try {
-          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.record && data.record.pratiche) {
-              const cloudP = JSON.stringify(data.record.pratiche);
-              const cloudT = JSON.stringify(data.record.manualTodos || []);
-              if (cloudP !== JSON.stringify(pratiche) || cloudT !== JSON.stringify(manualTodos)) {
-                pratiche = data.record.pratiche;
-                manualTodos = data.record.manualTodos || [];
-                renderApp();
-              }
-            }
+      try {
+        const { data } = await client
+          .from('workflow')
+          .select('data')
+          .eq('id', 'main')
+          .single();
+
+        if (data && data.data) {
+          const remoteP = JSON.stringify(data.data.pratiche || []);
+          const remoteT = JSON.stringify(data.data.manualTodos || []);
+          if (remoteP !== JSON.stringify(pratiche) || remoteT !== JSON.stringify(manualTodos)) {
+            pratiche = data.data.pratiche || [];
+            manualTodos = data.data.manualTodos || [];
+            renderApp();
           }
-        } catch(e) {}
-      }
+        }
+      } catch(e) {}
     }, 4000);
 
     function getDemoData() {
