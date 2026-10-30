@@ -287,6 +287,25 @@
     </div>
   </div>
 
+  <!-- MODAL COMMENTO / RISOLUZIONE TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoCommentModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="todoCommentTitle">Gestione Task Manuale</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoCommentModal()">✕</button>
+      </div>
+      <input type="hidden" id="todoCommentId">
+      <div class="form-group">
+        <label>Aggiungi una nota / aggiornamento</label>
+        <textarea id="todoCommentText" class="form-control" rows="3" placeholder="Scrivi qui eventuali sviluppi..."></textarea>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 18px; gap: 10px;">
+        <button class="btn-secondary-outline" style="flex:1;" onclick="addTodoCommentOnly()">💬 Aggiungi Nota</button>
+        <button class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px;" onclick="resolveManualTodoWithComment()">✅ Risolto</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL CHAT & STORICO -->
   <div class="modal-overlay hidden" id="chatModal">
     <div class="modal-card">
@@ -297,10 +316,11 @@
 
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
         <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Invia messaggio / comunicazione</div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Il mio Reparto (Mittente)</label>
-          <select id="chatSenderDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
+        
+        <div style="font-size: 14px; color: #fff; margin-bottom: 12px; background: rgba(214, 158, 46, 0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+          Messaggio da parte di: <strong style="color: var(--gold-light);" id="chatSenderLabel">...</strong>
         </div>
+
         <div class="form-group" style="margin-bottom: 10px;">
           <label style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Invia a quale Reparto Destinatario?</label>
           <select id="chatTargetDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
@@ -496,7 +516,7 @@
         p.statusMessages.forEach(st => {
           bannersHTML += `
             <div class="alert-banner alert-status">
-              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+              <span onclick="openChatModal('${p.id}', '${st.dept}')" style="cursor:pointer; flex: 1;">
                 🟣 <strong>Stato (${st.dept}):</strong> "${st.text}"
               </span>
               <button class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
@@ -514,7 +534,7 @@
 
           bannersHTML += `
             <div class="${bannerClass}">
-              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+              <span onclick="openChatModal('${p.id}', '${al.target}')" style="cursor:pointer; flex: 1;">
                 ${icon} <strong>${isReject ? `Bloccato (${al.target}):` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
               </span>
               <button class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
@@ -611,6 +631,7 @@
         if (p.statusMessages && p.statusMessages.length > 0) {
           p.statusMessages.forEach(st => {
             autoTasks.push({
+              id: 'st_auto_' + st.id,
               title: `${p.client} - ${p.title}`,
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
@@ -622,6 +643,7 @@
         if (p.mailDepts && p.mailDepts.length > 0) {
           p.mailDepts.forEach(dept => {
             autoTasks.push({
+              id: 'mail_auto_' + dept,
               title: `${p.client} - ${p.title}`,
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
@@ -634,6 +656,7 @@
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
             autoTasks.push({
+              id: 'al_auto_' + al.id,
               title: `${p.client} - ${p.title}`,
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
@@ -644,6 +667,7 @@
 
         if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
           autoTasks.push({
+            id: 'wait_auto_' + p.id,
             title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
             action: `Pratica ferma in attesa di approvazione o avanzamento.`,
@@ -679,7 +703,12 @@
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
               <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
             </div>
-            ${t.isManual ? `<button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;" title="Elimina task">✕</button>` : ''}
+            ${t.isManual ? `
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-solve-sm" onclick="openTodoCommentModal('${t.id}')">💬 / ✅</button>
+                <button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px;" title="Elimina task">✕</button>
+              </div>
+            ` : ''}
           </div>
         `;
         container.appendChild(item);
@@ -688,14 +717,12 @@
 
     function moveTaskIndex(index, direction) {
       const targetIndex = index + direction;
-      const manualCount = manualTodos.length;
+      if (targetIndex < 0 || targetIndex >= manualTodos.length) return;
 
-      if (index < manualCount && targetIndex < manualCount) {
-        const temp = manualTodos[index];
-        manualTodos[index] = manualTodos[targetIndex];
-        manualTodos[targetIndex] = temp;
-        saveData();
-      }
+      const temp = manualTodos[index];
+      manualTodos[index] = manualTodos[targetIndex];
+      manualTodos[targetIndex] = temp;
+      saveData();
     }
 
     function openTodoModal() { document.getElementById('todoModal').classList.remove('hidden'); }
@@ -720,6 +747,37 @@
     function deleteManualTodoItem(id) {
       manualTodos = manualTodos.filter(t => t.id !== id);
       saveData();
+    }
+
+    function openTodoCommentModal(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      document.getElementById('todoCommentId').value = item.id;
+      document.getElementById('todoCommentTitle').innerText = `Gestione: ${item.title}`;
+      document.getElementById('todoCommentText').value = '';
+      document.getElementById('todoCommentModal').classList.remove('hidden');
+    }
+
+    function closeTodoCommentModal() {
+      document.getElementById('todoCommentModal').classList.add('hidden');
+    }
+
+    function addTodoCommentOnly() {
+      const id = document.getElementById('todoCommentId').value;
+      const text = document.getElementById('todoCommentText').value.trim();
+      const item = manualTodos.find(t => t.id === id);
+      if (item && text) {
+        item.action += ` | Note: ${text}`;
+        saveData();
+      }
+      closeTodoCommentModal();
+    }
+
+    function resolveManualTodoWithComment() {
+      const id = document.getElementById('todoCommentId').value;
+      manualTodos = manualTodos.filter(t => t.id !== id);
+      saveData();
+      closeTodoCommentModal();
     }
 
     function openStepClickModal(id, idx) {
@@ -890,36 +948,33 @@
     }
 
     function openChatFromStepClick() {
+      const deptLabel = selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : null;
       closeStepClickModal();
-      openChatModal(activeItem.id);
+      openChatModal(activeItem.id, deptLabel);
     }
 
-    function openChatModal(id) {
+    function openChatModal(id, explicitSenderDept = null) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
       document.getElementById('chatModalTitle').innerText = 'Chat & Storico: ' + activeItem.title;
 
-      const senderSelect = document.getElementById('chatSenderDept');
-      const targetSelect = document.getElementById('chatTargetDept');
+      const currentSender = explicitSenderDept || (selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : ROUTE_STEPS[activeItem.currentStepIdx || 0].label);
       
-      senderSelect.innerHTML = '';
+      activeSenderDept = currentSender;
+      document.getElementById('chatSenderLabel').innerText = currentSender;
+
+      const targetSelect = document.getElementById('chatTargetDept');
       targetSelect.innerHTML = '';
 
       ROUTE_STEPS.forEach(s => {
-        const opt1 = document.createElement('option');
-        opt1.value = s.label;
-        opt1.innerText = s.label;
-        senderSelect.appendChild(opt1);
-
-        const opt2 = document.createElement('option');
-        opt2.value = s.label;
-        opt2.innerText = '➡️ ' + s.label;
-        targetSelect.appendChild(opt2);
+        const opt = document.createElement('option');
+        opt.value = s.label;
+        opt.innerText = '➡️ ' + s.label;
+        targetSelect.appendChild(opt);
       });
 
       document.getElementById('chatNewMsgText').value = '';
 
-      // Mostra prima il modale per permettere il calcolo corretto dell'altezza
       document.getElementById('chatModal').classList.remove('hidden');
       renderChatMessages();
     }
@@ -944,20 +999,18 @@
         `;
       });
 
-      // Posiziona lo scroll in fondo al caricamento dei messaggi
       box.scrollTop = box.scrollHeight;
     }
 
     function addChatMessage() {
-      if (!activeItem) return;
-      const senderDept = document.getElementById('chatSenderDept').value;
+      if (!activeItem || !activeSenderDept) return;
       const targetDept = document.getElementById('chatTargetDept').value;
       const text = document.getElementById('chatNewMsgText').value.trim();
       if (!text) return;
 
       activeItem.notesHistory.push({
         date: getNow(),
-        dept: senderDept,
+        dept: activeSenderDept,
         text: `[Messaggio a ${targetDept}]: ${text}`
       });
 
