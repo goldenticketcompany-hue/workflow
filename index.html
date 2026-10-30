@@ -275,14 +275,49 @@
     </div>
   </div>
 
-  <!-- MODAL CHAT -->
+  <!-- MODAL CHAT & STORICO -->
   <div class="modal-overlay hidden" id="chatModal">
     <div class="modal-card">
       <div class="modal-header">
         <div class="modal-title" id="chatModalTitle">Chat & Storico Pratica</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeChatModal()">✕</button>
       </div>
-      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
+
+      <!-- AGGIUNGI NUOVO MESSAGGIO IN CHAT -->
+      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi un commento o integrazione</div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <select id="chatSenderDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
+        </div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento da aggiungere alla chat..."></textarea>
+        </div>
+        <div style="text-align: right;">
+          <button class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">Invia Messaggio</button>
+        </div>
+      </div>
+
+      <div id="chatMessages" style="max-height: 320px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICA SINGOLO MESSAGGIO CHAT -->
+  <div class="modal-overlay hidden" id="editChatMsgModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Messaggio / Nota</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeEditChatMsgModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedChatMsg(event)">
+        <input type="hidden" id="editChatIndex">
+        <div class="form-group">
+          <label>Testo della Nota *</label>
+          <textarea id="editChatText" class="form-control" rows="4" required></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Modifica</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -370,9 +405,7 @@
         currentStepIdx: 1,
         approvedSteps: [0],
         statusMessage: null,
-        alertsList: [
-          { id: 'a_1', type: 'REJECT', sender: 'Amministrazione', target: 'Amministrazione', text: 'Spettacolo annullato dal teatro.' }
-        ],
+        alertsList: [],
         notesHistory: [
           { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserito blocco/annullamento.' }
         ]
@@ -435,7 +468,6 @@
 
         let bannersHTML = '';
 
-        // BANNER STATO / MOTIVO DELLO STALLO (Cornice Viola)
         if (p.statusMessage && p.statusMessage.text) {
           bannersHTML += `
             <div class="alert-banner alert-status">
@@ -447,7 +479,6 @@
           `;
         }
 
-        // BANNER SEGNALAZIONI E PROBLEMI / BLOCCHI (Cornice Rossa per ❌ o Arancione per ⚠️)
         p.alertsList.forEach((al) => {
           const isReject = al.type === 'REJECT';
           const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
@@ -758,24 +789,88 @@
     }
 
     function openChatModal(id) {
-      const item = pratiche.find(p => p.id === id);
-      if (!item) return;
-      document.getElementById('chatModalTitle').innerText = 'Storico: ' + item.title;
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      document.getElementById('chatModalTitle').innerText = 'Chat & Storico: ' + activeItem.title;
+
+      // Popola il menu a tendina dei reparti per il mittente del nuovo messaggio
+      const senderSelect = document.getElementById('chatSenderDept');
+      senderSelect.innerHTML = '';
+      ROUTE_STEPS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.label;
+        opt.innerText = s.label;
+        senderSelect.appendChild(opt);
+      });
+      document.getElementById('chatNewMsgText').value = '';
+
+      renderChatMessages();
+      document.getElementById('chatModal').classList.remove('hidden');
+    }
+
+    function renderChatMessages() {
       const box = document.getElementById('chatMessages');
       box.innerHTML = '';
-      (item.notesHistory || []).slice().reverse().forEach(n => {
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+
+      activeItem.notesHistory.forEach((n, index) => {
         box.innerHTML += `
-          <div style="background: #1c0507; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
+          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; color: var(--gold-light); font-weight: bold; margin-bottom: 6px;">
               <span>${n.dept}</span>
-              <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
+                <button class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditChatMsgModal(${index})">✏️ Modifica</button>
+              </div>
             </div>
-            <div style="color: #fff;">${n.text}</div>
+            <div style="color: #fff; line-height: 1.4;">${n.text}</div>
           </div>
         `;
       });
-      document.getElementById('chatModal').classList.remove('hidden');
     }
+
+    function addChatMessage() {
+      if (!activeItem) return;
+      const dept = document.getElementById('chatSenderDept').value;
+      const text = document.getElementById('chatNewMsgText').value.trim();
+      if (!text) return;
+
+      activeItem.notesHistory.push({
+        date: getNow(),
+        dept: dept,
+        text: text
+      });
+
+      document.getElementById('chatNewMsgText').value = '';
+      saveData();
+      renderChatMessages();
+    }
+
+    function openEditChatMsgModal(index) {
+      const note = activeItem.notesHistory[index];
+      if (!note) return;
+      document.getElementById('editChatIndex').value = index;
+      document.getElementById('editChatText').value = note.text;
+      document.getElementById('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function closeEditChatMsgModal() {
+      document.getElementById('editChatMsgModal').classList.add('hidden');
+    }
+
+    function saveEditedChatMsg(e) {
+      e.preventDefault();
+      const index = parseInt(document.getElementById('editChatIndex').value);
+      const newText = document.getElementById('editChatText').value.trim();
+      
+      if (activeItem && activeItem.notesHistory[index]) {
+        activeItem.notesHistory[index].text = newText;
+        saveData();
+        renderChatMessages();
+      }
+      closeEditChatMsgModal();
+    }
+
     function closeChatModal() { document.getElementById('chatModal').classList.add('hidden'); }
 
     function openNewModal() { document.getElementById('newModal').classList.remove('hidden'); }
