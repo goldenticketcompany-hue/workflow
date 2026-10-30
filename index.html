@@ -156,7 +156,7 @@
     </div>
   </div>
 
-  <!-- MODAL INSERIMENTO MOTIVO / STALLO (VIOLA) CON SCELTA DESTINATARIO -->
+  <!-- MODAL INSERIMENTO MOTIVO / STALLO (VIOLA) -->
   <div class="modal-overlay hidden" id="statusModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -361,7 +361,7 @@
           .eq('id', 'main')
           .single();
 
-        if (data && data.data) {
+        if (data && data.data && data.data.pratiche && data.data.pratiche.length > 0) {
           pratiche = data.data.pratiche || [];
           manualTodos = data.data.manualTodos || [];
         } else {
@@ -393,7 +393,7 @@
           .eq('id', 'main')
           .single();
 
-        if (data && data.data) {
+        if (data && data.data && data.data.pratiche) {
           const remoteP = JSON.stringify(data.data.pratiche || []);
           const remoteT = JSON.stringify(data.data.manualTodos || []);
           if (remoteP !== JSON.stringify(pratiche) || remoteT !== JSON.stringify(manualTodos)) {
@@ -413,12 +413,10 @@
         owner: 'Fabrizio R.',
         currentStepIdx: 1,
         approvedSteps: [0],
-        statusMessages: [
-          { id: 'st_1', dept: 'Servizi Tecnici', text: 'In attesa di chiarimenti sul rider.' }
-        ],
+        statusMessages: [],
         alertsList: [],
         notesHistory: [
-          { date: '30/10 09:00', dept: 'Servizi Tecnici', text: 'Impostato stallo su Servizi Tecnici.' }
+          { date: '30/10 09:00', dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }
         ]
       }];
     }
@@ -442,7 +440,14 @@
       });
 
       filteredPratiche.forEach((p, index) => {
-        if (!p.statusMessages) p.statusMessages = [];
+        if (!p.statusMessages) {
+          // Compatibilità con vecchi dati al singolare
+          if (p.statusMessage && p.statusMessage.text) {
+            p.statusMessages = [{ id: 'st_old', dept: p.statusMessage.dept, text: p.statusMessage.text }];
+          } else {
+            p.statusMessages = [];
+          }
+        }
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
 
@@ -484,7 +489,6 @@
 
         let bannersHTML = '';
 
-        // BANNER STATI / STALLI MULTIPLI (Cornice Viola)
         p.statusMessages.forEach(st => {
           bannersHTML += `
             <div class="alert-banner alert-status">
@@ -496,7 +500,6 @@
           `;
         });
 
-        // BANNER SEGNALAZIONI E PROBLEMI / BLOCCHI
         p.alertsList.forEach((al) => {
           const isReject = al.type === 'REJECT';
           const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
@@ -665,7 +668,7 @@
       e.preventDefault();
       manualTodos.unshift({
         title: document.getElementById('todoTitle').value,
-        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit'].value}` : '📌 TASK MANUALE',
+        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
         action: document.getElementById('todoAction').value,
         isManual: true
       });
@@ -700,7 +703,6 @@
         btnApprove.style.display = 'none';
       }
       
-      // Ora qualsiasi reparto può accendersi di viola (sia il corrente che un altro)
       btnSetStatus.style.display = 'block';
 
       document.getElementById('stepClickModal').classList.remove('hidden');
@@ -739,7 +741,6 @@
 
       if (!activeItem.statusMessages) activeItem.statusMessages = [];
 
-      // Aggiunge il nuovo stallo sul reparto scelto (permette stalli multipli)
       activeItem.statusMessages.push({
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         dept: targetDept,
@@ -761,7 +762,6 @@
         activeItem.approvedSteps.push(selectedStepIdx);
       }
 
-      // Rimuovi eventuali stalli relativi a questo reparto approvato
       if (activeItem.statusMessages) {
         activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
       }
