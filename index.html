@@ -43,15 +43,11 @@
     .client-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); font-size: 13px; padding: 4px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 8px; display: inline-block; }
     .card-title { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 14px; }
 
-    .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .alert-rejected { background: rgba(229, 62, 62, 0.25); color: #fc8181; border: 1.5px solid var(--danger-red); }
-    .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); animation: pulse-warn 2s infinite; }
+    .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
 
-    @keyframes pulse-warn {
-      0% { box-shadow: 0 0 0 0 rgba(221, 107, 32, 0.6); }
-      70% { box-shadow: 0 0 0 10px rgba(221, 107, 32, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(221, 107, 32, 0); }
-    }
+    .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
     .stepper-box { background: #2a080c; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
     .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 0; gap: 8px; }
@@ -61,7 +57,7 @@
 
     .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
     .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
-    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
+    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 20px !important; }
     .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
@@ -140,10 +136,6 @@
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
-        
-        <button class="btn-sm" id="btnClearReject" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearRejectStatus()">✅ Risolto: Rimuovi Problema (X)</button>
-        <button class="btn-sm" id="btnClearWarn" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearWarnStatus()">✅ Risolto: Rimuovi Segnalazione (⚠️)</button>
-        
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema ad altro reparto</button>
       </div>
@@ -165,7 +157,7 @@
 
       <div class="form-group">
         <label>Dettaglio / Nota della Segnalazione *</label>
-        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Spiega la problematica o il reminder..."></textarea>
+        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Es. I facchini non dovevano essere 10..."></textarea>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
@@ -351,10 +343,12 @@
         owner: 'Fabrizio R.',
         currentStepIdx: 4,
         approvedSteps: [0, 1, 2, 3],
-        rejectedDepts: [],
-        warningSenders: {},
+        alertsList: [
+          { id: 'a_1', type: 'WARN', sender: 'Amministrazione', target: 'Servizi Tecnici', text: 'I facchini non dovevano essere 10 ma 6.' },
+          { id: 'a_2', type: 'WARN', sender: 'Amministrazione', target: 'Servizi Tecnici', text: 'Montaggio la mattina presto ha costo aggiuntivo?' }
+        ],
         notesHistory: [
-          { date: '30/10 09:00', dept: 'Legale', text: 'Segnalato dettaglio a Servizi Tecnici.' }
+          { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserite segnalazioni operative.' }
         ]
       }];
     }
@@ -376,21 +370,24 @@
         const matchDept = (filter === 'ALL') || currentDept.includes(filter);
         return matchSearch && matchDept;
       }).forEach(p => {
-        if (!p.rejectedDepts) p.rejectedDepts = [];
-        if (!p.warningSenders) p.warningSenders = {};
+        if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
 
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
 
+        // Reparti con blocchi o segnalazioni
+        const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
+        const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
+
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
           let symbol = idx + 1;
 
-          if (p.rejectedDepts.includes(s.label)) {
+          if (rejectedTargets.includes(s.label)) {
             cls += ' rejected';
             symbol = '✕';
-          } else if (p.warningSenders[s.label]) {
+          } else if (warnedTargets.includes(s.label)) {
             cls += ' warning-alert';
             symbol = '⚠️';
           } else if (p.approvedSteps.includes(idx)) {
@@ -409,12 +406,22 @@
           `;
         }).join('');
 
-        let warningBannersHTML = '';
-        Object.keys(p.warningSenders).forEach(targetDept => {
-          const senderDept = p.warningSenders[targetDept];
-          warningBannersHTML += `
-            <div class="alert-banner alert-warning">
-              <span>⚠️ SEGNALAZIONE A <strong>${targetDept}</strong> (da: <strong>${senderDept}</strong>)</span>
+        // Generazione Banner Segnalazioni Singole con Anteprima Testo e Tasto Risolvi
+        let alertBannersHTML = '';
+        p.alertsList.forEach((al) => {
+          const isReject = al.type === 'REJECT';
+          const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
+          const icon = isReject ? '❌' : '⚠️';
+          
+          let previewText = al.text || '';
+          if (previewText.length > 45) previewText = previewText.substring(0, 45) + '...';
+
+          alertBannersHTML += `
+            <div class="${bannerClass}">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+                ${icon} <strong>Da ${al.sender} a ${al.target}:</strong> "${previewText}"
+              </span>
+              <button class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
             </div>
           `;
         });
@@ -426,13 +433,7 @@
           <div class="card-title">${p.title}</div>
           ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
-          ${p.rejectedDepts.length > 0 ? `
-            <div class="alert-banner alert-rejected">
-              <span>❌ PROBLEMA BLOCCANTE SU: ${p.rejectedDepts.join(', ')}</span>
-            </div>
-          ` : ''}
-
-          ${warningBannersHTML}
+          ${alertBannersHTML}
 
           <div class="stepper-box">
             <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
@@ -453,6 +454,23 @@
       });
     }
 
+    function removeSingleAlert(praticaId, alertId) {
+      const item = pratiche.find(p => p.id === praticaId);
+      if (!item || !item.alertsList) return;
+      
+      const removed = item.alertsList.find(a => a.id === alertId);
+      item.alertsList = item.alertsList.filter(a => a.id !== alertId);
+      
+      if (removed) {
+        item.notesHistory.push({ 
+          date: getNow(), 
+          dept: 'Sistema', 
+          text: `✅ Risolta e rimossa segnalazione da ${removed.sender} a ${removed.target}: "${removed.text}"` 
+        });
+      }
+      saveData();
+    }
+
     function renderTodoList() {
       const container = document.getElementById('todoList');
       container.innerHTML = '';
@@ -462,28 +480,18 @@
       pratiche.forEach(p => {
         const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
 
-        if (p.rejectedDepts && p.rejectedDepts.length > 0) {
-          p.rejectedDepts.forEach(dept => {
+        if (p.alertsList && p.alertsList.length > 0) {
+          p.alertsList.forEach(al => {
+            const isReject = al.type === 'REJECT';
             autoTasks.push({
               title: `${p.title} (${p.client})`,
-              situation: `❌ ${dept} - PROBLEMA BLOCCANTE`,
-              action: `Pratica bloccata per problema attivo su questo reparto.`
+              situation: isReject ? `❌ ${al.target} - PROBLEMA` : `⚠️ ${al.target} - DA: ${al.sender}`,
+              action: `Nota: ${al.text}`
             });
           });
         }
 
-        if (p.warningSenders && Object.keys(p.warningSenders).length > 0) {
-          Object.keys(p.warningSenders).forEach(targetDept => {
-            const sender = p.warningSenders[targetDept];
-            autoTasks.push({
-              title: `${p.title} (${p.client})`,
-              situation: `⚠️ ${targetDept} - SEGNALAZIONE IN ATTESA`,
-              action: `Promemoria: Avviso ricevuto da parte di ${sender}.`
-            });
-          });
-        }
-
-        if ((!p.rejectedDepts || p.rejectedDepts.length === 0) && (!p.warningSenders || Object.keys(p.warningSenders).length === 0)) {
+        if (!p.alertsList || p.alertsList.length === 0) {
           autoTasks.push({
             title: `${p.title} (${p.client})`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
@@ -502,7 +510,7 @@
       allTasks.forEach((t, idx) => {
         let badgeClass = 'todo-badge';
         if (t.situation.includes('PROBLEMA')) badgeClass += ' red';
-        else if (t.situation.includes('SEGNALAZIONE')) badgeClass += ' amber';
+        else if (t.situation.includes('DA:')) badgeClass += ' amber';
 
         const item = document.createElement('div');
         item.className = 'todo-card';
@@ -547,15 +555,8 @@
       selectedStepIdx = idx;
       const deptLabel = ROUTE_STEPS[idx].label;
       document.getElementById('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
+      document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
 
-      const sender = activeItem.warningSenders && activeItem.warningSenders[deptLabel];
-      if (sender) {
-        document.getElementById('stepClickSub').innerHTML = `⚠️ Segnalazione ricevuta da: <strong style="color:var(--gold-light);">${sender}</strong>`;
-      } else {
-        document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
-      }
-
-      // Mostra il pulsante "Approva e Passa Avanti" solo se si clicca sul reparto corrente della pratica
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
       const btnApprove = document.getElementById('btnApproveNext');
       if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
@@ -564,12 +565,6 @@
       } else {
         btnApprove.style.display = 'none';
       }
-
-      const isRejected = activeItem.rejectedDepts && activeItem.rejectedDepts.includes(deptLabel);
-      const isWarned = activeItem.warningSenders && activeItem.warningSenders[deptLabel];
-
-      document.getElementById('btnClearReject').style.display = isRejected ? 'block' : 'none';
-      document.getElementById('btnClearWarn').style.display = isWarned ? 'block' : 'none';
 
       document.getElementById('stepClickModal').classList.remove('hidden');
     }
@@ -593,24 +588,6 @@
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
       }
 
-      saveData();
-      closeStepClickModal();
-    }
-
-    function clearRejectStatus() {
-      if (!activeItem || selectedStepIdx === null) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      activeItem.rejectedDepts = activeItem.rejectedDepts.filter(d => d !== deptLabel);
-      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: '✅ Problema risolto e rimosso.' });
-      saveData();
-      closeStepClickModal();
-    }
-
-    function clearWarnStatus() {
-      if (!activeItem || selectedStepIdx === null) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      delete activeItem.warningSenders[deptLabel];
-      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: '✅ Segnalazione d\'attenzione risolta e rimossa.' });
       saveData();
       closeStepClickModal();
     }
@@ -643,21 +620,26 @@
       const note = document.getElementById('interveneNote').value.trim() || 'Segnalazione';
       const targetDeptLabel = document.getElementById('interveneTargetSelect').value;
 
-      if (!activeItem.rejectedDepts) activeItem.rejectedDepts = [];
-      if (!activeItem.warningSenders) activeItem.warningSenders = {};
+      if (!activeItem.alertsList) activeItem.alertsList = [];
 
-      if (actionType === 'REJECT') {
-        if (!activeItem.rejectedDepts.includes(activeSenderDept)) {
-          activeItem.rejectedDepts.push(activeSenderDept);
-        }
-        activeItem.notesHistory.push({ date: getNow(), dept: activeSenderDept, text: `[PROBLEMA ❌]: ${note}` });
-      } else if (actionType === 'WARN_DEST') {
-        activeItem.warningSenders[targetDeptLabel] = activeSenderDept;
-        activeItem.notesHistory.push({ date: getNow(), dept: activeSenderDept, text: `[SEGNALATO CON ⚠️ A ${targetDeptLabel}]: ${note}` });
-      }
+      const newAlert = {
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: actionType,
+        sender: activeSenderDept,
+        target: targetDeptLabel,
+        text: note
+      };
+
+      activeItem.alertsList.push(newAlert);
+      activeItem.notesHistory.push({ 
+        date: getNow(), 
+        dept: activeSenderDept, 
+        text: `[${actionType === 'REJECT' ? 'PROBLEMA ❌' : 'SEGNALAZIONE ⚠️'} a ${targetDeptLabel}]: ${note}` 
+      });
 
       saveData();
       closeInterveneModal();
+      document.getElementById('interveneNote').value = '';
     }
 
     function openChatFromStepClick() {
@@ -724,8 +706,7 @@
         owner: document.getElementById('formOwner').value,
         currentStepIdx: 0,
         approvedSteps: [],
-        rejectedDepts: [],
-        warningSenders: {},
+        alertsList: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
       saveData();
@@ -737,7 +718,7 @@
 
     function deletePratica(id) {
       if (confirm('Confermi l\'eliminazione della pratica?')) {
-        pratiche = pricate = pratiche.filter(p => p.id !== id);
+        pratiche = pratiche.filter(p => p.id !== id);
         saveData();
       }
     }
