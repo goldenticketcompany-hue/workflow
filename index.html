@@ -139,7 +139,7 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
-        <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema ad altro reparto</button>
+        <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
       </div>
     </div>
   </div>
@@ -152,19 +152,20 @@
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeInterveneModal()">✕</button>
       </div>
 
-      <div class="form-group">
-        <label>Reparto Destinatario da Segnalare</label>
+      <!-- Gruppo Scelta Reparto Destinatario (Visibile SOLO per avvisi ⚠️ ad altri reparti) -->
+      <div class="form-group" id="targetDeptGroup">
+        <label>Reparto Destinatario da Avvisare</label>
         <select id="interveneTargetSelect" class="form-control"></select>
       </div>
 
       <div class="form-group">
         <label>Dettaglio / Nota della Segnalazione *</label>
-        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Es. I facchini non dovevano essere 10..."></textarea>
+        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Scrivi il dettaglio..."></textarea>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
-        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante (X)</button>
-        <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala con Triangolo (al Reparto Selezionato)</button>
+        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante (Sul mio Reparto)</button>
+        <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala ad Altro Reparto</button>
       </div>
     </div>
   </div>
@@ -347,7 +348,7 @@
         approvedSteps: [0, 1, 2, 3],
         alertsList: [
           { id: 'a_1', type: 'WARN', sender: 'Amministrazione', target: 'Servizi Tecnici', text: 'I facchini non dovevano essere 10 ma 6.' },
-          { id: 'a_2', type: 'WARN', sender: 'Amministrazione', target: 'Servizi Tecnici', text: 'Montaggio la mattina presto ha costo aggiuntivo?' }
+          { id: 'a_2', type: 'REJECT', sender: 'Amministrazione', target: 'Amministrazione', text: 'Bloccato per verifica fondi.' }
         ],
         notesHistory: [
           { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserite segnalazioni operative.' }
@@ -421,14 +422,13 @@
           alertBannersHTML += `
             <div class="${bannerClass}">
               <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
-                ${icon} <strong>Da ${al.sender} a ${al.target}:</strong> "${previewText}"
+                ${icon} <strong>${isReject ? `Blocco su ${al.target}:` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
               </span>
               <button class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
             </div>
           `;
         });
 
-        // Trova l'indice reale nell'array globale per lo spostamento
         const globalIndex = pratiche.findIndex(item => item.id === p.id);
 
         const card = document.createElement('div');
@@ -469,7 +469,6 @@
       const targetIndex = index + direction;
       if (targetIndex < 0 || targetIndex >= pratiche.length) return;
       
-      // Scambia gli elementi nell'array
       const temp = pratiche[index];
       pratiche[index] = pratiche[targetIndex];
       pratiche[targetIndex] = temp;
@@ -508,7 +507,7 @@
             const isReject = al.type === 'REJECT';
             autoTasks.push({
               title: `${p.client} - ${p.title}`,
-              situation: isReject ? `❌ ${al.target} - PROBLEMA` : `⚠️ ${al.target} - DA: ${al.sender}`,
+              situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`
             });
           });
@@ -532,7 +531,7 @@
 
       allTasks.forEach((t, idx) => {
         let badgeClass = 'todo-badge';
-        if (t.situation.includes('PROBLEMA')) badgeClass += ' red';
+        if (t.situation.includes('BLOCCATO')) badgeClass += ' red';
         else if (t.situation.includes('DA:')) badgeClass += ' amber';
 
         const item = document.createElement('div');
@@ -625,8 +624,8 @@
       const select = document.getElementById('interveneTargetSelect');
       select.innerHTML = '';
 
-      ROUTE_STEPS.forEach((s, idx) => {
-        if (idx === selectedStepIdx) return;
+      // Popola la tendina con gli altri reparti
+      ROUTE_STEPS.forEach((s) => {
         const option = document.createElement('option');
         option.value = s.label;
         option.innerText = '➡️ [Segnala a] ' + s.label;
@@ -641,15 +640,19 @@
     function confirmInterveneAction(actionType) {
       if (!activeItem || !activeSenderDept) return;
       const note = document.getElementById('interveneNote').value.trim() || 'Segnalazione';
-      const targetDeptLabel = document.getElementById('interveneTargetSelect').value;
 
       if (!activeItem.alertsList) activeItem.alertsList = [];
+
+      let targetDept = activeSenderDept; // Se è bloccante, va sul reparto attuale
+      if (actionType === 'WARN_DEST') {
+        targetDept = document.getElementById('interveneTargetSelect').value; // Se è avviso, va al reparto scelto nella tendina
+      }
 
       const newAlert = {
         id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         type: actionType,
         sender: activeSenderDept,
-        target: targetDeptLabel,
+        target: targetDept,
         text: note
       };
 
@@ -657,7 +660,7 @@
       activeItem.notesHistory.push({ 
         date: getNow(), 
         dept: activeSenderDept, 
-        text: `[${actionType === 'REJECT' ? 'PROBLEMA ❌' : 'SEGNALAZIONE ⚠️'} a ${targetDeptLabel}]: ${note}` 
+        text: `[${actionType === 'REJECT' ? 'PROBLEMA BLOCCANTE ❌' : 'SEGNALAZIONE ⚠️ a ' + targetDept}]: ${note}` 
       });
 
       saveData();
