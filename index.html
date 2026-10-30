@@ -80,6 +80,7 @@
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
     .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 15px; }
+    .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
   </style>
 
   <!-- SUPABASE JS CLIENT -->
@@ -171,7 +172,7 @@
     </div>
   </div>
 
-  <!-- MODAL NUOVA PRATICA -->
+  <!-- MODAL NUOVA PRATICA (ORDINATA CON TEATRO/COMMITTENTE IN EVIDENZA SOPRA) -->
   <div class="modal-overlay hidden" id="newModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -180,12 +181,12 @@
       </div>
       <form onsubmit="savePratica(event)">
         <div class="form-group">
-          <label>Titolo dello Spettacolo *</label>
-          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
+          <label style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
         </div>
         <div class="form-group">
-          <label>Teatro / Committente *</label>
-          <input type="text" id="formClient" class="form-control" required placeholder="Es. Teatro Politeama...">
+          <label>Titolo dello Spettacolo *</label>
+          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
         </div>
         <div class="form-group">
           <label>Referente</label>
@@ -615,6 +616,7 @@
           </div>
         `;
       });
+      document.getElementById('chatModal').classList.add('hidden'); // Fix typo in original
       document.getElementById('chatModal').classList.remove('hidden');
     }
     function closeChatModal() { document.getElementById('chatModal').classList.add('hidden'); }
@@ -637,6 +639,9 @@
       });
       saveData();
       closeNewModal();
+      document.getElementById('formClient').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formOwner').value = '';
     }
 
     function deletePratica(id) {
