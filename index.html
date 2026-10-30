@@ -79,7 +79,7 @@
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
     .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
-    .btn-priority { background: #331015; color: var(--gold-light); border: 1.5px solid var(--border-color); padding: 8px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; }
+    .btn-priority { background: #331015; color: var(--gold-light); border: 1.5px solid var(--border-color); padding: 8px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; user-select: none; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.hidden { display: none; }
@@ -410,26 +410,6 @@
       } catch(e) {}
     }
 
-    setInterval(async () => {
-      try {
-        const { data } = await client
-          .from('workflow')
-          .select('data')
-          .eq('id', 'main')
-          .single();
-
-        if (data && data.data) {
-          const remoteP = JSON.stringify(data.data.pratiche || []);
-          const remoteT = JSON.stringify(data.data.manualTodos || []);
-          if (remoteP !== JSON.stringify(pratiche) || remoteT !== JSON.stringify(manualTodos)) {
-            pratiche = data.data.pratiche || [];
-            manualTodos = data.data.manualTodos || [];
-            renderApp();
-          }
-        }
-      } catch(e) {}
-    }, 5000);
-
     function getDemoData() {
       return [{
         id: 'p_1',
@@ -454,6 +434,7 @@
 
     function renderFeed() {
       const container = document.getElementById('feedList');
+      if(!container) return;
       const search = document.getElementById('searchInput').value.toLowerCase();
       const filter = document.getElementById('filterDept').value;
       container.innerHTML = '';
@@ -623,6 +604,7 @@
 
     function renderTodoList() {
       const container = document.getElementById('todoList');
+      if(!container) return;
       container.innerHTML = '';
 
       let autoTasks = [];
@@ -696,10 +678,12 @@
         item.className = 'todo-card';
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
+            ${t.isManual ? `
             <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
-              <button type="button" class="btn-priority" onclick="moveTaskIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button type="button" class="btn-priority" onclick="moveTaskIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button type="button" class="btn-priority" onclick="moveManualTodo('${t.id}', -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button type="button" class="btn-priority" onclick="moveManualTodo('${t.id}', 1)" ${idx === manualTodos.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
+            ` : `<div style="width: 32px;"></div>`}
             <div style="flex: 1;">
               <span class="${badgeClass}">${t.situation}</span>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
@@ -717,13 +701,16 @@
       });
     }
 
-    function moveTaskIndex(index, direction) {
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= manualTodos.length) return;
+    function moveManualTodo(id, direction) {
+      const idx = manualTodos.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= manualTodos.length) return;
 
-      const temp = manualTodos[index];
-      manualTodos[index] = manualTodos[targetIndex];
-      manualTodos[targetIndex] = temp;
+      const temp = manualTodos[idx];
+      manualTodos[idx] = manualTodos[targetIdx];
+      manualTodos[targetIdx] = temp;
+      
       renderTodoList();
       saveData();
     }
@@ -781,11 +768,6 @@
 
     function resolveManualTodoWithComment() {
       const id = document.getElementById('todoCommentId').value;
-      const text = document.getElementById('todoCommentText').value.trim();
-      const item = manualTodos.find(t => t.id === id);
-      if (item && text) {
-        item.action += ` | Nota risoluiva: ${text}`;
-      }
       manualTodos = manualTodos.filter(t => t.id !== id);
       renderTodoList();
       saveData();
