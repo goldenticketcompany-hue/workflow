@@ -144,7 +144,7 @@
           <option value="Promo">Promo</option>
           <option value="Logistica">Logistica</option>
         </select>
-        <select id="filterTodoAssignee" class="select-filter" onchange="renderApp()">
+        <select id="filterTodoAssignee" class="select-filter" onchange="renderTodoList()">
           <option value="ALL">👤 Tutti i Responsabili</option>
         </select>
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
@@ -166,7 +166,9 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
         
-        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Rimanda a Reparto (Viola)</button>
+        <button class="btn-gold" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+
+        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa (Viola)</button>
 
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
@@ -480,6 +482,7 @@
         pratiche = getDemoData();
         manualTodos = [];
       }
+      initAssigneeDropdownOptions();
       renderApp();
     }
 
@@ -498,8 +501,8 @@
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
         owner: 'Fabrizio R.',
-        currentStepIdx: 1,
-        approvedSteps: [0],
+        currentStepIdx: 4, // Legale
+        approvedSteps: [0, 1, 2, 3],
         statusMessages: [],
         alertsList: [],
         mailDepts: [],
@@ -543,6 +546,7 @@
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
         if (!p.mailDepts) p.mailDepts = [];
+        if (!p.parallelFinished) p.parallelFinished = { Promo: false, Logistica: false };
 
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
@@ -550,6 +554,8 @@
         const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
+
+        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6);
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -567,6 +573,22 @@
           } else if (p.mailDepts.includes(s.label)) {
             cls += ' has-mail';
             symbol = '✉️';
+          } else if (isFullyDone) {
+            cls += ' done';
+            symbol = '✓';
+          } else if (idx === 5 || idx === 6) { // Promo o Logistica
+            if (p.approvedSteps.includes(idx)) {
+              cls += ' done';
+              symbol = '✓';
+            } else if (stepIdx >= 5) {
+              cls += ' current-fuchsia';
+              symbol = '●';
+            } else {
+              if (p.approvedSteps.includes(idx)) {
+                cls += ' done';
+                symbol = '✓';
+              }
+            }
           } else if (p.approvedSteps.includes(idx)) {
             cls += ' done';
             symbol = '✓';
@@ -616,6 +638,18 @@
 
         const globalIndex = pratiche.findIndex(item => item.id === p.id);
 
+        let phaseDisplayLabel = currentDeptLabel;
+        if (stepIdx >= 5) {
+          let pList = [];
+          if (!p.approvedSteps.includes(5)) pList.push('Promo');
+          if (!p.approvedSteps.includes(6)) pList.push('Logistica');
+          if (pList.length > 0) {
+            phaseDisplayLabel = `In corso su: ${pList.join(' e ')}`;
+          } else {
+            phaseDisplayLabel = `✅ Completato (Promo & Logistica)`;
+          }
+        }
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
@@ -633,7 +667,7 @@
 
           <div class="stepper-box">
             <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
-              Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${currentDeptLabel}</strong>
+              Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${phaseDisplayLabel}</strong>
             </div>
             <div class="stepper">${stepperHTML}</div>
           </div>
@@ -694,13 +728,13 @@
       saveData();
     }
 
-    function updateAssigneeDropdown(allTasks) {
+    function initAssigneeDropdownOptions() {
       const select = document.getElementById('filterTodoAssignee');
       if (!select) return;
       const currentVal = select.value;
 
       const assigneesSet = new Set();
-      allTasks.forEach(t => {
+      manualTodos.forEach(t => {
         if (t.assignee && t.assignee.trim() !== '') {
           assigneesSet.add(t.assignee.trim());
         }
@@ -717,6 +751,8 @@
     }
 
     function renderTodoList() {
+      initAssigneeDropdownOptions();
+
       const container = document.getElementById('todoList');
       if(!container) return;
 
@@ -743,7 +779,8 @@
       let autoTasks = [];
 
       pratiche.forEach(p => {
-        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
+        const stepIdx = p.currentStepIdx || 0;
+        const currentDept = ROUTE_STEPS[stepIdx].label;
 
         if (p.statusMessages && p.statusMessages.length > 0) {
           p.statusMessages.forEach(st => {
@@ -789,22 +826,44 @@
         }
 
         if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
-          autoTasks.push({
-            id: 'wait_auto_' + p.id,
-            title: `${p.client} - ${p.title}`,
-            dept: currentDept,
-            assignee: p.owner || '',
-            situation: `⏳ ${currentDept} - IN ATTESA`,
-            action: `Pratica ferma in attesa di approvazione o avanzamento.`,
-            isManual: false
-          });
+          if (stepIdx >= 5) {
+            if (!p.approvedSteps.includes(5)) {
+              autoTasks.push({
+                id: 'wait_auto_promo_' + p.id,
+                title: `${p.client} - ${p.title}`,
+                dept: 'Promo',
+                assignee: p.owner || '',
+                situation: `⏳ Promo - IN ATTESA (parallelo)`,
+                action: `In attesa di conferma ESEGUITO da Promo.`,
+                isManual: false
+              });
+            }
+            if (!p.approvedSteps.includes(6)) {
+              autoTasks.push({
+                id: 'wait_auto_log_' + p.id,
+                title: `${p.client} - ${p.title}`,
+                dept: 'Logistica',
+                assignee: p.owner || '',
+                situation: `⏳ Logistica - IN ATTESA (parallelo)`,
+                action: `In attesa di conferma ESEGUITO da Logistica.`,
+                isManual: false
+              });
+            }
+          } else {
+            autoTasks.push({
+              id: 'wait_auto_' + p.id,
+              title: `${p.client} - ${p.title}`,
+              dept: currentDept,
+              assignee: p.owner || '',
+              situation: `⏳ ${currentDept} - IN ATTESA`,
+              action: `Pratica ferma in attesa di approvazione o avanzamento.`,
+              isManual: false
+            });
+          }
         }
       });
 
       const allTasks = [...sortedManuals, ...autoTasks];
-
-      // Aggiorna il menu dei responsabili basandosi su TUTTI i task generati
-      updateAssigneeDropdown(allTasks);
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
@@ -820,12 +879,12 @@
           }
         }
 
-        // Filtro per Persona Assegnata
+        // Filtro per Persona Assegnata rigoroso
         if (filterAssignee !== 'ALL') {
           const taskAssignee = (t.assignee || '').toLowerCase().trim();
           const selectedAssignee = filterAssignee.toLowerCase().trim();
           
-          if (!taskAssignee || !taskAssignee.includes(selectedAssignee)) {
+          if (taskAssignee !== selectedAssignee) {
             return false;
           }
         }
@@ -1048,16 +1107,22 @@
 
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
       const btnApprove = document.getElementById('btnApproveNext');
+      const btnExecuteFinal = document.getElementById('btnExecuteFinal');
       const btnSetStatus = document.getElementById('btnSetStatusModal');
 
-      if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+      btnApprove.style.display = 'none';
+      btnExecuteFinal.style.display = 'none';
+      btnSetStatus.style.display = 'block';
+
+      if (activeItem.currentStepIdx >= 5 && (idx === 5 || idx === 6)) {
+        // Siamo in Promo o Logistica (parallelo finale)
+        const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
+        btnExecuteFinal.style.display = 'block';
+        btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
+      } else if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         btnApprove.style.display = 'block';
         btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
-      } else {
-        btnApprove.style.display = 'none';
       }
-      
-      btnSetStatus.style.display = 'block';
 
       document.getElementById('stepClickModal').classList.remove('hidden');
     }
@@ -1134,10 +1199,39 @@
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
-        const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
+        
+        // Se arriviamo al Legale (indice 4), l'approvazione del legale porta direttamente alla fase parallela Promo (5) e Logistica (6)
+        if (activeItem.currentStepIdx === 5) {
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legale. Avviato in parallelo su Promo e Logistica.` });
+        } else {
+          const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
+        }
       } else {
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
+      }
+
+      renderApp();
+      saveData();
+      closeStepClickModal();
+    }
+
+    function executeFinalDepartment() {
+      if (!activeItem || (selectedStepIdx !== 5 && selectedStepIdx !== 6)) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+
+      const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
+
+      if (isAlreadyDone) {
+        // Annulla eseguito (rimuove il verde)
+        activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
+      } else {
+        // Segna eseguito
+        activeItem.approvedSteps.push(selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
       }
 
       renderApp();
