@@ -45,8 +45,9 @@
     .card-show-title { font-size: 16px; color: var(--text-muted); font-weight: bold; margin-bottom: 14px; }
 
     .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .alert-rejected { background: rgba(229, 62, 62, 0.25); color: #fc8181; border: 1.5px solid var(--danger-red); }
+    .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
     .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
+    .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
@@ -65,6 +66,7 @@
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+    .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1px solid var(--status-fuchsia); }
 
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
@@ -127,7 +129,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GESTIONE REPARTO & APPROVAZIONE -->
+  <!-- MODAL: GESTIONE REPARTO & STATO -->
   <div class="modal-overlay hidden" id="stepClickModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -138,9 +140,31 @@
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
+        
+        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #86198f; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">📝 Inserisci Motivo dello Stallo / Stato</button>
+
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL INSERIMENTO MOTIVO / STATO DEL REPARTO -->
+  <div class="modal-overlay hidden" id="statusModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Motivo dello Stallo / Stato Attuale</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStatusModal()">✕</button>
+      </div>
+      <form onsubmit="saveDepartmentStatus(event)">
+        <div class="form-group">
+          <label>Spiega perché il reparto è in attesa *</label>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di consegnare scheda tecnica..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Pubblica Comunicazione</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -152,19 +176,18 @@
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeInterveneModal()">✕</button>
       </div>
 
-      <!-- Gruppo Scelta Reparto Destinatario (Visibile SOLO per avvisi ⚠️ ad altri reparti) -->
       <div class="form-group" id="targetDeptGroup">
         <label>Reparto Destinatario da Avvisare</label>
         <select id="interveneTargetSelect" class="form-control"></select>
       </div>
 
       <div class="form-group">
-        <label>Dettaglio / Nota della Segnalazione *</label>
-        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Scrivi il dettaglio..."></textarea>
+        <label>Dettaglio / Nota del Problema o Annullamento *</label>
+        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Es. Spettacolo annullato dal teatro, fondi non approvati..."></textarea>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
-        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante (Sul mio Reparto)</button>
+        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante / Annullato</button>
         <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala ad Altro Reparto</button>
       </div>
     </div>
@@ -344,14 +367,14 @@
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
         owner: 'Fabrizio R.',
-        currentStepIdx: 4,
-        approvedSteps: [0, 1, 2, 3],
+        currentStepIdx: 1,
+        approvedSteps: [0],
+        statusMessage: null,
         alertsList: [
-          { id: 'a_1', type: 'WARN', sender: 'Amministrazione', target: 'Servizi Tecnici', text: 'I facchini non dovevano essere 10 ma 6.' },
-          { id: 'a_2', type: 'REJECT', sender: 'Amministrazione', target: 'Amministrazione', text: 'Bloccato per verifica fondi.' }
+          { id: 'a_1', type: 'REJECT', sender: 'Amministrazione', target: 'Amministrazione', text: 'Spettacolo annullato dal teatro.' }
         ],
         notesHistory: [
-          { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserite segnalazioni operative.' }
+          { date: '30/10 09:00', dept: 'Amministrazione', text: 'Inserito blocco/annullamento.' }
         ]
       }];
     }
@@ -410,19 +433,33 @@
           `;
         }).join('');
 
-        let alertBannersHTML = '';
+        let bannersHTML = '';
+
+        // BANNER STATO / MOTIVO DELLO STALLO (Cornice Viola)
+        if (p.statusMessage && p.statusMessage.text) {
+          bannersHTML += `
+            <div class="alert-banner alert-status">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+                🟣 <strong>Stato (${p.statusMessage.dept}):</strong> "${p.statusMessage.text}"
+              </span>
+              <button class="btn-solve-sm" onclick="removeStatusMessage('${p.id}')">✅ Risolto</button>
+            </div>
+          `;
+        }
+
+        // BANNER SEGNALAZIONI E PROBLEMI / BLOCCHI (Cornice Rossa per ❌ o Arancione per ⚠️)
         p.alertsList.forEach((al) => {
           const isReject = al.type === 'REJECT';
           const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
           const icon = isReject ? '❌' : '⚠️';
           
           let previewText = al.text || '';
-          if (previewText.length > 45) previewText = previewText.substring(0, 45) + '...';
+          if (previewText.length > 50) previewText = previewText.substring(0, 50) + '...';
 
-          alertBannersHTML += `
+          bannersHTML += `
             <div class="${bannerClass}">
               <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
-                ${icon} <strong>${isReject ? `Blocco su ${al.target}:` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
+                ${icon} <strong>${isReject ? `Bloccato (${al.target}):` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
               </span>
               <button class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
             </div>
@@ -444,7 +481,7 @@
           <div class="card-show-title">${p.title}</div>
           ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
-          ${alertBannersHTML}
+          ${bannersHTML}
 
           <div class="stepper-box">
             <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
@@ -476,6 +513,14 @@
       saveData();
     }
 
+    function removeStatusMessage(praticaId) {
+      const item = pratiche.find(p => p.id === praticaId);
+      if (!item) return;
+      item.statusMessage = null;
+      item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: '✅ Risolto e rimosso lo stato di stallo del reparto.' });
+      saveData();
+    }
+
     function removeSingleAlert(praticaId, alertId) {
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.alertsList) return;
@@ -487,7 +532,7 @@
         item.notesHistory.push({ 
           date: getNow(), 
           dept: 'Sistema', 
-          text: `✅ Risolta e rimossa segnalazione da ${removed.sender} a ${removed.target}: "${removed.text}"` 
+          text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` 
         });
       }
       saveData();
@@ -502,6 +547,14 @@
       pratiche.forEach(p => {
         const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
 
+        if (p.statusMessage && p.statusMessage.text) {
+          autoTasks.push({
+            title: `${p.client} - ${p.title}`,
+            situation: `🟣 ${p.statusMessage.dept} - IN ATTESA`,
+            action: `Motivo: ${p.statusMessage.text}`
+          });
+        }
+
         if (p.alertsList && p.alertsList.length > 0) {
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
@@ -513,7 +566,7 @@
           });
         }
 
-        if (!p.alertsList || p.alertsList.length === 0) {
+        if ((!p.statusMessage || !p.statusMessage.text) && (!p.alertsList || p.alertsList.length === 0)) {
           autoTasks.push({
             title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
@@ -533,6 +586,7 @@
         let badgeClass = 'todo-badge';
         if (t.situation.includes('BLOCCATO')) badgeClass += ' red';
         else if (t.situation.includes('DA:')) badgeClass += ' amber';
+        else if (t.situation.includes('IN ATTESA')) badgeClass += ' fuchsia';
 
         const item = document.createElement('div');
         item.className = 'todo-card';
@@ -581,17 +635,46 @@
 
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
       const btnApprove = document.getElementById('btnApproveNext');
-      if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
-        btnApprove.style.display = 'block';
-        btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
+      const btnSetStatus = document.getElementById('btnSetStatusModal');
+
+      if (isCurrentStep) {
+        if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+          btnApprove.style.display = 'block';
+          btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
+        } else {
+          btnApprove.style.display = 'none';
+        }
+        btnSetStatus.style.display = 'block';
       } else {
         btnApprove.style.display = 'none';
+        btnSetStatus.style.display = 'none';
       }
 
       document.getElementById('stepClickModal').classList.remove('hidden');
     }
 
     function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
+
+    function openStatusModal() {
+      closeStepClickModal();
+      document.getElementById('statusNoteInput').value = '';
+      document.getElementById('statusModal').classList.remove('hidden');
+    }
+
+    function closeStatusModal() { document.getElementById('statusModal').classList.add('hidden'); }
+
+    function saveDepartmentStatus(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      const text = document.getElementById('statusNoteInput').value.trim();
+
+      activeItem.statusMessage = { dept: deptLabel, text: text };
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `🟣 [Stato Stallo]: ${text}` });
+
+      saveData();
+      closeStatusModal();
+    }
 
     function approveAndNext() {
       if (!activeItem || selectedStepIdx === null) return;
@@ -601,6 +684,8 @@
       if (!activeItem.approvedSteps.includes(selectedStepIdx)) {
         activeItem.approvedSteps.push(selectedStepIdx);
       }
+
+      activeItem.statusMessage = null;
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
@@ -624,7 +709,6 @@
       const select = document.getElementById('interveneTargetSelect');
       select.innerHTML = '';
 
-      // Popola la tendina con gli altri reparti
       ROUTE_STEPS.forEach((s) => {
         const option = document.createElement('option');
         option.value = s.label;
@@ -643,9 +727,9 @@
 
       if (!activeItem.alertsList) activeItem.alertsList = [];
 
-      let targetDept = activeSenderDept; // Se è bloccante, va sul reparto attuale
+      let targetDept = activeSenderDept;
       if (actionType === 'WARN_DEST') {
-        targetDept = document.getElementById('interveneTargetSelect').value; // Se è avviso, va al reparto scelto nella tendina
+        targetDept = document.getElementById('interveneTargetSelect').value;
       }
 
       const newAlert = {
@@ -660,7 +744,7 @@
       activeItem.notesHistory.push({ 
         date: getNow(), 
         dept: activeSenderDept, 
-        text: `[${actionType === 'REJECT' ? 'PROBLEMA BLOCCANTE ❌' : 'SEGNALAZIONE ⚠️ a ' + targetDept}]: ${note}` 
+        text: `[${actionType === 'REJECT' ? 'PROBLEMA BLOCCATO / ANNULLATO ❌' : 'SEGNALAZIONE ⚠️ a ' + targetDept}]: ${note}` 
       });
 
       saveData();
@@ -732,6 +816,7 @@
         owner: document.getElementById('formOwner').value,
         currentStepIdx: 0,
         approvedSteps: [],
+        statusMessage: null,
         alertsList: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
