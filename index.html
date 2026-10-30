@@ -249,11 +249,13 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
+    // CREDENZIALI CLOUD DEDICATE E FISSE PER GOLDEN TICKET
     const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
+    // Se non c'è ancora un ID memorizzato nel browser, ne usiamo uno pre-configurato
     let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
 
     async function loadData() {
-      // Se abbiamo già un ID salvato sul browser, proviamo a scaricarlo
+      // 1. Prova a scaricare dal cloud con l'ID salvato
       if (jsonbinId) {
         try {
           const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
@@ -271,32 +273,32 @@
         } catch(e) {}
       }
 
-      // Se non esiste ancora un bin o fallisce, creiamone uno al volo sul tuo account JSONBin
+      // 2. Se è la prima volta in assoluto, crea il magazzino dati sul cloud e salva l'ID
       try {
-        const demo = { pratiche: getDemoData(), manualTodos: [] };
-        const createRes = await fetch('https://api.jsonbin.io/v3/b', {
+        const initialData = { pratiche: getDemoData(), manualTodos: [] };
+        const res = await fetch('https://api.jsonbin.io/v3/b', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-Master-Key': JSONBIN_MASTER_KEY,
-            'X-Bin-Name': 'GoldenTicketCloudDB'
+            'X-Bin-Name': 'GoldenTicketCloudSync'
           },
-          body: JSON.stringify(demo)
+          body: JSON.stringify(initialData)
         });
-        if (createRes.ok) {
-          const createData = await createRes.json();
-          if (createData.metadata && createData.metadata.id) {
-            jsonbinId = createData.metadata.id;
+        if (res.ok) {
+          const json = await res.json();
+          if (json.metadata && json.metadata.id) {
+            jsonbinId = json.metadata.id;
             localStorage.setItem('gt_jsonbin_id', jsonbinId);
-            pratiche = createData.record.pratiche;
-            manualTodos = createData.record.manualTodos || [];
+            pratiche = json.record.pratiche;
+            manualTodos = json.record.manualTodos || [];
             renderApp();
             return;
           }
         }
       } catch(e) {}
 
-      // Estremo fallback locale se manca internet
+      // Fallback per emergenza offline
       pratiche = getDemoData();
       manualTodos = [];
       renderApp();
@@ -304,13 +306,14 @@
 
     async function saveData() {
       renderApp();
-
       const payload = { pratiche, manualTodos };
-      try {
-        if (!jsonbinId) {
-          await loadData(); // Riprova a creare/trovare il bin se mancava
-        }
-        if (jsonbinId) {
+
+      if (!jsonbinId) {
+        await loadData();
+      }
+
+      if (jsonbinId) {
+        try {
           await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
             method: 'PUT',
             headers: {
@@ -319,11 +322,11 @@
             },
             body: JSON.stringify(payload)
           });
-        }
-      } catch(e) {}
+        } catch(e) {}
+      }
     }
 
-    // Sincronizzazione automatica in tempo reale ogni 5 secondi da cloud
+    // Polling periodico: ogni 4 secondi legge dal cloud per mostrare i cambiamenti fatti dagli altri soci
     setInterval(async () => {
       if (jsonbinId) {
         try {
@@ -333,8 +336,9 @@
           if (res.ok) {
             const data = await res.json();
             if (data.record && data.record.pratiche) {
-              if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche) || 
-                  JSON.stringify(data.record.manualTodos) !== JSON.stringify(manualTodos)) {
+              const cloudP = JSON.stringify(data.record.pratiche);
+              const cloudT = JSON.stringify(data.record.manualTodos || []);
+              if (cloudP !== JSON.stringify(pratiche) || cloudT !== JSON.stringify(manualTodos)) {
                 pratiche = data.record.pratiche;
                 manualTodos = data.record.manualTodos || [];
                 renderApp();
@@ -343,7 +347,7 @@
           }
         } catch(e) {}
       }
-    }, 5000);
+    }, 4000);
 
     function getDemoData() {
       return [{
