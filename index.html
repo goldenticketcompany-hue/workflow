@@ -290,12 +290,20 @@
           <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
         </div>
         <div class="form-group">
-          <label>Reparto di Riferimento / Nota</label>
-          <input type="text" id="todoSit" class="form-control" placeholder="Es. Legale o Contratto Beatrice">
+          <label>Reparto di Riferimento *</label>
+          <select id="todoSit" class="form-control" required>
+            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+            <option value="Servizi Tecnici">Servizi Tecnici</option>
+            <option value="Amministrazione">Amministrazione</option>
+            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+            <option value="Legale">Legale</option>
+            <option value="Promo">Promo</option>
+            <option value="Logistica">Logistica</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Chi deve farlo (Assegnato a)</label>
-          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Fulvio, Fabrizio, Amministrazione...">
+          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio, Jax...">
         </div>
         <div class="form-group">
           <label>Azione da fare *</label>
@@ -322,12 +330,20 @@
           <input type="text" id="editTodoTitle" class="form-control" required>
         </div>
         <div class="form-group">
-          <label>Reparto di Riferimento / Nota</label>
-          <input type="text" id="editTodoSit" class="form-control">
+          <label>Reparto di Riferimento *</label>
+          <select id="editTodoSit" class="form-control" required>
+            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+            <option value="Servizi Tecnici">Servizi Tecnici</option>
+            <option value="Amministrazione">Amministrazione</option>
+            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+            <option value="Legale">Legale</option>
+            <option value="Promo">Promo</option>
+            <option value="Logistica">Logistica</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Chi deve farlo (Assegnato a)</label>
-          <input type="text" id="editTodoAssignee" class="form-control" placeholder="Es. Fulvio, Fabrizio...">
+          <input type="text" id="editTodoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
         </div>
         <div class="form-group">
           <label>Azione / Note *</label>
@@ -678,16 +694,14 @@
       saveData();
     }
 
-    function updateAssigneeDropdown() {
+    function updateAssigneeDropdown(allTasks) {
       const select = document.getElementById('filterTodoAssignee');
       if (!select) return;
       const currentVal = select.value;
 
-      // Raccoglie tutti i nomi unici dai task manuali
       const assigneesSet = new Set();
-      manualTodos.forEach(t => {
+      allTasks.forEach(t => {
         if (t.assignee && t.assignee.trim() !== '') {
-          // Se ci sono più nomi separati da virgola o simili, puliamo o prendiamo l'intero testo
           assigneesSet.add(t.assignee.trim());
         }
       });
@@ -703,8 +717,6 @@
     }
 
     function renderTodoList() {
-      updateAssigneeDropdown();
-
       const container = document.getElementById('todoList');
       if(!container) return;
 
@@ -791,6 +803,9 @@
 
       const allTasks = [...sortedManuals, ...autoTasks];
 
+      // Aggiorna il menu dei responsabili basandosi su TUTTI i task generati
+      updateAssigneeDropdown(allTasks);
+
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
@@ -807,9 +822,12 @@
 
         // Filtro per Persona Assegnata
         if (filterAssignee !== 'ALL') {
-          const taskAssignee = (t.assignee || '').toLowerCase();
-          const selectedAssignee = filterAssignee.toLowerCase();
-          if (!taskAssignee.includes(selectedAssignee)) return false;
+          const taskAssignee = (t.assignee || '').toLowerCase().trim();
+          const selectedAssignee = filterAssignee.toLowerCase().trim();
+          
+          if (!taskAssignee || !taskAssignee.includes(selectedAssignee)) {
+            return false;
+          }
         }
 
         return true;
@@ -884,7 +902,6 @@
 
     function openTodoModal() { 
       document.getElementById('todoTitle').value = '';
-      document.getElementById('todoSit').value = '';
       document.getElementById('todoAssignee').value = '';
       document.getElementById('todoAction').value = '';
       document.getElementById('todoModal').classList.remove('hidden'); 
@@ -893,13 +910,13 @@
 
     function saveManualTodo(e) {
       e.preventDefault();
-      const sitVal = document.getElementById('todoSit').value.trim();
+      const sitVal = document.getElementById('todoSit').value;
       manualTodos.unshift({
         id: 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         title: document.getElementById('todoTitle').value,
         dept: sitVal,
         assignee: document.getElementById('todoAssignee').value.trim(),
-        situation: sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE',
+        situation: `📌 ${sitVal}`,
         action: document.getElementById('todoAction').value,
         isManual: true,
         isResolved: false
@@ -914,8 +931,12 @@
       if (!item) return;
       document.getElementById('editTodoId').value = item.id;
       document.getElementById('editTodoTitle').value = item.title || '';
-      let cleanSit = (item.situation || '').replace(/^[📌🟣✉️❌⚠️⏳✅]\s*/, '');
-      document.getElementById('editTodoSit').value = item.dept || cleanSit;
+      
+      const selectSit = document.getElementById('editTodoSit');
+      if (item.dept && [...selectSit.options].some(o => o.value === item.dept)) {
+        selectSit.value = item.dept;
+      }
+      
       document.getElementById('editTodoAssignee').value = item.assignee || '';
       document.getElementById('editTodoAction').value = item.action || '';
       document.getElementById('editTodoIsResolved').checked = !!item.isResolved;
@@ -932,12 +953,12 @@
       const item = manualTodos.find(t => t.id === id);
       if (item) {
         item.title = document.getElementById('editTodoTitle').value;
-        const sitVal = document.getElementById('editTodoSit').value.trim();
+        const sitVal = document.getElementById('editTodoSit').value;
         item.dept = sitVal;
         item.assignee = document.getElementById('editTodoAssignee').value.trim();
         item.isResolved = document.getElementById('editTodoIsResolved').checked;
         if (!item.isResolved) {
-          item.situation = sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE';
+          item.situation = `📌 ${sitVal}`;
         }
         item.action = document.getElementById('editTodoAction').value;
         renderTodoList();
@@ -996,8 +1017,8 @@
       if (item) {
         if (item.isResolved) {
           item.isResolved = false;
-          const sitVal = item.dept || '';
-          item.situation = sitVal ? `📌 ${sitVal}` : '📌 TASK MANUALE';
+          const sitVal = item.dept || 'TASK MANUALE';
+          item.situation = `📌 ${sitVal}`;
           if (text) item.action += ` | Riaperto: ${text}`;
         } else {
           if (text) item.action += ` | Risolto: ${text}`;
@@ -1307,7 +1328,7 @@
       const id = document.getElementById('editId').value;
       const item = pratiche.find(p => p.id === id);
       if (item) {
-        item.client = document.getElementById('editClient', '').value;
+        item.client = document.getElementById('editClient').value;
         item.title = document.getElementById('editTitle').value;
         item.owner = document.getElementById('editOwner').value;
         item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
