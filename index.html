@@ -56,4 +56,648 @@
     .stepper-box { background: #2a080c; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
     .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 0; gap: 8px; }
     .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 70px; }
-    .step-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center
+    .step-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
+    .step-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; }
+
+    .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
+    .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
+    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
+    .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
+
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; }
+    .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
+    .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+
+    .btn-sm { padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+    .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">GT</div>
+      <div class="brand-title">GOLDEN TICKET CLOUD</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
+      <button class="tab-btn" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="sectionFlussi">
+      <div class="toolbar">
+        <input type="text" id="searchInput" class="search-input" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterDept" class="select-filter" onchange="renderApp()">
+          <option value="ALL">Tutti i Reparti</option>
+          <option value="Proposta (commerciale)">Proposta (commerciale)</option>
+          <option value="Servizi Tecnici">Servizi Tecnici</option>
+          <option value="Amministrazione">Amministrazione</option>
+          <option value="Accordo (commerciale)">Accordo (commerciale)</option>
+          <option value="Legale">Legale</option>
+          <option value="Promo">Promo</option>
+          <option value="Logistica">Logistica</option>
+        </select>
+        <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
+      </div>
+
+      <div id="feedList"></div>
+    </div>
+
+    <div id="sectionTodo" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 18px; color: var(--gold-light);">Attività Quotidiane & Scadenze Bloccate</h3>
+        <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
+      </div>
+      <div id="todoList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTIONE PALLINO REPARTO -->
+  <div class="modal-overlay hidden" id="stepClickModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStepClickModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per este reparto:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-sm" id="btnClearReject" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearRejectStatus()">✅ Risolto: Rimuovi Problema (X)</button>
+        <button class="btn-sm" id="btnClearWarn" style="display:none; background: var(--success-green); color:#fff; font-size:15px; padding:14px; text-align:left;" onclick="clearWarnStatus()">✅ Risolto: Rimuovi Segnalazione (⚠️)</button>
+        
+        <button class="btn-gold" style="text-align: left; padding: 14px; font-size:15px;" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
+        <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema ad altro reparto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL INTERVENTO / SEGNALAZIONE PROBLEMA -->
+  <div class="modal-overlay hidden" id="interveneModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="interveneModalTitle">Segnala o Registra Problema</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeInterveneModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Reparto Destinatario da Segnalare</label>
+        <select id="interveneTargetSelect" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label>Dettaglio / Nota della Segnalazione *</label>
+        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Spiega la problematica o il reminder..."></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
+        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante (X)</button>
+        <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala con Triangolo (al Reparto Selezionato)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NUOVA PRATICA -->
+  <div class="modal-overlay hidden" id="newModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Pratica Spettacolo</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeNewModal()">✕</button>
+      </div>
+      <form onsubmit="savePratica(event)">
+        <div class="form-group">
+          <label>Titolo dello Spettacolo *</label>
+          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
+        </div>
+        <div class="form-group">
+          <label>Teatro / Committente *</label>
+          <input type="text" id="formClient" class="form-control" required placeholder="Es. Teatro Politeama...">
+        </div>
+        <div class="form-group">
+          <label>Referente</label>
+          <input type="text" id="formOwner" class="form-control" placeholder="Es. Fabrizio R.">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Crea Pratica</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Aggiungi Task Manuale</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveManualTodo(event)">
+        <div class="form-group">
+          <label>Titolo Attività *</label>
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
+        </div>
+        <div class="form-group">
+          <label>Reparto / Situazione</label>
+          <input type="text" id="todoSit" class="form-control" placeholder="Es. Logistica">
+        </div>
+        <div class="form-group">
+          <label>Azione da fare *</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHAT -->
+  <div class="modal-overlay hidden" id="chatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="chatModalTitle">Chat & Storico Pratica</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeChatModal()">✕</button>
+      </div>
+      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <script>
+    const ROUTE_STEPS = [
+      { id: 'Vendite', label: 'Proposta (commerciale)' },
+      { id: 'Servizi Tecnici', label: 'Servizi Tecnici' },
+      { id: 'Amministrazione', label: 'Amministrazione' },
+      { id: 'Vendite_2', label: 'Accordo (commerciale)' },
+      { id: 'Legale', label: 'Legale' },
+      { id: 'Promo', label: 'Promo' },
+      { id: 'Logistica', label: 'Logistica' }
+    ];
+
+    let pratiche = [];
+    let manualTodos = [];
+    let activeItem = null;
+    let selectedStepIdx = null;
+
+    // CONFIGURAZIONE JSONBIN.IO CON LA TUA MASTER KEY
+    const JSONBIN_MASTER_KEY = '$2a$10$IwB5xDeEVp5HLzLrbI6nKeYLBeqrqKmest5uI0SrC4HdnQ0r1D6bG';
+    // ID della pillola cloud (verrà creato automaticamente al primo salvataggio o puoi impostarlo)
+    let jsonbinId = localStorage.getItem('gt_jsonbin_id') || '';
+
+    async function loadData() {
+      if (jsonbinId) {
+        try {
+          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.record && data.record.pratiche) {
+              pratiche = data.record.pratiche;
+              manualTodos = data.record.manualTodos || [];
+              renderApp();
+              return;
+            }
+          }
+        } catch(e) {
+          console.log('Errore di connessione cloud, uso fallback locale', e);
+        }
+      }
+
+      // Fallback locale se non c'è ancora un bin su jsonbin
+      const savedP = localStorage.getItem('gt_pratiche_cloud_v35');
+      const savedT = localStorage.getItem('gt_todos_cloud_v35');
+      if (savedP) {
+        try { pratiche = JSON.parse(savedP); } catch(e) { pratiche = getDemoData(); }
+      } else {
+        pratiche = getDemoData();
+      }
+      if (savedT) {
+        try { manualTodos = JSON.parse(savedT); } catch(e) { manualTodos = []; }
+      }
+      renderApp();
+    }
+
+    async function saveData() {
+      // Salva in locale per reattività immediata
+      localStorage.setItem('gt_pratiche_cloud_v35', JSON.stringify(pratiche));
+      localStorage.setItem('gt_todos_cloud_v35', JSON.stringify(manualTodos));
+      renderApp();
+
+      // Sincronizza sul cloud JSONBin in tempo reale per tutti i dispositivi
+      const payload = { pratiche, manualTodos };
+      try {
+        if (!jsonbinId) {
+          // Crea un nuovo Bin su JSONBin se non esiste
+          const res = await fetch('https://api.jsonbin.io/v3/b', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': JSONBIN_MASTER_KEY,
+              'X-Bin-Name': 'GoldenTicketWorkflowDB'
+            },
+            body: JSON.stringify(payload)
+          });
+          const json = await res.json();
+          if (json.metadata && json.metadata.id) {
+            jsonbinId = json.metadata.id;
+            localStorage.setItem('gt_jsonbin_id', jsonbinId);
+          }
+        } else {
+          // Aggiorna il Bin esistente
+          await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': JSONBIN_MASTER_KEY
+            },
+            body: JSON.stringify(payload)
+          });
+        }
+      } catch(e) {
+        console.log('Errore salvataggio cloud', e);
+      }
+    }
+
+    // Polling periodico ogni 10 secondi per aggiornare i dati da altri dispositivi in tempo reale
+    setInterval(async () => {
+      if (jsonbinId) {
+        try {
+          const res = await fetch(`https://api.jsonbin.io/v3/b/${jsonbinId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.record && data.record.pratiche) {
+              // Aggiorna solo se ci sono differenze di dati
+              if (JSON.stringify(data.record.pratiche) !== JSON.stringify(pratiche)) {
+                pratiche = data.record.pratiche;
+                manualTodos = data.record.manualTodos || [];
+                renderApp();
+              }
+            }
+          }
+        } catch(e) {}
+      }
+    }, 10000);
+
+    function getDemoData() {
+      return [{
+        id: 'p_1',
+        title: 'Caravaggio - Rebel Rock Musical',
+        client: 'Teatro Manzoni Cassino',
+        owner: 'Fabrizio R.',
+        currentStepIdx: 4,
+        approvedSteps: [0, 1, 2, 3],
+        rejectedDepts: [],
+        warningSenders: {},
+        notesHistory: [
+          { date: '30/10 09:00', dept: 'Legale', text: 'Segnalato dettaglio a Servizi Tecnici.' }
+        ]
+      }];
+    }
+
+    function renderApp() {
+      renderFeed();
+      renderTodoList();
+    }
+
+    function renderFeed() {
+      const container = document.getElementById('feedList');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filter = document.getElementById('filterDept').value;
+      container.innerHTML = '';
+
+      pratiche.filter(p => {
+        const matchSearch = p.title.toLowerCase().includes(search) || p.client.toLowerCase().includes(search);
+        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
+        const matchDept = (filter === 'ALL') || currentDept.includes(filter);
+        return matchSearch && matchDept;
+      }).forEach(p => {
+        if (!p.rejectedDepts) p.rejectedDepts = [];
+        if (!p.warningSenders) p.warningSenders = {};
+        if (!p.approvedSteps) p.approvedSteps = [];
+
+        const stepIdx = p.currentStepIdx || 0;
+        const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
+
+        let stepperHTML = ROUTE_STEPS.map((s, idx) => {
+          let cls = 'step-circle';
+          let symbol = idx + 1;
+
+          if (p.rejectedDepts.includes(s.label)) {
+            cls += ' rejected';
+            symbol = '✕';
+          } else if (p.warningSenders[s.label]) {
+            cls += ' warning-alert';
+            symbol = '⚠️';
+          } else if (p.approvedSteps.includes(idx)) {
+            cls += ' done';
+            symbol = '✓';
+          } else if (idx === stepIdx) {
+            cls += ' current-fuchsia';
+            symbol = '●';
+          }
+
+          return `
+            <div class="step-item" onclick="openStepClickModal('${p.id}', ${idx})">
+              <div class="${cls}">${symbol}</div>
+              <div class="step-label">${s.label.split(' ')[0]}</div>
+            </div>
+          `;
+        }).join('');
+
+        let warningBannersHTML = '';
+        Object.keys(p.warningSenders).forEach(targetDept => {
+          const senderDept = p.warningSenders[targetDept];
+          warningBannersHTML += `
+            <div class="alert-banner alert-warning">
+              <span>⚠️ SEGNALAZIONE A <strong>${targetDept}</strong> (da: <strong>${senderDept}</strong>)</span>
+            </div>
+          `;
+        });
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <span class="client-badge">${p.client}</span>
+          <div class="card-title">${p.title}</div>
+
+          ${p.rejectedDepts.length > 0 ? `
+            <div class="alert-banner alert-rejected">
+              <span>❌ PROBLEMA BLOCCANTE SU: ${p.rejectedDepts.join(', ')}</span>
+            </div>
+          ` : ''}
+
+          ${warningBannersHTML}
+
+          <div class="stepper-box">
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
+              Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${currentDeptLabel}</strong>
+            </div>
+            <div class="stepper">${stepperHTML}</div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+            <button class="btn-danger-outline" onclick="deletePratica('${p.id}')">Elimina</button>
+            <button class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderTodoList() {
+      const container = document.getElementById('todoList');
+      container.innerHTML = '';
+
+      let autoTasks = [];
+
+      pratiche.forEach(p => {
+        const currentDept = ROUTE_STEPS[p.currentStepIdx || 0].label;
+
+        if (p.rejectedDepts && p.rejectedDepts.length > 0) {
+          p.rejectedDepts.forEach(dept => {
+            autoTasks.push({
+              title: `${p.title} (${p.client})`,
+              situation: `❌ ${dept} - PROBLEMA BLOCCANTE`,
+              action: `Pratica bloccata per problema attivo su questo reparto.`
+            });
+          });
+        }
+
+        if (p.warningSenders && Object.keys(p.warningSenders).length > 0) {
+          Object.keys(p.warningSenders).forEach(targetDept => {
+            const sender = p.warningSenders[targetDept];
+            autoTasks.push({
+              title: `${p.title} (${p.client})`,
+              situation: `⚠️ ${targetDept} - SEGNALAZIONE IN ATTESA`,
+              action: `Promemoria: Avviso ricevuto da parte di ${sender}.`
+            });
+          });
+        }
+
+        if ((!p.rejectedDepts || p.rejectedDepts.length === 0) && (!p.warningSenders || Object.keys(p.warningSenders).length === 0)) {
+          autoTasks.push({
+            title: `${p.title} (${p.client})`,
+            situation: `⏳ ${currentDept} - IN ATTESA`,
+            action: `Pratica ferma in attesa di approvazione o avanzamento.`
+          });
+        }
+      });
+
+      const allTasks = [...manualTodos, ...autoTasks];
+
+      if (allTasks.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna attività in sospeso.</div>`;
+        return;
+      }
+
+      allTasks.forEach((t, idx) => {
+        let badgeClass = 'todo-badge';
+        if (t.situation.includes('PROBLEMA')) badgeClass += ' red';
+        else if (t.situation.includes('SEGNALAZIONE')) badgeClass += ' amber';
+
+        const item = document.createElement('div');
+        item.className = 'todo-card';
+        item.innerHTML = `
+          <div>
+            <span class="${badgeClass}">${t.situation}</span>
+            <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
+            <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
+          </div>
+          ${t.isManual ? `<button onclick="deleteManualTodo(${idx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;">✕</button>` : ''}
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function openTodoModal() { document.getElementById('todoModal').classList.remove('hidden'); }
+    function closeTodoModal() { document.getElementById('todoModal').classList.add('hidden'); }
+
+    function saveManualTodo(e) {
+      e.preventDefault();
+      manualTodos.unshift({
+        title: document.getElementById('todoTitle').value,
+        situation: document.getElementById('todoSit').value ? `📌 ${document.getElementById('todoSit').value}` : '📌 TASK MANUALE',
+        action: document.getElementById('todoAction').value,
+        isManual: true
+      });
+      saveData();
+      closeTodoModal();
+      document.getElementById('todoTitle').value = '';
+      document.getElementById('todoSit').value = '';
+      document.getElementById('todoAction').value = '';
+    }
+
+    function deleteManualTodo(idx) {
+      manualTodos.splice(0, 1);
+      saveData();
+    }
+
+    function openStepClickModal(id, idx) {
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      selectedStepIdx = idx;
+      const deptLabel = ROUTE_STEPS[idx].label;
+      document.getElementById('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
+
+      const sender = activeItem.warningSenders && activeItem.warningSenders[deptLabel];
+      if (sender) {
+        document.getElementById('stepClickSub').innerHTML = `⚠️ Segnalazione ricevuta da: <strong style="color:var(--gold-light);">${sender}</strong>`;
+      } else {
+        document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
+      }
+
+      const isRejected = activeItem.rejectedDepts && activeItem.rejectedDepts.includes(deptLabel);
+      const isWarned = activeItem.warningSenders && activeItem.warningSenders[deptLabel];
+
+      document.getElementById('btnClearReject').style.display = isRejected ? 'block' : 'none';
+      document.getElementById('btnClearWarn').style.display = isWarned ? 'block' : 'none';
+
+      document.getElementById('stepClickModal').classList.remove('hidden');
+    }
+
+    function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
+
+    function clearRejectStatus() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      activeItem.rejectedDepts = activeItem.rejectedDepts.filter(d => d !== deptLabel);
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: '✅ Problema risolto e rimosso.' });
+      saveData();
+      closeStepClickModal();
+    }
+
+    function clearWarnStatus() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      delete activeItem.warningSenders[deptLabel];
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: '✅ Segnalazione d\'attenzione risolta e rimossa.' });
+      saveData();
+      closeStepClickModal();
+    }
+
+    let activeSenderDept = '';
+
+    function openInterveneFromStepClick() {
+      closeStepClickModal();
+      activeSenderDept = ROUTE_STEPS[selectedStepIdx].label;
+      document.getElementById('interveneModalTitle').innerText = `Segnala da "${activeSenderDept}"`;
+
+      const select = document.getElementById('interveneTargetSelect');
+      select.innerHTML = '';
+
+      ROUTE_STEPS.forEach((s, idx) => {
+        if (idx === selectedStepIdx) return;
+        const option = document.createElement('option');
+        option.value = s.label;
+        option.innerText = '➡️ [Segnala a] ' + s.label;
+        select.appendChild(option);
+      });
+
+      document.getElementById('interveneModal').classList.remove('hidden');
+    }
+
+    function closeInterveneModal() { document.getElementById('interveneModal').classList.add('hidden'); }
+
+    function confirmInterveneAction(actionType) {
+      if (!activeItem || !activeSenderDept) return;
+      const note = document.getElementById('interveneNote').value.trim() || 'Segnalazione';
+      const targetDeptLabel = document.getElementById('interveneTargetSelect').value;
+
+      if (!activeItem.rejectedDepts) activeItem.rejectedDepts = [];
+      if (!activeItem.warningSenders) activeItem.warningSenders = {};
+
+      if (actionType === 'REJECT') {
+        if (!activeItem.rejectedDepts.includes(activeSenderDept)) {
+          activeItem.rejectedDepts.push(activeSenderDept);
+        }
+        activeItem.notesHistory.push({ date: getNow(), dept: activeSenderDept, text: `[PROBLEMA ❌]: ${note}` });
+      } else if (actionType === 'WARN_DEST') {
+        activeItem.warningSenders[targetDeptLabel] = activeSenderDept;
+        activeItem.notesHistory.push({ date: getNow(), dept: activeSenderDept, text: `[SEGNALATO CON ⚠️ A ${targetDeptLabel}]: ${note}` });
+      }
+
+      saveData();
+      closeInterveneModal();
+    }
+
+    function openChatFromStepClick() {
+      closeStepClickModal();
+      openChatModal(activeItem.id);
+    }
+
+    function openChatModal(id) {
+      const item = pratiche.find(p => p.id === id);
+      if (!item) return;
+      document.getElementById('chatModalTitle').innerText = 'Storico: ' + item.title;
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = '';
+      (item.notesHistory || []).slice().reverse().forEach(n => {
+        box.innerHTML += `
+          <div style="background: #1c0507; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; color: var(--gold-light); font-weight: bold; margin-bottom: 6px;">
+              <span>${n.dept}</span>
+              <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
+            </div>
+            <div style="color: #fff;">${n.text}</div>
+          </div>
+        `;
+      });
+      document.getElementById('chatModal').classList.remove('hidden');
+    }
+    function closeChatModal() { document.getElementById('chatModal').classList.add('hidden'); }
+
+    function openNewModal() { document.getElementById('newModal').classList.remove('hidden'); }
+    function closeNewModal() { document.getElementById('newModal').classList.add('hidden'); }
+
+    function savePratica(e) {
+      e.preventDefault();
+      pratiche.unshift({
+        id: 'p_' + Date.now(),
+        title: document.getElementById('formTitle').value,
+        client: document.getElementById('formClient').value,
+        owner: document.getElementById('formOwner').value,
+        currentStepIdx: 0,
+        approvedSteps: [],
+        rejectedDepts: [],
+        warningSenders: {},
+        notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
+      });
+      saveData();
+      closeNewModal();
+    }
+
+    function deletePratica(id) {
+      if (confirm('Confermi l\'eliminazione della pratica?')) {
+        pratiche = pratiche.filter(p => p.id !== id);
+        saveData();
+      }
+    }
+
+    function switchTab(tab) {
+      document.getElementById('sectionFlussi').style.display = tab === 'flussi' ? 'block' : 'none';
+      document.getElementById('sectionTodo').style.display = tab === 'todo' ? 'block' : 'none';
+      document.getElementById('btnTabFlussi').className = tab === 'flussi' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('btnTabTodo').className = tab === 'todo' ? 'tab-btn active' : 'tab-btn';
+    }
+
+    function getNow() {
+      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
