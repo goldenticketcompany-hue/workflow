@@ -144,7 +144,7 @@
         <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeStepClickModal()">✕</button>
       </div>
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per este reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
@@ -296,15 +296,20 @@
       </div>
 
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
-        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi un commento o integrazione</div>
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Invia messaggio / comunicazione</div>
         <div class="form-group" style="margin-bottom: 10px;">
+          <label style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Il mio Reparto (Mittente)</label>
           <select id="chatSenderDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
         </div>
         <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento da aggiungere alla chat..."></textarea>
+          <label style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Invia a quale Reparto Destinatario?</label>
+          <select id="chatTargetDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
+        </div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento o i chiarimenti..."></textarea>
         </div>
         <div style="text-align: right;">
-          <button class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">Invia Messaggio</button>
+          <button class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
         </div>
       </div>
 
@@ -362,7 +367,7 @@
           .eq('id', 'main')
           .single();
 
-        if (data && data.data && data.data.pratiche && data.data.pratiche.length > 0) {
+        if (data && data.data) {
           pratiche = data.data.pratiche || [];
           manualTodos = data.data.manualTodos || [];
         } else {
@@ -394,7 +399,7 @@
           .eq('id', 'main')
           .single();
 
-        if (data && data.data && data.data.pratiche) {
+        if (data && data.data) {
           const remoteP = JSON.stringify(data.data.pratiche || []);
           const remoteT = JSON.stringify(data.data.manualTodos || []);
           if (remoteP !== JSON.stringify(pratiche) || remoteT !== JSON.stringify(manualTodos)) {
@@ -416,6 +421,7 @@
         approvedSteps: [0],
         statusMessages: [],
         alertsList: [],
+        mailDepts: [],
         notesHistory: [
           { date: '30/10 09:00', dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }
         ]
@@ -441,15 +447,10 @@
       });
 
       filteredPratiche.forEach((p, index) => {
-        if (!p.statusMessages) {
-          if (p.statusMessage && p.statusMessage.text) {
-            p.statusMessages = [{ id: 'st_old', dept: p.statusMessage.dept, text: p.statusMessage.text }];
-          } else {
-            p.statusMessages = [];
-          }
-        }
+        if (!p.statusMessages) p.statusMessages = [];
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
+        if (!p.mailDepts) p.mailDepts = [];
 
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
@@ -457,17 +458,6 @@
         const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
-
-        // Raccoglie i reparti che hanno ricevuto messaggi in chat (per mostrare la letterina ✉️)
-        const mailDepts = [];
-        if (p.notesHistory) {
-          p.notesHistory.forEach(n => {
-            if (n.dept && n.dept !== 'Sistema' && n.dept !== 'Modifica') {
-              // Se un reparto scrive un messaggio, lo consideriamo come notifica o attività per gli altri/aggiornamento
-              // Per farlo apparire come "posta in arrivo" su tutti i reparti tranne chi ha scritto l'ultimo, oppure semplicemente se c'è un messaggio recente
-            }
-          });
-        }
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -482,7 +472,7 @@
           } else if (warnedTargets.includes(s.label)) {
             cls += ' warning-alert';
             symbol = '⚠️';
-          } else if (p.hasMail && p.hasMail === s.label) {
+          } else if (p.mailDepts.includes(s.label)) {
             cls += ' has-mail';
             symbol = '✉️';
           } else if (p.approvedSteps.includes(idx)) {
@@ -623,16 +613,20 @@
             autoTasks.push({
               title: `${p.client} - ${p.title}`,
               situation: `🟣 ${st.dept} - IN ATTESA`,
-              action: `Motivo: ${st.text}`
+              action: `Motivo: ${st.text}`,
+              isManual: false
             });
           });
         }
 
-        if (p.hasMail) {
-          autoTasks.push({
-            title: `${p.client} - ${p.title}`,
-            situation: `✉️ ${p.hasMail} - POSTA IN ARRIVO`,
-            action: `Nuovo messaggio o comunicazione ricevuta in chat.`
+        if (p.mailDepts && p.mailDepts.length > 0) {
+          p.mailDepts.forEach(dept => {
+            autoTasks.push({
+              title: `${p.client} - ${p.title}`,
+              situation: `✉️ ${dept} - POSTA IN ARRIVO`,
+              action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
+              isManual: false
+            });
           });
         }
 
@@ -642,16 +636,18 @@
             autoTasks.push({
               title: `${p.client} - ${p.title}`,
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
-              action: `Nota: ${al.text}`
+              action: `Nota: ${al.text}`,
+              isManual: false
             });
           });
         }
 
-        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && !p.hasMail) {
+        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
           autoTasks.push({
             title: `${p.client} - ${p.title}`,
             situation: `⏳ ${currentDept} - IN ATTESA`,
-            action: `Pratica ferma in attesa di approvazione o avanzamento.`
+            action: `Pratica ferma in attesa di approvazione o avanzamento.`,
+            isManual: false
           });
         }
       });
@@ -675,30 +671,31 @@
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
             <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
-              <button class="btn-priority" onclick="moveManualTodoIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button class="btn-priority" onclick="moveManualTodoIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button class="btn-priority" onclick="moveTaskIndex(${idx}, -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
+              <button class="btn-priority" onclick="moveTaskIndex(${idx}, 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
             <div style="flex: 1;">
               <span class="${badgeClass}">${t.situation}</span>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
               <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
             </div>
-            ${t.isManual ? `<button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;">✕</button>` : ''}
+            ${t.isManual ? `<button onclick="deleteManualTodoItem('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px;" title="Elimina task">✕</button>` : ''}
           </div>
         `;
         container.appendChild(item);
       });
     }
 
-    function moveManualTodoIndex(index, direction) {
+    function moveTaskIndex(index, direction) {
       const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= manualTodos.length) return;
-      
-      const temp = manualTodos[index];
-      manualTodos[index] = manualTodos[targetIndex];
-      manualTodos[targetIndex] = temp;
+      const manualCount = manualTodos.length;
 
-      saveData();
+      if (index < manualCount && targetIndex < manualCount) {
+        const temp = manualTodos[index];
+        manualTodos[index] = manualTodos[targetIndex];
+        manualTodos[targetIndex] = temp;
+        saveData();
+      }
     }
 
     function openTodoModal() { document.getElementById('todoModal').classList.remove('hidden'); }
@@ -731,9 +728,9 @@
       selectedStepIdx = idx;
       const deptLabel = ROUTE_STEPS[idx].label;
 
-      // Se il reparto cliccato aveva la letterina della posta, la azzeriamo (letta!)
-      if (activeItem.hasMail === deptLabel) {
-        activeItem.hasMail = null;
+      // Quando apri il reparto, se aveva posta in arrivo, la marchiamo come letta rimuovendola
+      if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
+        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
         saveData();
       }
 
@@ -797,9 +794,9 @@
         text: text
       });
 
-      // Imposta la notifica di posta/comunicazione in arrivo sul reparto destinatario se è diverso dal mittente
       if (senderDept !== targetDept) {
-        activeItem.hasMail = targetDept;
+        if (!activeItem.mailDepts) activeItem.mailDepts = [];
+        if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
       }
 
       activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
@@ -821,8 +818,8 @@
         activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
       }
 
-      if (activeItem.hasMail === deptLabel) {
-        activeItem.hasMail = null;
+      if (activeItem.mailDepts) {
+        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
       }
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
@@ -879,7 +876,9 @@
       };
 
       activeItem.alertsList.push(newAlert);
-      activeItem.hasMail = targetDept; // Accende la letterina sul reparto destinatario
+      
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
 
       activeItem.notesHistory.push({ 
         date: getNow(), 
@@ -902,13 +901,23 @@
       document.getElementById('chatModalTitle').innerText = 'Chat & Storico: ' + activeItem.title;
 
       const senderSelect = document.getElementById('chatSenderDept');
+      const targetSelect = document.getElementById('chatTargetDept');
+      
       senderSelect.innerHTML = '';
+      targetSelect.innerHTML = '';
+
       ROUTE_STEPS.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.label;
-        opt.innerText = s.label;
-        senderSelect.appendChild(opt);
+        const opt1 = document.createElement('option');
+        opt1.value = s.label;
+        opt1.innerText = s.label;
+        senderSelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = s.label;
+        opt2.innerText = '➡️ ' + s.label;
+        targetSelect.appendChild(opt2);
       });
+
       document.getElementById('chatNewMsgText').value = '';
 
       renderChatMessages();
@@ -939,15 +948,22 @@
 
     function addChatMessage() {
       if (!activeItem) return;
-      const dept = document.getElementById('chatSenderDept').value;
+      const senderDept = document.getElementById('chatSenderDept').value;
+      const targetDept = document.getElementById('chatTargetDept').value;
       const text = document.getElementById('chatNewMsgText').value.trim();
       if (!text) return;
 
       activeItem.notesHistory.push({
         date: getNow(),
-        dept: dept,
-        text: text
+        dept: senderDept,
+        text: `[Messaggio a ${targetDept}]: ${text}`
       });
+
+      // Accende la letterina sul reparto destinatario del messaggio
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(targetDept)) {
+        activeItem.mailDepts.push(targetDept);
+      }
 
       document.getElementById('chatNewMsgText').value = '';
       saveData();
@@ -1021,7 +1037,7 @@
         approvedSteps: [],
         statusMessages: [],
         alertsList: [],
-        hasMail: null,
+        mailDepts: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
       saveData();
