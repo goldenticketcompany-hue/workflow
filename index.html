@@ -81,7 +81,6 @@
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
-    /* Stile per i link nelle chat e nei task: word-break per evitare sbordamenti grafici */
     .chat-msg-text, .todo-text-block { word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a:hover, .todo-text-block a:hover { color: #fff; }
@@ -206,9 +205,34 @@
 
         <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa (Viola)</button>
 
+        <button class="btn-sm" id="btnSendBackModal" style="display:none; background: var(--warning-amber); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un altro Reparto</button>
+
         <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
         <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL RIMANDA INDIETRO O AD ALTRO REPARTO -->
+  <div class="modal-overlay hidden" id="sendBackModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeSendBackModal()">✕</button>
+      </div>
+      <form onsubmit="saveSendBackAction(event)">
+        <div class="form-group">
+          <label>A quale Reparto vuoi rimandare la pratica?</label>
+          <select id="sendBackTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Motivo del rimando / Cosa bisogna rivedere *</label>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a servizi tecnici per modifica rider o ricalcolo costi..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Conferma Rimando</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1650,10 +1674,12 @@
       const btnApprove = document.getElementById('btnApproveNext');
       const btnExecuteFinal = document.getElementById('btnExecuteFinal');
       const btnSetStatus = document.getElementById('btnSetStatusModal');
+      const btnSendBack = document.getElementById('btnSendBackModal');
 
       btnApprove.style.display = 'none';
       btnExecuteFinal.style.display = 'none';
       btnSetStatus.style.display = 'block';
+      btnSendBack.style.display = 'block';
 
       if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
@@ -1668,6 +1694,66 @@
     }
 
     function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
+
+    function openSendBackModal() {
+      closeStepClickModal();
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      document.getElementById('sendBackModalTitle').innerText = `Rimanda da "${currentDeptLabel}" ad altro reparto`;
+
+      const select = document.getElementById('sendBackTargetSelect');
+      select.innerHTML = '';
+
+      ROUTE_STEPS.forEach((s, idx) => {
+        // Mostra tutti i reparti (permette di rimandare a qualsiasi step precedente o successivo)
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.innerText = s.label + (idx < selectedStepIdx ? ' (Indietro)' : idx === selectedStepIdx ? ' (Stesso reparto)' : ' (Avanti)');
+        if (idx === Math.max(0, selectedStepIdx - 1)) opt.selected = true; // Default sul reparto immediatamente precedente
+        select.appendChild(opt);
+      });
+
+      document.getElementById('sendBackNoteInput').value = '';
+      document.getElementById('sendBackModal').classList.remove('hidden');
+    }
+
+    function closeSendBackModal() {
+      document.getElementById('sendBackModal').classList.add('hidden');
+    }
+
+    function saveSendBackAction(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetStepIdx = parseInt(document.getElementById('sendBackTargetSelect').value);
+      const targetDept = ROUTE_STEPS[targetStepIdx].label;
+      const note = document.getElementById('sendBackNoteInput').value.trim();
+
+      // Riporta la pratica all'indice del reparto scelto
+      activeItem.currentStepIdx = targetStepIdx;
+
+      // Registra l'avviso/notifica in modo che il reparto destinatario veda il rimando
+      if (!activeItem.alertsList) activeItem.alertsList = [];
+      activeItem.alertsList.push({
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'WARN',
+        sender: senderDept,
+        target: targetDept,
+        text: `Rimandato indietro: ${note}`
+      });
+
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+
+      activeItem.notesHistory.push({
+        date: getNow(),
+        dept: senderDept,
+        text: `↩️ [Rimandato a ${targetDept}]: ${note}`
+      });
+
+      renderApp();
+      saveData();
+      closeSendBackModal();
+    }
 
     function openStatusModal() {
       closeStepClickModal();
