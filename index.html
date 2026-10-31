@@ -288,8 +288,8 @@
           <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
         </div>
         <div class="form-group">
-          <label>Data dello Spettacolo</label>
-          <input type="text" id="formShowDate" class="form-control" placeholder="Es. 9 marzo 2027 o 15/04/2027...">
+          <label>Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="formShowDate" class="form-control">
         </div>
         <div class="form-group">
           <label>Referente</label>
@@ -320,8 +320,8 @@
           <input type="text" id="editTitle" class="form-control" required>
         </div>
         <div class="form-group">
-          <label>Data dello Spettacolo</label>
-          <input type="text" id="editShowDate" class="form-control" placeholder="Es. 9 marzo 2027...">
+          <label>Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="editShowDate" class="form-control">
         </div>
         <div class="form-group">
           <label>Referente</label>
@@ -364,8 +364,8 @@
           <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio, Jax...">
         </div>
         <div class="form-group">
-          <label>Scadenza (Entro il)</label>
-          <input type="text" id="todoDeadline" class="form-control" placeholder="Es. Entro venerdì, 10/05/2027...">
+          <label>Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="todoDeadline" class="form-control">
         </div>
         <div class="form-group">
           <label>Azione da fare *</label>
@@ -409,8 +409,8 @@
           <input type="text" id="editTodoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
         </div>
         <div class="form-group">
-          <label>Scadenza (Entro il)</label>
-          <input type="text" id="editTodoDeadline" class="form-control" placeholder="Es. Entro venerdì...">
+          <label>Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="editTodoDeadline" class="form-control">
         </div>
         <div class="form-group">
           <label>Azione / Note *</label>
@@ -531,6 +531,17 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
+    // Funzione per formattare la data da YYYY-MM-DD a formato leggibile italiano DD/MM/YYYY
+    function formatDateIt(dateStr) {
+      if (!dateStr) return '';
+      if (dateStr.includes('/')) return dateStr; // Se è già formattata o stringa libera
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    }
+
     // Funzione per rendere i link cliccabili ed aprirli in una nuova scheda
     function linkify(inputText) {
       if (!inputText) return '';
@@ -598,7 +609,7 @@
         id: 'p_1',
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
-        showDate: '9 marzo 2027',
+        showDate: '2027-03-09',
         owner: 'Fabrizio R.',
         currentStepIdx: 1,
         approvedSteps: [0],
@@ -669,6 +680,22 @@
         const hasMailHere = (p.mailDepts || []).includes(filter);
 
         return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
+      });
+
+      // ORDINAMENTO FLUSSI:
+      // 1. Pratiche SENZA data davanti (per prime)
+      // 2. Pratiche CON data dietro, ordinate cronologicamente per data (dalla più vicina alla più lontana)
+      filteredPratiche.sort((a, b) => {
+        const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
+        const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
+
+        if (!hasDateA && hasDateB) return -1; // A senza data sta davanti
+        if (hasDateA && !hasDateB) return 1;  // B senza data sta davanti
+
+        if (!hasDateA && !hasDateB) return 0; // Entrambe senza data
+
+        // Entrambe con data: ordina dalla più vicina alla più lontana
+        return a.showDate.localeCompare(b.showDate);
       });
 
       if (filteredPratiche.length === 0) {
@@ -790,6 +817,7 @@
         }
 
         const isExpanded = !!p.isExpanded;
+        const formattedShowDate = formatDateIt(p.showDate);
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -797,7 +825,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
             <div>
               <div class="client-title-main">${p.client}</div>
-              <div class="card-show-title">${p.title} ${p.showDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${p.showDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+              <div class="card-show-title">${p.title} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
             </div>
             <div style="display: flex; gap: 4px; align-items: center;" onclick="event.stopPropagation()">
               <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
@@ -807,7 +835,7 @@
 
           ${isExpanded ? `
             <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
-              ${p.showDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:6px;">🎭 Data dello Spettacolo: <strong>${p.showDate}</strong></div>` : ''}
+              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:6px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
               ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
               ${bannersHTML}
@@ -880,10 +908,11 @@
         archivedItems.forEach(p => {
           const item = document.createElement('div');
           item.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
+          const formattedShowDate = formatDateIt(p.showDate);
           item.innerHTML = `
             <div>
               <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${p.client}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${p.title} ${p.showDate ? `(${p.showDate})` : ''}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${p.title} ${formattedShowDate ? `(${formattedShowDate})` : ''}</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
               <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri</button>
@@ -998,8 +1027,6 @@
         }
       });
 
-      const sortedManuals = [...formattedManuals, ...resolvedManuals];
-
       let autoTasks = [];
 
       pratiche.filter(p => !p.isArchived).forEach(p => {
@@ -1016,7 +1043,7 @@
               title: `${p.client} - ${p.title}`,
               dept: st.dept,
               assignee: p.owner || '',
-              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+              deadline: p.showDate || '',
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
               isManual: false,
@@ -1033,7 +1060,7 @@
               title: `${p.client} - ${p.title}`,
               dept: dept,
               assignee: p.owner || '',
-              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+              deadline: p.showDate || '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
               isManual: false,
@@ -1052,7 +1079,7 @@
               title: `${p.client} - ${p.title}`,
               dept: al.target,
               assignee: p.owner || '',
-              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+              deadline: p.showDate || '',
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
               isManual: false,
@@ -1070,7 +1097,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'Promo',
                 assignee: p.owner || '',
-                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+                deadline: p.showDate || '',
                 situation: `⏳ Promo - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Promo.`,
                 isManual: false,
@@ -1084,7 +1111,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'PR',
                 assignee: p.owner || '',
-                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+                deadline: p.showDate || '',
                 situation: `⏳ PR - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da PR.`,
                 isManual: false,
@@ -1098,7 +1125,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'Logistica',
                 assignee: p.owner || '',
-                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+                deadline: p.showDate || '',
                 situation: `⏳ Logistica - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Logistica.`,
                 isManual: false,
@@ -1112,7 +1139,7 @@
               title: `${p.client} - ${p.title}`,
               dept: currentDept,
               assignee: p.owner || '',
-              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
+              deadline: p.showDate || '',
               situation: `⏳ ${currentDept} - IN ATTESA`,
               action: `Pratica ferma in attesa di approvazione o avanzamento.`,
               isManual: false,
@@ -1122,7 +1149,32 @@
         }
       });
 
-      const allTasks = [...sortedManuals, ...autoTasks];
+      // ORDINAMENTO TO-DO LIST:
+      // 1. Task CON deadline/data: ordinati dal più urgente (data più vicina) al più lontano.
+      // 2. Task SENZA deadline/data: vanno in fondo alla lista.
+      const sortTasksByDeadline = (list) => {
+        return list.sort((a, b) => {
+          const deadlineA = (a.deadline || '').trim();
+          const deadlineB = (b.deadline || '').trim();
+
+          const hasDateA = deadlineA !== '';
+          const hasDateB = deadlineB !== '';
+
+          if (hasDateA && !hasDateB) return -1; // A con data sta prima
+          if (!hasDateA && hasDateB) return 1;  // B con data sta prima
+
+          if (!hasDateA && !hasDateB) return 0; // Entrambe senza data
+
+          // Entrambe con data: ordina dalla più urgente (più vicina) alla più lontana
+          return deadlineA.localeCompare(deadlineB);
+        });
+      };
+
+      sortTasksByDeadline(formattedManuals);
+      sortTasksByDeadline(resolvedManuals);
+      sortTasksByDeadline(autoTasks);
+
+      const allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
@@ -1169,7 +1221,7 @@
 
         let deadlineBadgeHTML = '';
         if (t.deadline) {
-          deadlineBadgeHTML = `<span class="todo-badge deadline">⏳ Entro il: ${t.deadline}</span>`;
+          deadlineBadgeHTML = `<span class="todo-badge deadline">⏳ Entro il: ${formatDateIt(t.deadline)}</span>`;
         }
 
         const item = document.createElement('div');
@@ -1211,7 +1263,7 @@
             ${t.isManual ? `
             <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
               <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', 1)" ${idx === sortedManuals.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
+              <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
             ` : `<div style="width: 32px;"></div>`}
             
@@ -1326,7 +1378,7 @@
         item.style.cssText = "background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; opacity: 0.85;";
         
         let assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${t.assignee}</span>` : '';
-        let deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${t.deadline}</span>` : '';
+        let deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${formatDateIt(t.deadline)}</span>` : '';
 
         item.innerHTML = `
           <div style="flex: 1;">
