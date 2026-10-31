@@ -317,8 +317,12 @@
           <input type="date" id="formShowDate" class="form-control">
         </div>
         <div class="form-group">
-          <label>Referente</label>
-          <input type="text" id="formOwner" class="form-control" placeholder="Es. Fabrizio R.">
+          <label>Referente Esterno (Opzionale)</label>
+          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi (Teatro)...">
+        </div>
+        <div class="form-group">
+          <label>Referente Interno (Opzionale)</label>
+          <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Crea Pratica</button>
@@ -349,8 +353,12 @@
           <input type="date" id="editShowDate" class="form-control">
         </div>
         <div class="form-group">
-          <label>Referente</label>
-          <input type="text" id="editOwner" class="form-control">
+          <label>Referente Esterno (Opzionale)</label>
+          <input type="text" id="editOwnerExt" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Referente Interno (Opzionale)</label>
+          <input type="text" id="editOwnerInt" class="form-control">
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Salva Modifiche</button>
@@ -592,6 +600,12 @@
           manualTodos = data.data.manualTodos || [];
           archivedTodos = data.data.archivedTodos || [];
           
+          pratiche.forEach(p => {
+            if (p.owner && !p.ownerExt && !p.ownerInt) {
+              p.ownerExt = p.owner; // Migrazione retrocompatibile
+            }
+          });
+
           manualTodos.forEach((t, i) => {
             t.isManual = true;
             if (!t.id) {
@@ -633,7 +647,8 @@
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
         showDate: '2027-03-09',
-        owner: 'Fabrizio R.',
+        ownerExt: 'Mario Rossi',
+        ownerInt: 'Fabrizio R.',
         currentStepIdx: 1,
         approvedSteps: [0],
         statusMessages: [],
@@ -689,7 +704,7 @@
       const activePratiche = pratiche.filter(p => !p.isArchived);
 
       const filteredPratiche = activePratiche.filter(p => {
-        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search);
+        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search) || (p.ownerExt || '').toLowerCase().includes(search) || (p.ownerInt || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filter === 'ALL') return true;
@@ -837,6 +852,14 @@
         const isExpanded = !!p.isExpanded;
         const formattedShowDate = formatDateIt(p.showDate);
 
+        let referentsHTML = '';
+        if (p.ownerExt || p.ownerInt) {
+          referentsHTML = `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; display: flex; gap: 16px; flex-wrap: wrap;">`;
+          if (p.ownerExt) referentsHTML += `<span>👤 <strong>Referente Esterno:</strong> ${p.ownerExt}</span>`;
+          if (p.ownerInt) referentsHTML += `<span>🏢 <strong>Referente Interno:</strong> ${p.ownerInt}</span>`;
+          referentsHTML += `</div>`;
+        }
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
@@ -854,7 +877,7 @@
           ${isExpanded ? `
             <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
               ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:6px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
-              ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
+              ${referentsHTML}
 
               ${bannersHTML}
 
@@ -1004,9 +1027,8 @@
         }
       });
       pratiche.filter(p => !p.isArchived).forEach(p => {
-        if (p.owner && p.owner.trim() !== '') {
-          assigneesSet.add(p.owner.trim());
-        }
+        if (p.ownerExt && p.ownerExt.trim() !== '') assigneesSet.add(p.ownerExt.trim());
+        if (p.ownerInt && p.ownerInt.trim() !== '') assigneesSet.add(p.ownerInt.trim());
       });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
@@ -1060,7 +1082,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: st.dept,
-              assignee: p.owner || '',
+              assignee: p.ownerInt || p.ownerExt || '',
               deadline: p.showDate || '',
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
@@ -1077,7 +1099,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: dept,
-              assignee: p.owner || '',
+              assignee: p.ownerInt || p.ownerExt || '',
               deadline: p.showDate || '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
@@ -1096,7 +1118,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: al.target,
-              assignee: p.owner || '',
+              assignee: p.ownerInt || p.ownerExt || '',
               deadline: p.showDate || '',
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
@@ -1114,7 +1136,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Promo',
-                assignee: p.owner || '',
+                assignee: p.ownerInt || p.ownerExt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ Promo - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Promo.`,
@@ -1128,7 +1150,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'PR',
-                assignee: p.owner || '',
+                assignee: p.ownerInt || p.ownerExt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ PR - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da PR.`,
@@ -1142,7 +1164,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Logistica',
-                assignee: p.owner || '',
+                assignee: p.ownerInt || p.ownerExt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ Logistica - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Logistica.`,
@@ -1156,7 +1178,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: currentDept,
-              assignee: p.owner || '',
+              assignee: p.ownerInt || p.ownerExt || '',
               deadline: p.showDate || '',
               situation: `⏳ ${currentDept} - IN ATTESA`,
               action: `Pratica ferma in attesa di approvazione o avanzamento.`,
@@ -1704,11 +1726,10 @@
       select.innerHTML = '';
 
       ROUTE_STEPS.forEach((s, idx) => {
-        // Mostra tutti i reparti (permette di rimandare a qualsiasi step precedente o successivo)
         const opt = document.createElement('option');
         opt.value = idx;
         opt.innerText = s.label + (idx < selectedStepIdx ? ' (Indietro)' : idx === selectedStepIdx ? ' (Stesso reparto)' : ' (Avanti)');
-        if (idx === Math.max(0, selectedStepIdx - 1)) opt.selected = true; // Default sul reparto immediatamente precedente
+        if (idx === Math.max(0, selectedStepIdx - 1)) opt.selected = true;
         select.appendChild(opt);
       });
 
@@ -1728,10 +1749,8 @@
       const targetDept = ROUTE_STEPS[targetStepIdx].label;
       const note = document.getElementById('sendBackNoteInput').value.trim();
 
-      // Riporta la pratica all'indice del reparto scelto
       activeItem.currentStepIdx = targetStepIdx;
 
-      // Registra l'avviso/notifica in modo che il reparto destinatario veda il rimando
       if (!activeItem.alertsList) activeItem.alertsList = [];
       activeItem.alertsList.push({
         id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
@@ -2044,7 +2063,14 @@
 
     function closeChatModal() { document.getElementById('chatModal').classList.add('hidden'); }
 
-    function openNewModal() { document.getElementById('newModal').classList.remove('hidden'); }
+    function openNewModal() { 
+      document.getElementById('formClient').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formShowDate').value = '';
+      document.getElementById('formOwnerExt').value = '';
+      document.getElementById('formOwnerInt').value = '';
+      document.getElementById('newModal').classList.remove('hidden'); 
+    }
     function closeNewModal() { document.getElementById('newModal').classList.add('hidden'); }
 
     function openEditModal(id) {
@@ -2054,7 +2080,8 @@
       document.getElementById('editClient').value = item.client || '';
       document.getElementById('editTitle').value = item.title || '';
       document.getElementById('editShowDate').value = item.showDate || '';
-      document.getElementById('editOwner').value = item.owner || '';
+      document.getElementById('editOwnerExt').value = item.ownerExt || '';
+      document.getElementById('editOwnerInt').value = item.ownerInt || '';
       document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -2068,7 +2095,8 @@
         item.client = document.getElementById('editClient').value;
         item.title = document.getElementById('editTitle').value;
         item.showDate = document.getElementById('editShowDate').value.trim();
-        item.owner = document.getElementById('editOwner').value;
+        item.ownerExt = document.getElementById('editOwnerExt').value.trim();
+        item.ownerInt = document.getElementById('editOwnerInt').value.trim();
         item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
         renderApp();
         saveData();
@@ -2083,7 +2111,8 @@
         title: document.getElementById('formTitle').value,
         client: document.getElementById('formClient').value,
         showDate: document.getElementById('formShowDate').value.trim(),
-        owner: document.getElementById('formOwner').value,
+        ownerExt: document.getElementById('formOwnerExt').value.trim(),
+        ownerInt: document.getElementById('formOwnerInt').value.trim(),
         currentStepIdx: 0,
         approvedSteps: [],
         statusMessages: [],
@@ -2097,10 +2126,6 @@
       renderApp();
       saveData();
       closeNewModal();
-      document.getElementById('formClient').value = '';
-      document.getElementById('formTitle').value = '';
-      document.getElementById('formShowDate').value = '';
-      document.getElementById('formOwner').value = '';
     }
 
     function deletePratica(id) {
