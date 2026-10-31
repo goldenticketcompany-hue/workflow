@@ -21,7 +21,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
 
     header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     .brand { display: flex; align-items: center; gap: 14px; }
@@ -72,7 +72,7 @@
       100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
     }
 
-    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
@@ -81,8 +81,9 @@
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
-    /* Stile per i link nelle chat e nei task */
-    .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; }
+    /* Stile per i link nelle chat e nei task: word-break per evitare sbordamenti grafici */
+    .chat-msg-text, .todo-text-block { word-break: break-all; overflow-wrap: break-word; }
+    .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a:hover, .todo-text-block a:hover { color: #fff; }
 
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
@@ -168,14 +169,14 @@
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
       </div>
 
-      <!-- BARRA SUPERIORE TASK ARCHIVIATI (PORTA SUBITO ALLA CARTELLINA IN FONDO) -->
+      <!-- BARRA SUPERIORE TASK ARCHIVIATI -->
       <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 16px;">
         <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
       </div>
 
       <div id="todoList"></div>
 
-      <!-- SEZIONE CARTELLINA TASK ARCHIVIATI (IN FONDO) -->
+      <!-- SEZIONE CARTELLINA TASK ARCHIVIATI -->
       <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
           <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
@@ -368,8 +369,8 @@
           <input type="date" id="todoDeadline" class="form-control">
         </div>
         <div class="form-group">
-          <label>Azione da fare *</label>
-          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici con link...">
+          <label>Azione da fare * (puoi incollare link lunghi)</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici con link https://...">
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
@@ -429,7 +430,7 @@
     </div>
   </div>
 
-  <!-- MODAL CHAT & AGGIORNAMENTI TASK (MANUALE O FLUSSO) -->
+  <!-- MODAL CHAT & AGGIORNAMENTI TASK -->
   <div class="modal-overlay hidden" id="todoChatModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -531,10 +532,9 @@
     let activeItem = null;
     let selectedStepIdx = null;
 
-    // Funzione per formattare la data da YYYY-MM-DD a formato leggibile italiano DD/MM/YYYY
     function formatDateIt(dateStr) {
       if (!dateStr) return '';
-      if (dateStr.includes('/')) return dateStr; // Se è già formattata o stringa libera
+      if (dateStr.includes('/')) return dateStr;
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -542,7 +542,6 @@
       return dateStr;
     }
 
-    // Funzione per rendere i link cliccabili ed aprirli in una nuova scheda
     function linkify(inputText) {
       if (!inputText) return '';
       let replacedText = inputText;
@@ -682,19 +681,14 @@
         return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
       });
 
-      // ORDINAMENTO FLUSSI:
-      // 1. Pratiche SENZA data davanti (per prime)
-      // 2. Pratiche CON data dietro, ordinate cronologicamente per data (dalla più vicina alla più lontana)
       filteredPratiche.sort((a, b) => {
         const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
         const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
 
-        if (!hasDateA && hasDateB) return -1; // A senza data sta davanti
-        if (hasDateA && !hasDateB) return 1;  // B senza data sta davanti
+        if (!hasDateA && hasDateB) return -1;
+        if (hasDateA && !hasDateB) return 1;
+        if (!hasDateA && !hasDateB) return 0;
 
-        if (!hasDateA && !hasDateB) return 0; // Entrambe senza data
-
-        // Entrambe con data: ordina dalla più vicina alla più lontana
         return a.showDate.localeCompare(b.showDate);
       });
 
@@ -1149,9 +1143,6 @@
         }
       });
 
-      // ORDINAMENTO TO-DO LIST:
-      // 1. Task CON deadline/data: ordinati dal più urgente (data più vicina) al più lontano.
-      // 2. Task SENZA deadline/data: vanno in fondo alla lista.
       const sortTasksByDeadline = (list) => {
         return list.sort((a, b) => {
           const deadlineA = (a.deadline || '').trim();
@@ -1160,12 +1151,10 @@
           const hasDateA = deadlineA !== '';
           const hasDateB = deadlineB !== '';
 
-          if (hasDateA && !hasDateB) return -1; // A con data sta prima
-          if (!hasDateA && hasDateB) return 1;  // B con data sta prima
+          if (hasDateA && !hasDateB) return -1;
+          if (!hasDateA && hasDateB) return 1;
+          if (!hasDateA && !hasDateB) return 0;
 
-          if (!hasDateA && !hasDateB) return 0; // Entrambe senza data
-
-          // Entrambe con data: ordina dalla più urgente (più vicina) alla più lontana
           return deadlineA.localeCompare(deadlineB);
         });
       };
@@ -1230,11 +1219,9 @@
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
 
-        // Azione originale iniziale sempre in vista
         const originalActionText = t.actionOriginal || t.action || '';
         let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
 
-        // Sotto: ultimo messaggio della chat (se esiste)
         if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
           const lastMsg = t.chatHistory[t.chatHistory.length - 1];
           displayContentHTML += `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${lastMsg.date}]:</strong> ${linkify(lastMsg.text)}</div>`;
@@ -1259,15 +1246,15 @@
         }
 
         item.innerHTML = `
-          <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
+          <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
             ${t.isManual ? `
-            <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px; flex-shrink: 0;">
               <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
               <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
-            ` : `<div style="width: 32px;"></div>`}
+            ` : `<div style="width: 32px; flex-shrink: 0;"></div>`}
             
-            <div style="flex: 1;">
+            <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
@@ -1276,11 +1263,11 @@
                 </div>
                 ${actionTabsHTML}
               </div>
-              <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
+              <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;">${t.title}</div>
               ${displayContentHTML}
             </div>
 
-            <div style="display: flex; gap: 6px; align-items: center;">
+            <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
               ${t.isManual ? `
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${safeId}')">✏️</button>
@@ -1381,16 +1368,16 @@
         let deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${formatDateIt(t.deadline)}</span>` : '';
 
         item.innerHTML = `
-          <div style="flex: 1;">
+          <div style="flex: 1; min-width: 0; overflow: hidden;">
             <div>
               <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${t.archivedAt || 'Storico'})</span>
               ${assigneeBadgeHTML}
               ${deadlineBadgeHTML}
             </div>
-            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px;">${t.title}</div>
-            <div style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
+            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px; word-break: break-word;">${t.title}</div>
+            <div style="font-size: 13px; color: var(--text-muted); word-break: break-word;">${linkify(t.actionOriginal || t.action || '')}</div>
           </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
+          <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
             <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
             <button type="button" onclick="permanentDeleteArchivedTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
           </div>
@@ -1477,12 +1464,12 @@
       messagesArray.forEach((msg, index) => {
         const delCall = manualItem ? `confirmDeleteTodoChatMessage('${manualItem.id}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
         box.innerHTML += `
-          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
+          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
               <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${msg.date}</span>
               <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
             </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(msg.text)}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4; word-break: break-word;">${linkify(msg.text)}</div>
           </div>
         `;
       });
@@ -1892,7 +1879,7 @@
 
       activeItem.notesHistory.forEach((n, index) => {
         box.innerHTML += `
-          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px;">
+          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px; word-break: break-word;">
             <div style="display: flex; justify-content: space-between; color: var(--gold-light); font-weight: bold; margin-bottom: 6px;">
               <span>${n.dept}</span>
               <div style="display: flex; gap: 8px; align-items: center;">
@@ -1901,7 +1888,7 @@
                 <button type="button" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(n.text)}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4; word-break: break-word;">${linkify(n.text)}</div>
           </div>
         `;
       });
