@@ -88,7 +88,6 @@
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
     .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
-    .btn-priority { background: #331015; color: var(--gold-light); border: 1.5px solid var(--border-color); padding: 8px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; user-select: none; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.hidden { display: none; }
@@ -121,8 +120,11 @@
     <div id="sectionFlussi">
       <div class="toolbar">
         <input type="text" id="searchInput" class="search-input" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterShowTitle" class="select-filter" onchange="renderApp()">
+          <option value="ALL">🎭 Tutti gli Spettacoli</option>
+        </select>
         <select id="filterDept" class="select-filter" onchange="renderApp()">
-          <option value="ALL">Tutti i Reparti</option>
+          <option value="ALL">🏢 Tutti i Reparti</option>
           <option value="Proposta (commerciale)">Proposta (commerciale)</option>
           <option value="Servizi Tecnici">Servizi Tecnici</option>
           <option value="Amministrazione">Amministrazione</option>
@@ -628,7 +630,7 @@
         manualTodos = [];
         archivedTodos = [];
       }
-      initAssigneeDropdownOptions();
+      initDropdownOptions();
       renderApp();
     }
 
@@ -694,11 +696,38 @@
       if (badge) badge.innerText = count;
     }
 
+    function initDropdownOptions() {
+      const selectShow = document.getElementById('filterShowTitle');
+      if (!selectShow) return;
+      const currentShowVal = selectShow.value;
+
+      const showsSet = new Set();
+      pratiche.forEach(p => {
+        if (p.title && p.title.trim() !== '') {
+          showsSet.add(p.title.trim());
+        }
+      });
+
+      selectShow.innerHTML = '<option value="ALL">🎭 Tutti gli Spettacoli</option>';
+      Array.from(showsSet).sort().forEach(showTitle => {
+        const opt = document.createElement('option');
+        opt.value = showTitle;
+        opt.innerText = '🎭 ' + showTitle;
+        if (showTitle === currentShowVal) opt.selected = true;
+        selectShow.appendChild(opt);
+      });
+
+      initAssigneeDropdownOptions();
+    }
+
     function renderFeed() {
+      initDropdownOptions();
+
       const container = document.getElementById('feedList');
       if(!container) return;
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const filter = document.getElementById('filterDept').value;
+      const filterShow = document.getElementById('filterShowTitle').value;
+      const filterDept = document.getElementById('filterDept').value;
       container.innerHTML = '';
 
       const activePratiche = pratiche.filter(p => !p.isArchived);
@@ -707,17 +736,23 @@
         const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search) || (p.ownerExt || '').toLowerCase().includes(search) || (p.ownerInt || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
-        if (filter === 'ALL') return true;
+        if (filterShow !== 'ALL') {
+          if ((p.title || '').trim() !== filterShow) return false;
+        }
 
-        const stepIdx = p.currentStepIdx || 0;
-        const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
+        if (filterDept !== 'ALL') {
+          const stepIdx = p.currentStepIdx || 0;
+          const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
 
-        const isCurrent = (currentDeptLabel === filter);
-        const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filter);
-        const hasAlertHere = (p.alertsList || []).some(al => al.target === filter);
-        const hasMailHere = (p.mailDepts || []).includes(filter);
+          const isCurrent = (currentDeptLabel === filterDept);
+          const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filterDept);
+          const hasAlertHere = (p.alertsList || []).some(al => al.target === filterDept);
+          const hasMailHere = (p.mailDepts || []).includes(filterDept);
 
-        return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
+          if (!isCurrent && !hasStatusHere && !hasAlertHere && !hasMailHere) return false;
+        }
+
+        return true;
       });
 
       // ORDINAMENTO AUTOMATICO PER DATA DELLO SPETTACOLO
@@ -1277,12 +1312,7 @@
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
-            ${t.isManual ? `
-            <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 2px; flex-shrink: 0;">
-              <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', -1)" ${idx === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', 1)" ${idx === allTasks.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
-            </div>
-            ` : `<div style="width: 32px; flex-shrink: 0;"></div>`}
+            <div style="width: 10px; flex-shrink: 0;"></div>
             
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
@@ -1571,20 +1601,6 @@
         saveData();
         closeTodoChatModal();
       }
-    }
-
-    function moveManualTodo(id, direction) {
-      const idx = manualTodos.findIndex(t => t.id === id);
-      if (idx === -1) return;
-      const targetIdx = idx + direction;
-      if (targetIdx < 0 || targetIdx >= manualTodos.length) return;
-
-      const temp = manualTodos[idx];
-      manualTodos[idx] = manualTodos[targetIdx];
-      manualTodos[targetIdx] = temp;
-      
-      renderTodoList();
-      saveData();
     }
 
     function openTodoModal() { 
