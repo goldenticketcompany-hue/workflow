@@ -42,13 +42,14 @@
 
     .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
     
-    .client-title-main { font-size: 24px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
-    .card-show-title { font-size: 16px; color: var(--text-muted); font-weight: bold; margin-bottom: 14px; }
+    .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
 
     .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
     .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
     .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
@@ -126,6 +127,17 @@
           <option value="Logistica">Logistica</option>
         </select>
         <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
+      </div>
+
+      <!-- BARRA CONTROLLO VISTA COMPATTA / ESPANSA E ARCHIVIO -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllCards()">📁 Compatta Tutto</button>
+        </div>
+        <div>
+          <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
+        </div>
       </div>
 
       <div id="feedList"></div>
@@ -218,9 +230,21 @@
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
-        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccante / Annullato</button>
+        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccato / Annullato</button>
         <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala ad Altro Reparto</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRATICHE ARCHIVIATE -->
+  <div class="modal-overlay hidden" id="archiveModal">
+    <div class="modal-card" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeArchiveModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate e archiviate, oppure riaprirle se necessario.</p>
+      <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
     </div>
   </div>
 
@@ -501,11 +525,13 @@
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
         owner: 'Fabrizio R.',
-        currentStepIdx: 4, // Legale
-        approvedSteps: [0, 1, 2, 3],
+        currentStepIdx: 1,
+        approvedSteps: [0],
         statusMessages: [],
         alertsList: [],
         mailDepts: [],
+        isArchived: false,
+        isExpanded: false,
         notesHistory: [
           { date: '30/10 09:00', dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }
         ]
@@ -515,6 +541,31 @@
     function renderApp() {
       renderFeed();
       renderTodoList();
+      updateArchiveCount();
+    }
+
+    function expandAllCards() {
+      pratiche.forEach(p => p.isExpanded = true);
+      renderFeed();
+    }
+
+    function collapseAllCards() {
+      pratiche.forEach(p => p.isExpanded = false);
+      renderFeed();
+    }
+
+    function toggleCardExpand(id) {
+      const p = pratiche.find(item => item.id === id);
+      if (p) {
+        p.isExpanded = !p.isExpanded;
+        renderFeed();
+      }
+    }
+
+    function updateArchiveCount() {
+      const count = pratiche.filter(p => p.isArchived).length;
+      const badge = document.getElementById('archiveCountBadge');
+      if (badge) badge.innerText = count;
     }
 
     function renderFeed() {
@@ -524,7 +575,10 @@
       const filter = document.getElementById('filterDept').value;
       container.innerHTML = '';
 
-      const filteredPratiche = pratiche.filter(p => {
+      // Mostra solo le pratiche NON archiviate nella vista principale
+      const activePratiche = pratiche.filter(p => !p.isArchived);
+
+      const filteredPratiche = activePratiche.filter(p => {
         const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
@@ -541,12 +595,16 @@
         return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
       });
 
+      if (filteredPratiche.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna pratica attiva trovata.</div>`;
+        return;
+      }
+
       filteredPratiche.forEach((p) => {
         if (!p.statusMessages) p.statusMessages = [];
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
         if (!p.mailDepts) p.mailDepts = [];
-        if (!p.parallelFinished) p.parallelFinished = { Promo: false, Logistica: false };
 
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
@@ -576,18 +634,13 @@
           } else if (isFullyDone) {
             cls += ' done';
             symbol = '✓';
-          } else if (idx === 5 || idx === 6) { // Promo o Logistica
+          } else if (idx === 5 || idx === 6) {
             if (p.approvedSteps.includes(idx)) {
               cls += ' done';
               symbol = '✓';
             } else if (stepIdx >= 5) {
               cls += ' current-fuchsia';
               symbol = '●';
-            } else {
-              if (p.approvedSteps.includes(idx)) {
-                cls += ' done';
-                symbol = '✓';
-              }
             }
           } else if (p.approvedSteps.includes(idx)) {
             cls += ' done';
@@ -606,6 +659,16 @@
         }).join('');
 
         let bannersHTML = '';
+
+        // Banner di richiesta archiviazione se tutti i pallini sono verdi
+        if (isFullyDone && !p.isArchived) {
+          bannersHTML += `
+            <div class="alert-banner alert-archive">
+              <span>📦 Tutti i reparti hanno completato. Vuoi archiviare questa pratica?</span>
+              <button type="button" class="btn-solve-sm" style="background: var(--success-green);" onclick="archivePratica('${p.id}')">Sì, Archivia</button>
+            </div>
+          `;
+        }
 
         p.statusMessages.forEach(st => {
           bannersHTML += `
@@ -650,38 +713,100 @@
           }
         }
 
+        const isExpanded = !!p.isExpanded;
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <div class="client-title-main">${p.client}</div>
-            <div style="display: flex; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
+            <div>
+              <div class="client-title-main">${p.client}</div>
+              <div class="card-show-title">${p.title} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+            </div>
+            <div style="display: flex; gap: 4px; align-items: center;" onclick="event.stopPropagation()">
               <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
               <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, 1)" ${globalIndex === pratiche.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
           </div>
-          <div class="card-show-title">${p.title}</div>
-          ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
-          ${bannersHTML}
+          ${isExpanded ? `
+            <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+              ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
-          <div class="stepper-box">
-            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
-              Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${phaseDisplayLabel}</strong>
+              ${bannersHTML}
+
+              <div class="stepper-box">
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
+                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${phaseDisplayLabel}</strong>
+                </div>
+                <div class="stepper">${stepperHTML}</div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
+                  <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
+                </div>
+                <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+              </div>
             </div>
-            <div class="stepper">${stepperHTML}</div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
-              <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
-            </div>
-            <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
-          </div>
+          ` : `
+            ${bannersHTML ? `<div style="margin-top: 10px;">${bannersHTML}</div>` : ''}
+          `}
         `;
         container.appendChild(card);
       });
+    }
+
+    function archivePratica(id) {
+      const p = pratiche.find(item => item.id === id);
+      if (p) {
+        p.isArchived = true;
+        p.isExpanded = false;
+        renderApp();
+        saveData();
+      }
+    }
+
+    function unarchivePratica(id) {
+      const p = pratiche.find(item => item.id === id);
+      if (p) {
+        p.isArchived = false;
+        p.isExpanded = true;
+        renderApp();
+        saveData();
+        openArchiveModal(); // Aggiorna il modale archivio
+      }
+    }
+
+    function openArchiveModal() {
+      const container = document.getElementById('archiveListContainer');
+      container.innerHTML = '';
+
+      const archivedItems = pratiche.filter(p => p.isArchived);
+
+      if (archivedItems.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessuna pratica archiviata al momento.</div>`;
+      } else {
+        archivedItems.forEach(p => {
+          const item = document.createElement('div');
+          item.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
+          item.innerHTML = `
+            <div>
+              <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${p.client}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${p.title}</div>
+            </div>
+            <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri / Ripristina</button>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      document.getElementById('archiveModal').classList.remove('hidden');
+    }
+
+    function closeArchiveModal() {
+      document.getElementById('archiveModal').classList.add('hidden');
     }
 
     function movePratica(index, direction) {
@@ -778,7 +903,7 @@
 
       let autoTasks = [];
 
-      pratiche.forEach(p => {
+      pratiche.filter(p => !p.isArchived).forEach(p => {
         const stepIdx = p.currentStepIdx || 0;
         const currentDept = ROUTE_STEPS[stepIdx].label;
 
@@ -869,7 +994,6 @@
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
-        // Filtro per Reparto
         if (filterDept !== 'ALL') {
           if (t.isManual) {
             const matchDept = (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
@@ -879,11 +1003,9 @@
           }
         }
 
-        // Filtro per Persona Assegnata rigoroso
         if (filterAssignee !== 'ALL') {
           const taskAssignee = (t.assignee || '').toLowerCase().trim();
           const selectedAssignee = filterAssignee.toLowerCase().trim();
-          
           if (taskAssignee !== selectedAssignee) {
             return false;
           }
@@ -1115,7 +1237,6 @@
       btnSetStatus.style.display = 'block';
 
       if (activeItem.currentStepIdx >= 5 && (idx === 5 || idx === 6)) {
-        // Siamo in Promo o Logistica (parallelo finale)
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
         btnExecuteFinal.style.display = 'block';
         btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
@@ -1200,7 +1321,6 @@
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
         
-        // Se arriviamo al Legale (indice 4), l'approvazione del legale porta direttamente alla fase parallela Promo (5) e Logistica (6)
         if (activeItem.currentStepIdx === 5) {
           activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legale. Avviato in parallelo su Promo e Logistica.` });
         } else {
@@ -1225,11 +1345,9 @@
       const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
 
       if (isAlreadyDone) {
-        // Annulla eseguito (rimuove il verde)
         activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
       } else {
-        // Segna eseguito
         activeItem.approvedSteps.push(selectedStepIdx);
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
       }
@@ -1444,6 +1562,8 @@
         statusMessages: [],
         alertsList: [],
         mailDepts: [],
+        isArchived: false,
+        isExpanded: false,
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
       renderApp();
