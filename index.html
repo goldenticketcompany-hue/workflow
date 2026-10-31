@@ -80,9 +80,9 @@
     .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
 
-    /* Stile per i link nelle chat */
-    .chat-msg-text a { color: var(--gold-light); text-decoration: underline; font-weight: bold; }
-    .chat-msg-text a:hover { color: #fff; }
+    /* Stile per i link nelle chat e nei task */
+    .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; }
+    .chat-msg-text a:hover, .todo-text-block a:hover { color: #fff; }
 
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
@@ -356,7 +356,7 @@
         </div>
         <div class="form-group">
           <label>Azione da fare *</label>
-          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici...">
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici con link...">
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
@@ -546,8 +546,11 @@
             if (!t.id) {
               t.id = 'mt_fixed_' + i + '_' + Date.now();
             }
+            if (!t.actionOriginal && t.action) {
+              t.actionOriginal = t.action;
+            }
             if (!t.chatHistory) {
-              t.chatHistory = t.action ? [{ date: 'Storico', text: t.action }] : [];
+              t.chatHistory = t.actionOriginal ? [{ date: 'Storico', text: t.actionOriginal }] : [];
             }
           });
         } else {
@@ -966,7 +969,8 @@
       manualTodos.forEach(m => {
         const item = { ...m, isManual: true };
         if (!item.id) item.id = 'mt_fallback_' + Math.random().toString(36).substr(2, 6);
-        if (!item.chatHistory) item.chatHistory = item.action ? [{ date: 'Storico', text: item.action }] : [];
+        if (!item.actionOriginal && item.action) item.actionOriginal = item.action;
+        if (!item.chatHistory) item.chatHistory = item.actionOriginal ? [{ date: 'Storico', text: item.actionOriginal }] : [];
         
         if (item.isResolved) {
           resolvedManuals.push(item);
@@ -1095,7 +1099,7 @@
       const allTasks = [...sortedManuals, ...autoTasks];
 
       const filteredTasks = allTasks.filter(t => {
-        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filterDept !== 'ALL') {
@@ -1143,13 +1147,17 @@
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
 
-        let latestCommentDisplay = t.action;
+        // Azione originale iniziale sempre in vista
+        const originalActionText = t.actionOriginal || t.action || '';
+        let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
+
+        // Sotto: ultimo messaggio della chat (se esiste)
         if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
           const lastMsg = t.chatHistory[t.chatHistory.length - 1];
-          latestCommentDisplay = `💬 [${lastMsg.date}] ${lastMsg.text}`;
+          displayContentHTML += `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${lastMsg.date}]:</strong> ${linkify(lastMsg.text)}</div>`;
         } else if (!t.isManual && t.todoNotes && t.todoNotes.length > 0) {
           const lastMsg = t.todoNotes[t.todoNotes.length - 1];
-          latestCommentDisplay = `💬 [${lastMsg.date}] ${lastMsg.text}`;
+          displayContentHTML += `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${lastMsg.date}]:</strong> ${linkify(lastMsg.text)}</div>`;
         }
 
         const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}', '${t.title.replace(/'/g, "\\'")}')`;
@@ -1185,7 +1193,7 @@
                 ${actionTabsHTML}
               </div>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${linkify(latestCommentDisplay)}</div>
+              ${displayContentHTML}
             </div>
 
             <div style="display: flex; gap: 6px; align-items: center;">
@@ -1227,13 +1235,10 @@
     }
 
     function confirmDeleteManualTodo(id) {
-      if (confirm('Vuoi eliminare questo task?')) {
+      if (confirm('Vuoi eliminare definitivamente questo task?')) {
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
-          const removed = manualTodos.splice(itemIdx, 1)[0];
-          removed.archivedAt = getNow();
-          if (!archivedTodos) archivedTodos = [];
-          archivedTodos.unshift(removed);
+          manualTodos.splice(itemIdx, 1);
           renderApp();
           saveData();
         }
@@ -1297,7 +1302,7 @@
               ${assigneeBadgeHTML}
             </div>
             <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px;">${t.title}</div>
-            <div style="font-size: 13px; color: var(--text-muted);">${linkify(t.action || '')}</div>
+            <div style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center;">
             <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
@@ -1436,7 +1441,6 @@
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
-          manualObj.action = text;
         }
       } else if (praticaId) {
         praticaObj = pratiche.find(item => item.id === praticaId);
@@ -1498,6 +1502,7 @@
         dept: sitVal,
         assignee: document.getElementById('todoAssignee').value.trim(),
         situation: `📌 ${sitVal}`,
+        actionOriginal: initialAction,
         action: initialAction,
         chatHistory: [{ date: getNow(), text: initialAction }],
         isManual: true,
@@ -1520,7 +1525,7 @@
       }
       
       document.getElementById('editTodoAssignee').value = item.assignee || '';
-      document.getElementById('editTodoAction').value = item.action || '';
+      document.getElementById('editTodoAction').value = item.actionOriginal || item.action || '';
       document.getElementById('editTodoIsResolved').checked = !!item.isResolved;
       document.getElementById('editTodoModal').classList.remove('hidden');
     }
@@ -1542,7 +1547,8 @@
         if (!item.isResolved) {
           item.situation = `📌 ${sitVal}`;
         }
-        item.action = document.getElementById('editTodoAction').value;
+        item.actionOriginal = document.getElementById('editTodoAction').value;
+        item.action = item.actionOriginal;
         renderTodoList();
         saveData();
       }
