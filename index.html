@@ -847,7 +847,7 @@
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.alertsList) return;
       
-      const removed = item.alertsList.filter(a => a.id !== alertId);
+      const removed = item.alertsList.find(a => a.id === alertId);
       item.alertsList = item.alertsList.filter(a => a.id !== alertId);
       
       if (removed) {
@@ -1062,7 +1062,6 @@
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
 
-        // Mostra l'ultimo aggiornamento chat in evidenza
         let latestCommentDisplay = t.action;
         if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
           const lastMsg = t.chatHistory[t.chatHistory.length - 1];
@@ -1096,7 +1095,7 @@
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
               ${t.isManual ? `
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${safeId}')">✏️</button>
-                <button type="button" onclick="deleteManualTodoItem('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
+                <button type="button" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               ` : ''}
             </div>
           </div>
@@ -1105,7 +1104,14 @@
       });
     }
 
-    // Gestione Chat per Task Manuale
+    function confirmDeleteManualTodo(id) {
+      if (confirm('Vuoi eliminare questo task?')) {
+        manualTodos = manualTodos.filter(t => t.id !== id);
+        renderTodoList();
+        saveData();
+      }
+    }
+
     function openTodoChatModal(id) {
       const item = manualTodos.find(t => t.id === id);
       if (!item) return;
@@ -1127,10 +1133,9 @@
       }
 
       document.getElementById('todoChatModal').classList.remove('hidden');
-      renderTodoChatMessages(item.chatHistory);
+      renderTodoChatMessages(item, null);
     }
 
-    // Gestione Chat per Item dei Flussi nella To-Do List
     function openPraticaTodoChatModal(praticaId, praticaTitle) {
       const p = pratiche.find(item => item.id === praticaId);
       if (!p) return;
@@ -1138,35 +1143,68 @@
       document.getElementById('todoChatPraticaId').value = p.id;
       document.getElementById('todoChatModalTitle').innerText = `Chat Operativa: ${praticaTitle}`;
       document.getElementById('todoChatNewText').value = '';
-      document.getElementById('btnTodoResolveToggle').style.display = 'none'; // I flussi si gestiscono dai pallini
+      document.getElementById('btnTodoResolveToggle').style.display = 'none';
 
       if (!p.todoNotes) p.todoNotes = [];
 
       document.getElementById('todoChatModal').classList.remove('hidden');
-      renderTodoChatMessages(p.todoNotes);
+      renderTodoChatMessages(null, p);
     }
 
     function closeTodoChatModal() {
       document.getElementById('todoChatModal').classList.add('hidden');
     }
 
-    function renderTodoChatMessages(messagesArray) {
+    function renderTodoChatMessages(manualItem, praticaItem) {
       const box = document.getElementById('todoChatMessages');
       box.innerHTML = '';
-      if (!messagesArray || messagesArray.length === 0) {
+
+      let messagesArray = [];
+      if (manualItem) messagesArray = manualItem.chatHistory || [];
+      if (praticaItem) messagesArray = praticaItem.todoNotes || [];
+
+      if (messagesArray.length === 0) {
         box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 13px;">Nessun messaggio in questa chat operativa.</div>`;
         return;
       }
 
-      messagesArray.forEach(msg => {
+      messagesArray.forEach((msg, index) => {
+        const delCall = manualItem ? `confirmDeleteTodoChatMessage('${manualItem.id}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
         box.innerHTML += `
           <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
-            <div style="font-size: 11px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">${msg.date}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${msg.date}</span>
+              <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+            </div>
             <div style="color: #fff; line-height: 1.4;">${msg.text}</div>
           </div>
         `;
       });
       box.scrollTop = box.scrollHeight;
+    }
+
+    function confirmDeleteTodoChatMessage(itemId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const item = manualTodos.find(t => t.id === itemId);
+        if (item && item.chatHistory) {
+          item.chatHistory.splice(msgIndex, 1);
+          renderTodoChatMessages(item, null);
+          renderTodoList();
+          saveData();
+        }
+      }
+    }
+
+    function confirmDeletePraticaTodoMessage(praticaId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes) {
+          p.todoNotes.splice(msgIndex, 1);
+          renderTodoChatMessages(null, p);
+          renderTodoList();
+          saveData();
+        }
+      }
     }
 
     function addTodoChatMessage() {
@@ -1175,24 +1213,28 @@
       const text = document.getElementById('todoChatNewText').value.trim();
       if (!text) return;
 
+      let manualObj = null;
+      let praticaObj = null;
+
       if (manualId) {
-        const item = manualTodos.find(t => t.id === manualId);
-        if (item) {
-          if (!item.chatHistory) item.chatHistory = [];
-          item.chatHistory.push({ date: getNow(), text: text });
-          item.action = text;
+        manualObj = manualTodos.find(t => t.id === manualId);
+        if (manualObj) {
+          if (!manualObj.chatHistory) manualObj.chatHistory = [];
+          manualObj.chatHistory.push({ date: getNow(), text: text });
+          manualObj.action = text;
         }
       } else if (praticaId) {
-        const p = pratiche.find(item => item.id === praticaId);
-        if (p) {
-          if (!p.todoNotes) p.todoNotes = [];
-          p.todoNotes.push({ date: getNow(), text: text });
+        praticaObj = pratiche.find(item => item.id === praticaId);
+        if (praticaObj) {
+          if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
+          praticaObj.todoNotes.push({ date: getNow(), text: text });
         }
       }
 
+      document.getElementById('todoChatNewText').value = '';
+      renderTodoChatMessages(manualObj, praticaObj);
       renderTodoList();
       saveData();
-      closeTodoChatModal();
     }
 
     function toggleResolveFromChat() {
@@ -1290,12 +1332,6 @@
         saveData();
       }
       closeEditTodoModal();
-    }
-
-    function deleteManualTodoItem(id) {
-      manualTodos = manualTodos.filter(t => t.id !== id);
-      renderTodoList();
-      saveData();
     }
 
     function openStepClickModal(id, idx) {
@@ -1551,6 +1587,7 @@
               <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
                 <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditChatMsgModal(${index})">✏️ Modifica</button>
+                <button type="button" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
             <div style="color: #fff; line-height: 1.4;">${n.text}</div>
@@ -1559,6 +1596,17 @@
       });
 
       box.scrollTop = box.scrollHeight;
+    }
+
+    function confirmDeleteChatMsg(index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        if (activeItem && activeItem.notesHistory) {
+          activeItem.notesHistory.splice(index, 1);
+          renderApp();
+          saveData();
+          renderChatMessages();
+        }
+      }
     }
 
     function addChatMessage() {
