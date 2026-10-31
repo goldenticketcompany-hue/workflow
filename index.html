@@ -254,7 +254,7 @@
         <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeArchiveModal()">✕</button>
       </div>
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate e archiviate, oppure riaprirle se necessario.</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate e archiviate, riaprirle oppure eliminarle definitivamente.</p>
       <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
     </div>
   </div>
@@ -805,6 +805,15 @@
       }
     }
 
+    function permanentDeletePratica(id) {
+      if (confirm('Vuoi eliminare definitivamente questa pratica dall\'archivio?')) {
+        pratiche = pratiche.filter(p => p.id !== id);
+        renderApp();
+        saveData();
+        openArchiveModal();
+      }
+    }
+
     function openArchiveModal() {
       const container = document.getElementById('archiveListContainer');
       container.innerHTML = '';
@@ -822,7 +831,10 @@
               <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${p.client}</div>
               <div style="font-size: 14px; color: var(--text-muted);">${p.title}</div>
             </div>
-            <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri / Ripristina</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri</button>
+              <button type="button" onclick="permanentDeletePratica('${p.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina definitivamente">✕</button>
+            </div>
           `;
           container.appendChild(item);
         });
