@@ -80,6 +80,10 @@
     .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
 
+    /* Stile per i link nelle chat */
+    .chat-msg-text a { color: var(--gold-light); text-decoration: underline; font-weight: bold; }
+    .chat-msg-text a:hover { color: #fff; }
+
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
     .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
@@ -161,13 +165,18 @@
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
       </div>
 
+      <!-- BARRA SUPERIORE TASK ARCHIVIATI (VERDE) -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 16px;">
+        <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="toggleArchivedTodosSection()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
+      </div>
+
       <div id="todoList"></div>
 
-      <!-- SEZIONE CARTELLINA TASK ARCHIVIATI -->
+      <!-- SEZIONE CARTELLINA TASK ARCHIVIATI (IN FONDO) -->
       <div style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
-          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">
-            📂 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)
+          <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
+            📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
           </div>
           <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
         </div>
@@ -412,7 +421,7 @@
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
         <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
         <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto o l'ultimo aggiornamento..."></textarea>
+          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto o l'ultimo aggiornamento (puoi inserire link web o Google Drive)..."></textarea>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
           <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
@@ -445,7 +454,7 @@
           <select id="chatTargetDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
         </div>
         <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento o i chiarimenti..."></textarea>
+          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento o i chiarimenti (puoi incollare link)..."></textarea>
         </div>
         <div style="text-align: right;">
           <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
@@ -499,6 +508,20 @@
     let isArchivedSectionOpen = false;
     let activeItem = null;
     let selectedStepIdx = null;
+
+    // Funzione per rendere i link cliccabili ed aprirli in una nuova scheda
+    function linkify(inputText) {
+      if (!inputText) return '';
+      let replacedText = inputText;
+      
+      const downloadUrlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+      replacedText = replacedText.replace(downloadUrlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+
+      const wwwPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+      replacedText = replacedText.replace(wwwPattern, '$1<a href="http://$2" target="_blank" rel="noopener noreferrer">$2</a>');
+
+      return replacedText;
+    }
 
     async function loadData() {
       try {
@@ -786,12 +809,14 @@
     }
 
     function archivePratica(id) {
-      const p = pratiche.find(item => item.id === id);
-      if (p) {
-        p.isArchived = true;
-        p.isExpanded = false;
-        renderApp();
-        saveData();
+      if (confirm('Vuoi archiviare questa pratica?')) {
+        const p = pratiche.find(item => item.id === id);
+        if (p) {
+          p.isArchived = true;
+          p.isExpanded = false;
+          renderApp();
+          saveData();
+        }
       }
     }
 
@@ -1110,6 +1135,20 @@
 
         const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}', '${t.title.replace(/'/g, "\\'")}')`;
 
+        // Tab Risolto (ON/OFF) e Archivia con conferma Sì/No vicini al responsabile / chat
+        let actionTabsHTML = '';
+        if (t.isManual) {
+          const resolveBtnStyle = t.isResolved ? 'background: #d69e2e; color: #000;' : 'background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid var(--success-green);';
+          const resolveBtnText = t.isResolved ? '↩️ Riapri' : '✅ Risolto';
+          
+          actionTabsHTML = `
+            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${safeId}')">${resolveBtnText}</button>
+              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${safeId}')">📦 Archivia</button>
+            </div>
+          `;
+        }
+
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
             ${t.isManual ? `
@@ -1120,12 +1159,15 @@
             ` : `<div style="width: 32px;"></div>`}
             
             <div style="flex: 1;">
-              <div>
-                <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
-                ${assigneeBadgeHTML}
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
+                  ${assigneeBadgeHTML}
+                </div>
+                ${actionTabsHTML}
               </div>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${latestCommentDisplay}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${linkify(latestCommentDisplay)}</div>
             </div>
 
             <div style="display: flex; gap: 6px; align-items: center;">
@@ -1139,6 +1181,31 @@
         `;
         container.appendChild(item);
       });
+    }
+
+    function toggleManualTodoResolved(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.isResolved = !item.isResolved;
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        renderTodoList();
+        saveData();
+      }
+    }
+
+    function archiveManualTodoWithPrompt(id) {
+      if (confirm('Vuoi archiviare questo task?')) {
+        const itemIdx = manualTodos.findIndex(t => t.id === id);
+        if (itemIdx !== -1) {
+          const removed = manualTodos.splice(itemIdx, 1)[0];
+          removed.archivedAt = getNow();
+          if (!archivedTodos) archivedTodos = [];
+          archivedTodos.unshift(removed);
+          renderApp();
+          saveData();
+        }
+      }
     }
 
     function confirmDeleteManualTodo(id) {
@@ -1170,11 +1237,13 @@
 
     function renderArchivedTodoList() {
       const container = document.getElementById('archivedTodosContainer');
-      const badge = document.getElementById('archivedTodoCountBadge');
-      if (!container || !badge) return;
+      const badgeTop = document.getElementById('archivedTodoCountBadge');
+      const badgeBottom = document.getElementById('archivedTodoCountBadgeBottom');
+      if (!container || !badgeTop || !badgeBottom) return;
 
       if (!archivedTodos) archivedTodos = [];
-      badge.innerText = archivedTodos.length;
+      badgeTop.innerText = archivedTodos.length;
+      badgeBottom.innerText = archivedTodos.length;
 
       container.innerHTML = '';
       if (archivedTodos.length === 0) {
@@ -1195,7 +1264,7 @@
               ${assigneeBadgeHTML}
             </div>
             <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px;">${t.title}</div>
-            <div style="font-size: 13px; color: var(--text-muted);">${t.action || ''}</div>
+            <div style="font-size: 13px; color: var(--text-muted);">${linkify(t.action || '')}</div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center;">
             <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
@@ -1289,7 +1358,7 @@
               <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${msg.date}</span>
               <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
             </div>
-            <div style="color: #fff; line-height: 1.4;">${msg.text}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(msg.text)}</div>
           </div>
         `;
       });
@@ -1703,7 +1772,7 @@
                 <button type="button" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
-            <div style="color: #fff; line-height: 1.4;">${n.text}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(n.text)}</div>
           </div>
         `;
       });
