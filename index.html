@@ -529,9 +529,12 @@
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeEditChatMsgModal()">✕</button>
       </div>
       <form onsubmit="saveEditedChatMsg(event)">
+        <input type="hidden" id="editChatType">
+        <input type="hidden" id="editChatManualId">
+        <input type="hidden" id="editChatPraticaId">
         <input type="hidden" id="editChatIndex">
         <div class="form-group">
-          <label>Testo della Nota *</label>
+          <label>Testo della Nota / Messaggio *</label>
           <textarea id="editChatText" class="form-control" rows="4" required></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
@@ -1522,18 +1525,44 @@
       }
 
       messagesArray.forEach((msg, index) => {
+        const editCall = manualItem ? `openEditTodoChatMessageModal('${manualItem.id}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`;
         const delCall = manualItem ? `confirmDeleteTodoChatMessage('${manualItem.id}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
         box.innerHTML += `
           <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
               <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${msg.date}</span>
-              <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${editCall}">✏️ Modifica</button>
+                <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+              </div>
             </div>
             <div class="chat-msg-text" style="color: #fff; line-height: 1.4; word-break: break-word;">${linkify(msg.text)}</div>
           </div>
         `;
       });
       box.scrollTop = box.scrollHeight;
+    }
+
+    function openEditTodoChatMessageModal(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory || !item.chatHistory[index]) return;
+      document.getElementById('editChatType').value = 'manualTodo';
+      document.getElementById('editChatManualId').value = itemId;
+      document.getElementById('editChatPraticaId').value = '';
+      document.getElementById('editChatIndex').value = index;
+      document.getElementById('editChatText').value = item.chatHistory[index].text;
+      document.getElementById('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function openEditPraticaTodoMessageModal(praticaId, index) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (!p || !p.todoNotes || !p.todoNotes[index]) return;
+      document.getElementById('editChatType').value = 'praticaTodo';
+      document.getElementById('editChatManualId').value = '';
+      document.getElementById('editChatPraticaId').value = praticaId;
+      document.getElementById('editChatIndex').value = index;
+      document.getElementById('editChatText').value = p.todoNotes[index].text;
+      document.getElementById('editChatMsgModal').classList.remove('hidden');
     }
 
     function confirmDeleteTodoChatMessage(itemId, msgIndex) {
@@ -1989,7 +2018,7 @@
               <span>${n.dept}</span>
               <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-muted);">${n.date}</span>
-                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditChatMsgModal(${index})">✏️ Modifica</button>
+                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditFlussiChatMsgModal(${index})">✏️ Modifica</button>
                 <button type="button" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
@@ -2035,9 +2064,12 @@
       renderChatMessages();
     }
 
-    function openEditChatMsgModal(index) {
+    function openEditFlussiChatMsgModal(index) {
       const note = activeItem.notesHistory[index];
       if (!note) return;
+      document.getElementById('editChatType').value = 'flussi';
+      document.getElementById('editChatManualId').value = '';
+      document.getElementById('editChatPraticaId').value = '';
       document.getElementById('editChatIndex').value = index;
       document.getElementById('editChatText').value = note.text;
       document.getElementById('editChatMsgModal').classList.remove('hidden');
@@ -2049,14 +2081,35 @@
 
     function saveEditedChatMsg(e) {
       e.preventDefault();
+      const type = document.getElementById('editChatType').value;
       const index = parseInt(document.getElementById('editChatIndex').value);
       const newText = document.getElementById('editChatText').value.trim();
       
-      if (activeItem && activeItem.notesHistory[index]) {
-        activeItem.notesHistory[index].text = newText;
-        renderApp();
-        saveData();
-        renderChatMessages();
+      if (type === 'flussi') {
+        if (activeItem && activeItem.notesHistory[index]) {
+          activeItem.notesHistory[index].text = newText;
+          renderApp();
+          saveData();
+          renderChatMessages();
+        }
+      } else if (type === 'manualTodo') {
+        const manualId = document.getElementById('editChatManualId').value;
+        const item = manualTodos.find(t => t.id === manualId);
+        if (item && item.chatHistory && item.chatHistory[index]) {
+          item.chatHistory[index].text = newText;
+          renderTodoChatMessages(item, null);
+          renderTodoList();
+          saveData();
+        }
+      } else if (type === 'praticaTodo') {
+        const praticaId = document.getElementById('editChatPraticaId').value;
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes && p.todoNotes[index]) {
+          p.todoNotes[index].text = newText;
+          renderTodoChatMessages(null, p);
+          renderTodoList();
+          saveData();
+        }
       }
       closeEditChatMsgModal();
     }
