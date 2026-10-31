@@ -903,6 +903,11 @@
           assigneesSet.add(t.assignee.trim());
         }
       });
+      pratiche.filter(p => !p.isArchived).forEach(p => {
+        if (p.owner && p.owner.trim() !== '') {
+          assigneesSet.add(p.owner.trim());
+        }
+      });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
       Array.from(assigneesSet).sort().forEach(name => {
@@ -1074,6 +1079,7 @@
         return;
       }
 
+      container.innerHTML = '';
       filteredTasks.forEach((t, idx) => {
         let badgeClass = 'todo-badge';
         if (t.isResolved) badgeClass += ' green';
