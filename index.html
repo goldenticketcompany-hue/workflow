@@ -602,7 +602,7 @@
           
           pratiche.forEach(p => {
             if (p.owner && !p.ownerExt && !p.ownerInt) {
-              p.ownerExt = p.owner; // Migrazione retrocompatibile
+              p.ownerExt = p.owner;
             }
           });
 
@@ -720,12 +720,13 @@
         return (isCurrent || hasStatusHere || hasAlertHere || hasMailHere);
       });
 
+      // ORDINAMENTO AUTOMATICO PER DATA DELLO SPETTACOLO
       filteredPratiche.sort((a, b) => {
         const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
         const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
 
-        if (!hasDateA && hasDateB) return -1;
-        if (hasDateA && !hasDateB) return 1;
+        if (!hasDateA && hasDateB) return 1;
+        if (hasDateA && !hasDateB) return -1;
         if (!hasDateA && !hasDateB) return 0;
 
         return a.showDate.localeCompare(b.showDate);
@@ -834,8 +835,6 @@
           `;
         });
 
-        const globalIndex = pratiche.findIndex(item => item.id === p.id);
-
         let phaseDisplayLabel = currentDeptLabel;
         if (stepIdx >= 5) {
           let pList = [];
@@ -868,10 +867,7 @@
               <div class="client-title-main">${p.client}</div>
               <div class="card-show-title">${p.title} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
             </div>
-            <div style="display: flex; gap: 4px; align-items: center;" onclick="event.stopPropagation()">
-              <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
-              <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, 1)" ${globalIndex === pratiche.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
-            </div>
+            <div></div>
           </div>
 
           ${isExpanded ? `
@@ -969,18 +965,6 @@
 
     function closeArchiveModal() {
       document.getElementById('archiveModal').classList.add('hidden');
-    }
-
-    function movePratica(index, direction) {
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= pratiche.length) return;
-      
-      const temp = pratiche[index];
-      pratiche[index] = pratiche[targetIndex];
-      pratiche[targetIndex] = temp;
-
-      renderApp();
-      saveData();
     }
 
     function removeStatusMessage(praticaId, statusId) {
