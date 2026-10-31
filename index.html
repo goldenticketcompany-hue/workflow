@@ -128,6 +128,7 @@
           <option value="Accordo (commerciale)">Accordo (commerciale)</option>
           <option value="Legale">Legale</option>
           <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
           <option value="Logistica">Logistica</option>
         </select>
         <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
@@ -157,6 +158,7 @@
           <option value="Accordo (commerciale)">Accordo (commerciale)</option>
           <option value="Legale">Legale</option>
           <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
           <option value="Logistica">Logistica</option>
         </select>
         <select id="filterTodoAssignee" class="select-filter" onchange="renderTodoList()">
@@ -344,6 +346,7 @@
             <option value="Accordo (commerciale)">Accordo (commerciale)</option>
             <option value="Legale">Legale</option>
             <option value="Promo">Promo</option>
+            <option value="PR">PR</option>
             <option value="Logistica">Logistica</option>
           </select>
         </div>
@@ -384,6 +387,7 @@
             <option value="Accordo (commerciale)">Accordo (commerciale)</option>
             <option value="Legale">Legale</option>
             <option value="Promo">Promo</option>
+            <option value="PR">PR</option>
             <option value="Logistica">Logistica</option>
           </select>
         </div>
@@ -499,6 +503,7 @@
       { id: 'Vendite_2', label: 'Accordo (commerciale)' },
       { id: 'Legale', label: 'Legale' },
       { id: 'Promo', label: 'Promo' },
+      { id: 'PR', label: 'PR' },
       { id: 'Logistica', label: 'Logistica' }
     ];
 
@@ -663,7 +668,7 @@
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
 
-        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6);
+        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6) && p.approvedSteps.includes(7);
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -684,7 +689,7 @@
           } else if (isFullyDone) {
             cls += ' done';
             symbol = '✓';
-          } else if (idx === 5 || idx === 6) {
+          } else if (idx >= 5) {
             if (p.approvedSteps.includes(idx)) {
               cls += ' done';
               symbol = '✓';
@@ -754,11 +759,12 @@
         if (stepIdx >= 5) {
           let pList = [];
           if (!p.approvedSteps.includes(5)) pList.push('Promo');
-          if (!p.approvedSteps.includes(6)) pList.push('Logistica');
+          if (!p.approvedSteps.includes(6)) pList.push('PR');
+          if (!p.approvedSteps.includes(7)) pList.push('Logistica');
           if (pList.length > 0) {
-            phaseDisplayLabel = `In corso su: ${pList.join(' e ')}`;
+            phaseDisplayLabel = `In corso su: ${pList.join(', ')}`;
           } else {
-            phaseDisplayLabel = `✅ Completato (Promo & Logistica)`;
+            phaseDisplayLabel = `✅ Completato (Promo, PR & Logistica)`;
           }
         }
 
@@ -1046,6 +1052,19 @@
             }
             if (!p.approvedSteps.includes(6)) {
               autoTasks.push({
+                id: 'wait_auto_pr_' + p.id,
+                praticaId: p.id,
+                title: `${p.client} - ${p.title}`,
+                dept: 'PR',
+                assignee: p.owner || '',
+                situation: `⏳ PR - IN ATTESA (parallelo)`,
+                action: `In attesa di conferma ESEGUITO da PR.`,
+                isManual: false,
+                todoNotes: p.todoNotes
+              });
+            }
+            if (!p.approvedSteps.includes(7)) {
+              autoTasks.push({
                 id: 'wait_auto_log_' + p.id,
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
@@ -1234,7 +1253,6 @@
       }
     }
 
-    // Funzione per aprire la cartellina e portarsi subito lì con lo scroll
     function jumpToArchivedTodos() {
       if (!isArchivedSectionOpen) {
         isArchivedSectionOpen = true;
@@ -1554,7 +1572,7 @@
       btnExecuteFinal.style.display = 'none';
       btnSetStatus.style.display = 'block';
 
-      if (activeItem.currentStepIdx >= 5 && (idx === 5 || idx === 6)) {
+      if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
         btnExecuteFinal.style.display = 'block';
         btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
@@ -1640,7 +1658,7 @@
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
         
         if (activeItem.currentStepIdx === 5) {
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legale. Avviato in parallelo su Promo e Logistica.` });
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legale. Avviato in parallelo su Promo, PR e Logistica.` });
         } else {
           const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
           activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
@@ -1655,7 +1673,7 @@
     }
 
     function executeFinalDepartment() {
-      if (!activeItem || (selectedStepIdx !== 5 && selectedStepIdx !== 6)) return;
+      if (!activeItem || selectedStepIdx < 5) return;
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
 
       if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
