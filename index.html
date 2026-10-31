@@ -21,7 +21,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; }
 
     header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
     .brand { display: flex; align-items: center; gap: 14px; }
@@ -165,15 +165,15 @@
         <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
       </div>
 
-      <!-- BARRA SUPERIORE TASK ARCHIVIATI (VERDE) -->
+      <!-- BARRA SUPERIORE TASK ARCHIVIATI (PORTA SUBITO ALLA CARTELLINA IN FONDO) -->
       <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 16px;">
-        <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="toggleArchivedTodosSection()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
+        <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
       </div>
 
       <div id="todoList"></div>
 
       <!-- SEZIONE CARTELLINA TASK ARCHIVIATI (IN FONDO) -->
-      <div style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+      <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
           <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
             📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
@@ -1135,7 +1135,6 @@
 
         const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}', '${t.title.replace(/'/g, "\\'")}')`;
 
-        // Tab Risolto (ON/OFF) e Archivia con conferma Sì/No vicini al responsabile / chat
         let actionTabsHTML = '';
         if (t.isManual) {
           const resolveBtnStyle = t.isResolved ? 'background: #d69e2e; color: #000;' : 'background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid var(--success-green);';
@@ -1232,6 +1231,22 @@
       } else {
         container.style.display = 'none';
         label.innerText = '[ Clicca per aprire ▾ ]';
+      }
+    }
+
+    // Funzione per aprire la cartellina e portarsi subito lì con lo scroll
+    function jumpToArchivedTodos() {
+      if (!isArchivedSectionOpen) {
+        isArchivedSectionOpen = true;
+        const container = document.getElementById('archivedTodosContainer');
+        const label = document.getElementById('archivedToggleLabel');
+        if (container) container.style.display = 'block';
+        if (label) label.innerText = '[ Clicca per chiudere ▴ ]';
+      }
+      
+      const anchor = document.getElementById('archivedTodosAnchorSection');
+      if (anchor) {
+        anchor.scrollIntoView({ behavior: 'smooth' });
       }
     }
 
