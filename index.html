@@ -387,7 +387,7 @@
     </div>
   </div>
 
-  <!-- MODAL CHAT & AGGIORNAMENTI TASK -->
+  <!-- MODAL CHAT & AGGIORNAMENTI TASK (MANUALE O FLUSSO) -->
   <div class="modal-overlay hidden" id="todoChatModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -395,6 +395,7 @@
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoChatModal()">✕</button>
       </div>
       <input type="hidden" id="todoChatId">
+      <input type="hidden" id="todoChatPraticaId">
 
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
         <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
@@ -402,8 +403,9 @@
           <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto o l'ultimo aggiornamento..."></textarea>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle">✅ Segna Risolto</button>
-          <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
+          <div style="flex:1;"></div>
+          <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
         </div>
       </div>
 
@@ -517,13 +519,13 @@
       renderApp();
     }
 
-    async function saveData() {
-      try {
-        await client
-          .from('workflow')
-          .update({ data: { pratiche, manualTodos } })
-          .eq('id', 'main');
-      } catch(e) {}
+    function saveData() {
+      client
+        .from('workflow')
+        .update({ data: { pratiche, manualTodos } })
+        .eq('id', 'main')
+        .then(() => {})
+        .catch(() => {});
     }
 
     function getDemoData() {
@@ -539,6 +541,7 @@
         mailDepts: [],
         isArchived: false,
         isExpanded: false,
+        todoNotes: [],
         notesHistory: [
           { date: '30/10 09:00', dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }
         ]
@@ -844,7 +847,7 @@
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.alertsList) return;
       
-      const removed = item.alertsList.find(a => a.id === alertId);
+      const removed = item.alertsList.filter(a => a.id !== alertId);
       item.alertsList = item.alertsList.filter(a => a.id !== alertId);
       
       if (removed) {
@@ -913,16 +916,20 @@
         const stepIdx = p.currentStepIdx || 0;
         const currentDept = ROUTE_STEPS[stepIdx].label;
 
+        if (!p.todoNotes) p.todoNotes = [];
+
         if (p.statusMessages && p.statusMessages.length > 0) {
           p.statusMessages.forEach(st => {
             autoTasks.push({
               id: 'st_auto_' + st.id,
+              praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: st.dept,
               assignee: p.owner || '',
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
-              isManual: false
+              isManual: false,
+              todoNotes: p.todoNotes
             });
           });
         }
@@ -931,14 +938,15 @@
           p.mailDepts.forEach(dept => {
             autoTasks.push({
               id: 'mail_auto_' + dept + '_' + p.id,
+              praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: dept,
               assignee: p.owner || '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
               isManual: false,
-              praticaId: p.id,
-              mailDeptName: dept
+              mailDeptName: dept,
+              todoNotes: p.todoNotes
             });
           });
         }
@@ -948,12 +956,14 @@
             const isReject = al.type === 'REJECT';
             autoTasks.push({
               id: 'al_auto_' + al.id,
+              praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: al.target,
               assignee: p.owner || '',
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
-              isManual: false
+              isManual: false,
+              todoNotes: p.todoNotes
             });
           });
         }
@@ -963,34 +973,40 @@
             if (!p.approvedSteps.includes(5)) {
               autoTasks.push({
                 id: 'wait_auto_promo_' + p.id,
+                praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Promo',
                 assignee: p.owner || '',
                 situation: `⏳ Promo - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Promo.`,
-                isManual: false
+                isManual: false,
+                todoNotes: p.todoNotes
               });
             }
             if (!p.approvedSteps.includes(6)) {
               autoTasks.push({
                 id: 'wait_auto_log_' + p.id,
+                praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Logistica',
                 assignee: p.owner || '',
                 situation: `⏳ Logistica - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Logistica.`,
-                isManual: false
+                isManual: false,
+                todoNotes: p.todoNotes
               });
             }
           } else {
             autoTasks.push({
               id: 'wait_auto_' + p.id,
+              praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: currentDept,
               assignee: p.owner || '',
               situation: `⏳ ${currentDept} - IN ATTESA`,
               action: `Pratica ferma in attesa di approvazione o avanzamento.`,
-              isManual: false
+              isManual: false,
+              todoNotes: p.todoNotes
             });
           }
         }
@@ -1046,18 +1062,17 @@
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
 
-        // Mostra l'ultimo commento in evidenza se è un task manuale
+        // Mostra l'ultimo aggiornamento chat in evidenza
         let latestCommentDisplay = t.action;
         if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
           const lastMsg = t.chatHistory[t.chatHistory.length - 1];
           latestCommentDisplay = `💬 [${lastMsg.date}] ${lastMsg.text}`;
+        } else if (!t.isManual && t.todoNotes && t.todoNotes.length > 0) {
+          const lastMsg = t.todoNotes[t.todoNotes.length - 1];
+          latestCommentDisplay = `💬 [${lastMsg.date}] ${lastMsg.text}`;
         }
 
-        // Se è un task automatico di mail, permettiamo di cliccare e azzerare la notifica blu
-        let clickActionAttr = '';
-        if (!t.isManual && t.praticaId && t.mailDeptName) {
-          clickActionAttr = `onclick="markMailAsRead('${t.praticaId}', '${t.mailDeptName}')" style="cursor:pointer;" title="Clicca per aprire la chat e rimuovere l'avviso blu"`;
-        }
+        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}', '${t.title.replace(/'/g, "\\'")}')`;
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
@@ -1068,7 +1083,7 @@
             </div>
             ` : `<div style="width: 32px;"></div>`}
             
-            <div style="flex: 1;" ${clickActionAttr}>
+            <div style="flex: 1;">
               <div>
                 <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
                 ${assigneeBadgeHTML}
@@ -1078,9 +1093,9 @@
             </div>
 
             <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
               ${t.isManual ? `
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${safeId}')">✏️</button>
-                <button type="button" class="btn-solve-sm" onclick="openTodoChatModal('${safeId}')">💬 Chat</button>
                 <button type="button" onclick="deleteManualTodoItem('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               ` : ''}
             </div>
@@ -1090,21 +1105,15 @@
       });
     }
 
-    function markMailAsRead(praticaId, deptName) {
-      const p = pratiche.find(item => item.id === praticaId);
-      if (p && p.mailDepts) {
-        p.mailDepts = p.mailDepts.filter(d => d !== deptName);
-        saveData();
-        openChatModal(praticaId, deptName);
-      }
-    }
-
+    // Gestione Chat per Task Manuale
     function openTodoChatModal(id) {
       const item = manualTodos.find(t => t.id === id);
       if (!item) return;
       document.getElementById('todoChatId').value = item.id;
+      document.getElementById('todoChatPraticaId').value = '';
       document.getElementById('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
       document.getElementById('todoChatNewText').value = '';
+      document.getElementById('btnTodoResolveToggle').style.display = 'block';
 
       const btnResolveToggle = document.getElementById('btnTodoResolveToggle');
       if (item.isResolved) {
@@ -1118,19 +1127,38 @@
       }
 
       document.getElementById('todoChatModal').classList.remove('hidden');
-      renderTodoChatMessages(item);
+      renderTodoChatMessages(item.chatHistory);
+    }
+
+    // Gestione Chat per Item dei Flussi nella To-Do List
+    function openPraticaTodoChatModal(praticaId, praticaTitle) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (!p) return;
+      document.getElementById('todoChatId').value = '';
+      document.getElementById('todoChatPraticaId').value = p.id;
+      document.getElementById('todoChatModalTitle').innerText = `Chat Operativa: ${praticaTitle}`;
+      document.getElementById('todoChatNewText').value = '';
+      document.getElementById('btnTodoResolveToggle').style.display = 'none'; // I flussi si gestiscono dai pallini
+
+      if (!p.todoNotes) p.todoNotes = [];
+
+      document.getElementById('todoChatModal').classList.remove('hidden');
+      renderTodoChatMessages(p.todoNotes);
     }
 
     function closeTodoChatModal() {
       document.getElementById('todoChatModal').classList.add('hidden');
     }
 
-    function renderTodoChatMessages(item) {
+    function renderTodoChatMessages(messagesArray) {
       const box = document.getElementById('todoChatMessages');
       box.innerHTML = '';
-      if (!item.chatHistory) item.chatHistory = [];
+      if (!messagesArray || messagesArray.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 13px;">Nessun messaggio in questa chat operativa.</div>`;
+        return;
+      }
 
-      item.chatHistory.forEach(msg => {
+      messagesArray.forEach(msg => {
         box.innerHTML += `
           <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
             <div style="font-size: 11px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">${msg.date}</div>
@@ -1142,22 +1170,34 @@
     }
 
     function addTodoChatMessage() {
-      const id = document.getElementById('todoChatId').value;
+      const manualId = document.getElementById('todoChatId').value;
+      const praticaId = document.getElementById('todoChatPraticaId').value;
       const text = document.getElementById('todoChatNewText').value.trim();
-      const item = manualTodos.find(t => t.id === id);
-      if (item && text) {
-        if (!item.chatHistory) item.chatHistory = [];
-        item.chatHistory.push({ date: getNow(), text: text });
-        item.action = text; // Aggiorna anche l'azione di sintesi principale
-        document.getElementById('todoChatNewText').value = '';
-        renderTodoChatMessages(item);
-        renderTodoList();
-        saveData();
+      if (!text) return;
+
+      if (manualId) {
+        const item = manualTodos.find(t => t.id === manualId);
+        if (item) {
+          if (!item.chatHistory) item.chatHistory = [];
+          item.chatHistory.push({ date: getNow(), text: text });
+          item.action = text;
+        }
+      } else if (praticaId) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p) {
+          if (!p.todoNotes) p.todoNotes = [];
+          p.todoNotes.push({ date: getNow(), text: text });
+        }
       }
+
+      renderTodoList();
+      saveData();
+      closeTodoChatModal();
     }
 
     function toggleResolveFromChat() {
       const id = document.getElementById('todoChatId').value;
+      if (!id) return;
       const item = manualTodos.find(t => t.id === id);
       if (item) {
         item.isResolved = !item.isResolved;
@@ -1469,14 +1509,12 @@
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
       
-      // Rimozione notifica mail blu alla lettura
       if (explicitSenderDept && activeItem.mailDepts) {
         activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== explicitSenderDept);
         saveData();
         renderApp();
       }
 
-      // Riferimento con Nome Teatro e Spettacolo
       document.getElementById('chatModalTitle').innerText = `Chat & Storico: ${activeItem.client} - ${activeItem.title}`;
 
       const currentSender = explicitSenderDept || (selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : ROUTE_STEPS[activeItem.currentStepIdx || 0].label);
@@ -1618,6 +1656,7 @@
         mailDepts: [],
         isArchived: false,
         isExpanded: false,
+        todoNotes: [],
         notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
       });
       renderApp();
