@@ -707,28 +707,67 @@
       if (badge) badge.innerText = count;
     }
 
+    // GESTIONE MENU A TENDINA SPETTACOLI CASE-INSENSITIVE (SENZA DUPLICATI MAIUSC/MINUSC)
     function initDropdownOptions() {
       const selectShow = document.getElementById('filterShowTitle');
       if (!selectShow) return;
       const currentShowVal = selectShow.value;
 
-      const showsSet = new Set();
+      const showsMap = new Map(); // chiave minuscola -> nome originale formattato pulito
       pratiche.forEach(p => {
         if (p.title && p.title.trim() !== '') {
-          showsSet.add(p.title.trim());
+          const original = p.title.trim();
+          const lower = original.toLowerCase();
+          if (!showsMap.has(lower)) {
+            showsMap.set(lower, original);
+          }
         }
       });
 
       selectShow.innerHTML = '<option value="ALL">🎭 Tutti gli Spettacoli</option>';
-      Array.from(showsSet).sort().forEach(showTitle => {
+      Array.from(showsMap.values()).sort((a,b) => a.localeCompare(b, 'it', {sensitivity: 'base'})).forEach(showTitle => {
         const opt = document.createElement('option');
         opt.value = showTitle;
         opt.innerText = '🎭 ' + showTitle;
-        if (showTitle === currentShowVal) opt.selected = true;
+        if (showTitle.toLowerCase() === currentShowVal.toLowerCase()) opt.selected = true;
         selectShow.appendChild(opt);
       });
 
       initAssigneeDropdownOptions();
+    }
+
+    // GESTIONE MENU A TENDINA RESPONSABILI CASE-INSENSITIVE
+    function initAssigneeDropdownOptions() {
+      const select = document.getElementById('filterTodoAssignee');
+      if (!select) return;
+      const currentVal = select.value;
+
+      const assigneesMap = new Map(); // chiave minuscola -> nome originale formattato
+      
+      const addName = (name) => {
+        if (name && name.trim() !== '') {
+          const original = name.trim();
+          const lower = original.toLowerCase();
+          if (!assigneesMap.has(lower)) {
+            assigneesMap.set(lower, original);
+          }
+        }
+      };
+
+      manualTodos.forEach(t => addName(t.assignee));
+      pratiche.filter(p => !p.isArchived).forEach(p => {
+        addName(p.ownerExt);
+        addName(p.ownerInt);
+      });
+
+      select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
+      Array.from(assigneesMap.values()).sort((a,b) => a.localeCompare(b, 'it', {sensitivity: 'base'})).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = '👤 ' + name;
+        if (name.toLowerCase() === currentVal.toLowerCase()) opt.selected = true;
+        select.appendChild(opt);
+      });
     }
 
     function renderFeed() {
@@ -748,7 +787,7 @@
         if (!matchSearch) return false;
 
         if (filterShow !== 'ALL') {
-          if ((p.title || '').trim() !== filterShow) return false;
+          if ((p.title || '').trim().toLowerCase() !== filterShow.trim().toLowerCase()) return false;
         }
 
         if (filterDept !== 'ALL') {
@@ -1043,32 +1082,6 @@
       }
       renderApp();
       saveData();
-    }
-
-    function initAssigneeDropdownOptions() {
-      const select = document.getElementById('filterTodoAssignee');
-      if (!select) return;
-      const currentVal = select.value;
-
-      const assigneesSet = new Set();
-      manualTodos.forEach(t => {
-        if (t.assignee && t.assignee.trim() !== '') {
-          assigneesSet.add(t.assignee.trim());
-        }
-      });
-      pratiche.filter(p => !p.isArchived).forEach(p => {
-        if (p.ownerExt && p.ownerExt.trim() !== '') assigneesSet.add(p.ownerExt.trim());
-        if (p.ownerInt && p.ownerInt.trim() !== '') assigneesSet.add(p.ownerInt.trim());
-      });
-
-      select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
-      Array.from(assigneesSet).sort().forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.innerText = '👤 ' + name;
-        if (name === currentVal) opt.selected = true;
-        select.appendChild(opt);
-      });
     }
 
     function renderTodoList() {
