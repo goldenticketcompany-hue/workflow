@@ -73,6 +73,8 @@
     }
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
+    .todo-card.highlighted-task { background: linear-gradient(135deg, #2a1508, #1c0507); border: 2.5px solid var(--gold-main); box-shadow: 0 0 15px rgba(214, 158, 46, 0.25); }
+
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
@@ -1211,6 +1213,19 @@
         }
       });
 
+      // ORDINAMENTO: L'ULTIMO TASK CHATTATO VA SEMPRE IN CIMA (GLOBALMENTE)
+      const getLatestMsgTime = (task) => {
+        let maxTime = 0;
+        let msgs = [];
+        if (task.isManual) {
+          msgs = task.chatHistory || [];
+        } else {
+          msgs = task.todoNotes || [];
+        }
+        // Se c'è un timestamp o consideriamo l'ultimo inserito nell'array
+        return msgs.length;
+      };
+
       const sortTasksByDeadline = (list) => {
         return list.sort((a, b) => {
           const deadlineA = (a.deadline || '').trim();
@@ -1227,11 +1242,27 @@
         });
       };
 
-      sortTasksByDeadline(formattedManuals);
-      sortTasksByDeadline(resolvedManuals);
-      sortTasksByDeadline(autoTasks);
+      sortTasksByDivider = (list) => {
+        // Mantiene ordinamento per scadenza o altro se necessario
+        return sortTasksByDeadline(list);
+      };
 
-      const allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
+      sortTasksByDivider(formattedManuals);
+      sortTasksByDivider(resolvedManuals);
+      sortTasksByDivider(autoTasks);
+
+      let allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
+
+      // Controlliamo se in memoria abbiamo memorizzato l'ultimo ID task chattato
+      const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
+      
+      if (lastChattedId) {
+        const foundIdx = allTasks.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
+        if (foundIdx !== -1) {
+          const item = allTasks.splice(foundIdx, 1)[0];
+          allTasks.unshift(item); // Mette in primissimo piano assoluto!
+        }
+      }
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
@@ -1263,7 +1294,7 @@
       }
 
       container.innerHTML = '';
-      filteredTasks.forEach((t, idx) => {
+      filteredTasks.forEach((t) => {
         let badgeClass = 'todo-badge';
         if (t.isResolved) badgeClass += ' green';
         else if (t.situation && t.situation.includes('BLOCCATO')) badgeClass += ' red';
@@ -1281,8 +1312,10 @@
           deadlineBadgeHTML = `<span class="todo-badge deadline">⏳ Entro il: ${formatDateIt(t.deadline)}</span>`;
         }
 
+        const isHighlighted = (lastChattedId && (t.id === lastChattedId || t.praticaId === lastChattedId)) && !t.isResolved;
+
         const item = document.createElement('div');
-        item.className = 'todo-card';
+        item.className = isHighlighted ? 'todo-card highlighted-task' : 'todo-card';
         if (t.isResolved) item.style.opacity = '0.75';
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
@@ -1313,6 +1346,8 @@
           `;
         }
 
+        let highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(214, 158, 46, 0.4); color: var(--gold-light); border: 1px solid var(--gold-main); font-weight: 900;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
+
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
             <div style="width: 10px; flex-shrink: 0;"></div>
@@ -1320,6 +1355,7 @@
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
+                  ${highlightBadgeHTML}
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
                   ${assigneeBadgeHTML}
                   ${deadlineBadgeHTML}
@@ -1349,6 +1385,10 @@
         item.isResolved = !item.isResolved;
         if (!item.chatHistory) item.chatHistory = [];
         item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        
+        // Imposta questo task come l'ultimo chattato/aggiornato
+        localStorage.setItem('gt_last_chatted_todo_id', item.id);
+
         renderTodoList();
         saveData();
       }
@@ -1362,6 +1402,11 @@
           removed.archivedAt = getNow();
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
+          
+          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
+            localStorage.removeItem('gt_last_chatted_todo_id');
+          }
+
           renderApp();
           saveData();
         }
@@ -1373,6 +1418,9 @@
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
           manualTodos.splice(itemIdx, 1);
+          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
+            localStorage.removeItem('gt_last_chatted_todo_id');
+          }
           renderApp();
           saveData();
         }
@@ -1603,12 +1651,14 @@
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
+          localStorage.setItem('gt_last_chatted_todo_id', manualObj.id);
         }
       } else if (praticaId) {
         praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
           if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
           praticaObj.todoNotes.push({ date: getNow(), text: text });
+          localStorage.setItem('gt_last_chatted_todo_id', praticaObj.id);
         }
       }
 
@@ -1626,6 +1676,9 @@
         item.isResolved = !item.isResolved;
         if (!item.chatHistory) item.chatHistory = [];
         item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        
+        localStorage.setItem('gt_last_chatted_todo_id', item.id);
+
         renderTodoList();
         saveData();
         closeTodoChatModal();
@@ -1645,8 +1698,10 @@
       e.preventDefault();
       const sitVal = document.getElementById('todoSit').value;
       const initialAction = document.getElementById('todoAction').value;
+      const newId = 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+
       manualTodos.unshift({
-        id: 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        id: newId,
         title: document.getElementById('todoTitle').value,
         dept: sitVal,
         assignee: document.getElementById('todoAssignee').value.trim(),
@@ -1658,6 +1713,10 @@
         isManual: true,
         isResolved: false
       });
+
+      // Se viene creato con un messaggio iniziale, lo mettiamo in evidenza in cima
+      localStorage.setItem('gt_last_chatted_todo_id', newId);
+
       renderTodoList();
       saveData();
       closeTodoModal();
@@ -2057,6 +2116,9 @@
       if (!activeItem.mailDepts.includes(targetDept)) {
         activeItem.mailDepts.push(targetDept);
       }
+
+      // Imposta la pratica corrente come l'ultima con chat attiva nella To-Do
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
 
       document.getElementById('chatNewMsgText').value = '';
       renderApp();
