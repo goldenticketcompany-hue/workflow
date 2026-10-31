@@ -129,7 +129,6 @@
         <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
       </div>
 
-      <!-- BARRA CONTROLLO VISTA COMPATTA / ESPANSA E ARCHIVIO -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
@@ -388,26 +387,31 @@
     </div>
   </div>
 
-  <!-- MODAL COMMENTO / RISOLUZIONE TASK MANUALE -->
-  <div class="modal-overlay hidden" id="todoCommentModal">
+  <!-- MODAL CHAT & AGGIORNAMENTI TASK -->
+  <div class="modal-overlay hidden" id="todoChatModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="todoCommentTitle">Gestione Task Manuale</div>
-        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoCommentModal()">✕</button>
+        <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeTodoChatModal()">✕</button>
       </div>
-      <input type="hidden" id="todoCommentId">
-      <div class="form-group">
-        <label>Aggiungi una nota / aggiornamento</label>
-        <textarea id="todoCommentText" class="form-control" rows="3" placeholder="Scrivi qui eventuali sviluppi..."></textarea>
+      <input type="hidden" id="todoChatId">
+
+      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto o l'ultimo aggiornamento..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle">✅ Segna Risolto</button>
+          <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
+        </div>
       </div>
-      <div style="display: flex; justify-content: space-between; margin-top: 18px; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="btn-secondary-outline" style="flex:1; min-width: 120px;" onclick="addTodoCommentOnly()">💬 Aggiungi Nota</button>
-        <button type="button" id="btnToggleResolve" class="btn-solve-sm" style="flex:1; padding: 12px; font-size:14px; min-width: 140px;" onclick="resolveManualTodoWithComment()">✅ Segna Risolto</button>
-      </div>
+
+      <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
     </div>
   </div>
 
-  <!-- MODAL CHAT & STORICO -->
+  <!-- MODAL CHAT & STORICO FLUSSI -->
   <div class="modal-overlay hidden" id="chatModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -497,6 +501,9 @@
             if (!t.id) {
               t.id = 'mt_fixed_' + i + '_' + Date.now();
             }
+            if (!t.chatHistory) {
+              t.chatHistory = t.action ? [{ date: 'Storico', text: t.action }] : [];
+            }
           });
         } else {
           pratiche = getDemoData();
@@ -575,7 +582,6 @@
       const filter = document.getElementById('filterDept').value;
       container.innerHTML = '';
 
-      // Mostra solo le pratiche NON archiviate nella vista principale
       const activePratiche = pratiche.filter(p => !p.isArchived);
 
       const filteredPratiche = activePratiche.filter(p => {
@@ -660,7 +666,6 @@
 
         let bannersHTML = '';
 
-        // Banner di richiesta archiviazione se tutti i pallini sono verdi
         if (isFullyDone && !p.isArchived) {
           bannersHTML += `
             <div class="alert-banner alert-archive">
@@ -775,7 +780,7 @@
         p.isExpanded = true;
         renderApp();
         saveData();
-        openArchiveModal(); // Aggiorna il modale archivio
+        openArchiveModal();
       }
     }
 
@@ -891,6 +896,7 @@
       manualTodos.forEach(m => {
         const item = { ...m, isManual: true };
         if (!item.id) item.id = 'mt_fallback_' + Math.random().toString(36).substr(2, 6);
+        if (!item.chatHistory) item.chatHistory = item.action ? [{ date: 'Storico', text: item.action }] : [];
         
         if (item.isResolved) {
           resolvedManuals.push(item);
@@ -930,7 +936,9 @@
               assignee: p.owner || '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
-              isManual: false
+              isManual: false,
+              praticaId: p.id,
+              mailDeptName: dept
             });
           });
         }
@@ -1038,6 +1046,19 @@
 
         const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
 
+        // Mostra l'ultimo commento in evidenza se è un task manuale
+        let latestCommentDisplay = t.action;
+        if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
+          const lastMsg = t.chatHistory[t.chatHistory.length - 1];
+          latestCommentDisplay = `💬 [${lastMsg.date}] ${lastMsg.text}`;
+        }
+
+        // Se è un task automatico di mail, permettiamo di cliccare e azzerare la notifica blu
+        let clickActionAttr = '';
+        if (!t.isManual && t.praticaId && t.mailDeptName) {
+          clickActionAttr = `onclick="markMailAsRead('${t.praticaId}', '${t.mailDeptName}')" style="cursor:pointer;" title="Clicca per aprire la chat e rimuovere l'avviso blu"`;
+        }
+
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
             ${t.isManual ? `
@@ -1046,25 +1067,106 @@
               <button type="button" class="btn-priority" onclick="moveManualTodo('${safeId}', 1)" ${idx === sortedManuals.length - 1 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in basso">▼</button>
             </div>
             ` : `<div style="width: 32px;"></div>`}
-            <div style="flex: 1;">
+            
+            <div style="flex: 1;" ${clickActionAttr}>
               <div>
                 <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
                 ${assigneeBadgeHTML}
               </div>
               <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px;">${t.title}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${t.action}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${latestCommentDisplay}</div>
             </div>
-            ${t.isManual ? `
-              <div style="display: flex; gap: 6px; align-items: center;">
+
+            <div style="display: flex; gap: 6px; align-items: center;">
+              ${t.isManual ? `
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${safeId}')">✏️</button>
-                <button type="button" class="btn-solve-sm" onclick="openTodoCommentModal('${safeId}')">💬</button>
+                <button type="button" class="btn-solve-sm" onclick="openTodoChatModal('${safeId}')">💬 Chat</button>
                 <button type="button" onclick="deleteManualTodoItem('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
-              </div>
-            ` : ''}
+              ` : ''}
+            </div>
           </div>
         `;
         container.appendChild(item);
       });
+    }
+
+    function markMailAsRead(praticaId, deptName) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (p && p.mailDepts) {
+        p.mailDepts = p.mailDepts.filter(d => d !== deptName);
+        saveData();
+        openChatModal(praticaId, deptName);
+      }
+    }
+
+    function openTodoChatModal(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      document.getElementById('todoChatId').value = item.id;
+      document.getElementById('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
+      document.getElementById('todoChatNewText').value = '';
+
+      const btnResolveToggle = document.getElementById('btnTodoResolveToggle');
+      if (item.isResolved) {
+        btnResolveToggle.innerText = '↩️ Riapri Task';
+        btnResolveToggle.style.background = '#d69e2e';
+        btnResolveToggle.style.color = '#000';
+      } else {
+        btnResolveToggle.innerText = '✅ Segna Risolto';
+        btnResolveToggle.style.background = 'var(--success-green)';
+        btnResolveToggle.style.color = '#fff';
+      }
+
+      document.getElementById('todoChatModal').classList.remove('hidden');
+      renderTodoChatMessages(item);
+    }
+
+    function closeTodoChatModal() {
+      document.getElementById('todoChatModal').classList.add('hidden');
+    }
+
+    function renderTodoChatMessages(item) {
+      const box = document.getElementById('todoChatMessages');
+      box.innerHTML = '';
+      if (!item.chatHistory) item.chatHistory = [];
+
+      item.chatHistory.forEach(msg => {
+        box.innerHTML += `
+          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px;">
+            <div style="font-size: 11px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">${msg.date}</div>
+            <div style="color: #fff; line-height: 1.4;">${msg.text}</div>
+          </div>
+        `;
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function addTodoChatMessage() {
+      const id = document.getElementById('todoChatId').value;
+      const text = document.getElementById('todoChatNewText').value.trim();
+      const item = manualTodos.find(t => t.id === id);
+      if (item && text) {
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: text });
+        item.action = text; // Aggiorna anche l'azione di sintesi principale
+        document.getElementById('todoChatNewText').value = '';
+        renderTodoChatMessages(item);
+        renderTodoList();
+        saveData();
+      }
+    }
+
+    function toggleResolveFromChat() {
+      const id = document.getElementById('todoChatId').value;
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.isResolved = !item.isResolved;
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        renderTodoList();
+        saveData();
+        closeTodoChatModal();
+      }
     }
 
     function moveManualTodo(id, direction) {
@@ -1092,13 +1194,15 @@
     function saveManualTodo(e) {
       e.preventDefault();
       const sitVal = document.getElementById('todoSit').value;
+      const initialAction = document.getElementById('todoAction').value;
       manualTodos.unshift({
         id: 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         title: document.getElementById('todoTitle').value,
         dept: sitVal,
         assignee: document.getElementById('todoAssignee').value.trim(),
         situation: `📌 ${sitVal}`,
-        action: document.getElementById('todoAction').value,
+        action: initialAction,
+        chatHistory: [{ date: getNow(), text: initialAction }],
         isManual: true,
         isResolved: false
       });
@@ -1152,65 +1256,6 @@
       manualTodos = manualTodos.filter(t => t.id !== id);
       renderTodoList();
       saveData();
-    }
-
-    function openTodoCommentModal(id) {
-      const item = manualTodos.find(t => t.id === id);
-      if (!item) return;
-      document.getElementById('todoCommentId').value = item.id;
-      document.getElementById('todoCommentTitle').innerText = `Gestione: ${item.title}`;
-      document.getElementById('todoCommentText').value = '';
-
-      const btnResolve = document.getElementById('btnToggleResolve');
-      if (item.isResolved) {
-        btnResolve.innerText = '↩️ Riapri Task (Non Risolto)';
-        btnResolve.style.background = '#d69e2e';
-        btnResolve.style.color = '#000';
-      } else {
-        btnResolve.innerText = '✅ Segna Risolto';
-        btnResolve.style.background = 'var(--success-green)';
-        btnResolve.style.color = '#fff';
-      }
-
-      document.getElementById('todoCommentModal').classList.remove('hidden');
-    }
-
-    function closeTodoCommentModal() {
-      document.getElementById('todoCommentModal').classList.add('hidden');
-    }
-
-    function addTodoCommentOnly() {
-      const id = document.getElementById('todoCommentId').value;
-      const text = document.getElementById('todoCommentText').value.trim();
-      const item = manualTodos.find(t => t.id === id);
-      if (item && text) {
-        item.action += ` | Note: ${text}`;
-        renderTodoList();
-        saveData();
-      }
-      closeTodoCommentModal();
-    }
-
-    function resolveManualTodoWithComment() {
-      const id = document.getElementById('todoCommentId').value;
-      const text = document.getElementById('todoCommentText').value.trim();
-      const item = manualTodos.find(t => t.id === id);
-      if (item) {
-        if (item.isResolved) {
-          item.isResolved = false;
-          const sitVal = item.dept || 'TASK MANUALE';
-          item.situation = `📌 ${sitVal}`;
-          if (text) item.action += ` | Riaperto: ${text}`;
-        } else {
-          if (text) item.action += ` | Risolto: ${text}`;
-          item.isResolved = true;
-          manualTodos = manualTodos.filter(t => t.id !== id);
-          manualTodos.push(item);
-        }
-      }
-      renderTodoList();
-      saveData();
-      closeTodoCommentModal();
     }
 
     function openStepClickModal(id, idx) {
@@ -1423,7 +1468,16 @@
     function openChatModal(id, explicitSenderDept = null) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
-      document.getElementById('chatModalTitle').innerText = 'Chat & Storico: ' + activeItem.title;
+      
+      // Rimozione notifica mail blu alla lettura
+      if (explicitSenderDept && activeItem.mailDepts) {
+        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== explicitSenderDept);
+        saveData();
+        renderApp();
+      }
+
+      // Riferimento con Nome Teatro e Spettacolo
+      document.getElementById('chatModalTitle').innerText = `Chat & Storico: ${activeItem.client} - ${activeItem.title}`;
 
       const currentSender = explicitSenderDept || (selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : ROUTE_STEPS[activeItem.currentStepIdx || 0].label);
       
