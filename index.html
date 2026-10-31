@@ -79,6 +79,7 @@
     .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
     .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
+    .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
     /* Stile per i link nelle chat e nei task */
     .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; }
@@ -287,6 +288,10 @@
           <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
         </div>
         <div class="form-group">
+          <label>Data dello Spettacolo</label>
+          <input type="text" id="formShowDate" class="form-control" placeholder="Es. 9 marzo 2027 o 15/04/2027...">
+        </div>
+        <div class="form-group">
           <label>Referente</label>
           <input type="text" id="formOwner" class="form-control" placeholder="Es. Fabrizio R.">
         </div>
@@ -313,6 +318,10 @@
         <div class="form-group">
           <label>Titolo dello Spettacolo *</label>
           <input type="text" id="editTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Data dello Spettacolo</label>
+          <input type="text" id="editShowDate" class="form-control" placeholder="Es. 9 marzo 2027...">
         </div>
         <div class="form-group">
           <label>Referente</label>
@@ -355,6 +364,10 @@
           <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio, Jax...">
         </div>
         <div class="form-group">
+          <label>Scadenza (Entro il)</label>
+          <input type="text" id="todoDeadline" class="form-control" placeholder="Es. Entro venerdì, 10/05/2027...">
+        </div>
+        <div class="form-group">
           <label>Azione da fare *</label>
           <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici con link...">
         </div>
@@ -394,6 +407,10 @@
         <div class="form-group">
           <label>Chi deve farlo (Assegnato a)</label>
           <input type="text" id="editTodoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
+        </div>
+        <div class="form-group">
+          <label>Scadenza (Entro il)</label>
+          <input type="text" id="editTodoDeadline" class="form-control" placeholder="Es. Entro venerdì...">
         </div>
         <div class="form-group">
           <label>Azione / Note *</label>
@@ -581,6 +598,7 @@
         id: 'p_1',
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
+        showDate: '9 marzo 2027',
         owner: 'Fabrizio R.',
         currentStepIdx: 1,
         approvedSteps: [0],
@@ -637,7 +655,7 @@
       const activePratiche = pratiche.filter(p => !p.isArchived);
 
       const filteredPratiche = activePratiche.filter(p => {
-        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search);
+        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filter === 'ALL') return true;
@@ -779,7 +797,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
             <div>
               <div class="client-title-main">${p.client}</div>
-              <div class="card-show-title">${p.title} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+              <div class="card-show-title">${p.title} ${p.showDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${p.showDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
             </div>
             <div style="display: flex; gap: 4px; align-items: center;" onclick="event.stopPropagation()">
               <button type="button" class="btn-priority" onclick="movePratica(${globalIndex}, -1)" ${globalIndex === 0 ? 'style="opacity:0.3; cursor:default;"' : ''} title="Sposta in alto">▲</button>
@@ -789,6 +807,7 @@
 
           ${isExpanded ? `
             <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+              ${p.showDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:6px;">🎭 Data dello Spettacolo: <strong>${p.showDate}</strong></div>` : ''}
               ${p.owner ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Referente: ${p.owner}</div>` : ''}
 
               ${bannersHTML}
@@ -864,7 +883,7 @@
           item.innerHTML = `
             <div>
               <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${p.client}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${p.title}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${p.title} ${p.showDate ? `(${p.showDate})` : ''}</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
               <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri</button>
@@ -997,6 +1016,7 @@
               title: `${p.client} - ${p.title}`,
               dept: st.dept,
               assignee: p.owner || '',
+              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
               isManual: false,
@@ -1013,6 +1033,7 @@
               title: `${p.client} - ${p.title}`,
               dept: dept,
               assignee: p.owner || '',
+              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
               isManual: false,
@@ -1031,6 +1052,7 @@
               title: `${p.client} - ${p.title}`,
               dept: al.target,
               assignee: p.owner || '',
+              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
               isManual: false,
@@ -1048,6 +1070,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'Promo',
                 assignee: p.owner || '',
+                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
                 situation: `⏳ Promo - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Promo.`,
                 isManual: false,
@@ -1061,6 +1084,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'PR',
                 assignee: p.owner || '',
+                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
                 situation: `⏳ PR - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da PR.`,
                 isManual: false,
@@ -1074,6 +1098,7 @@
                 title: `${p.client} - ${p.title}`,
                 dept: 'Logistica',
                 assignee: p.owner || '',
+                deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
                 situation: `⏳ Logistica - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Logistica.`,
                 isManual: false,
@@ -1087,6 +1112,7 @@
               title: `${p.client} - ${p.title}`,
               dept: currentDept,
               assignee: p.owner || '',
+              deadline: p.showDate ? `Spettacolo: ${p.showDate}` : '',
               situation: `⏳ ${currentDept} - IN ATTESA`,
               action: `Pratica ferma in attesa di approvazione o avanzamento.`,
               isManual: false,
@@ -1099,7 +1125,7 @@
       const allTasks = [...sortedManuals, ...autoTasks];
 
       const filteredTasks = allTasks.filter(t => {
-        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search);
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filterDept !== 'ALL') {
@@ -1139,6 +1165,11 @@
         let assigneeBadgeHTML = '';
         if (t.assignee) {
           assigneeBadgeHTML = `<span class="todo-badge assignee">👤 ${t.assignee}</span>`;
+        }
+
+        let deadlineBadgeHTML = '';
+        if (t.deadline) {
+          deadlineBadgeHTML = `<span class="todo-badge deadline">⏳ Entro il: ${t.deadline}</span>`;
         }
 
         const item = document.createElement('div');
@@ -1189,6 +1220,7 @@
                 <div>
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : t.situation}</span>
                   ${assigneeBadgeHTML}
+                  ${deadlineBadgeHTML}
                 </div>
                 ${actionTabsHTML}
               </div>
@@ -1294,12 +1326,14 @@
         item.style.cssText = "background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; opacity: 0.85;";
         
         let assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${t.assignee}</span>` : '';
+        let deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${t.deadline}</span>` : '';
 
         item.innerHTML = `
           <div style="flex: 1;">
             <div>
               <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${t.archivedAt || 'Storico'})</span>
               ${assigneeBadgeHTML}
+              ${deadlineBadgeHTML}
             </div>
             <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px;">${t.title}</div>
             <div style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
@@ -1487,6 +1521,7 @@
     function openTodoModal() { 
       document.getElementById('todoTitle').value = '';
       document.getElementById('todoAssignee').value = '';
+      document.getElementById('todoDeadline').value = '';
       document.getElementById('todoAction').value = '';
       document.getElementById('todoModal').classList.remove('hidden'); 
     }
@@ -1501,6 +1536,7 @@
         title: document.getElementById('todoTitle').value,
         dept: sitVal,
         assignee: document.getElementById('todoAssignee').value.trim(),
+        deadline: document.getElementById('todoDeadline').value.trim(),
         situation: `📌 ${sitVal}`,
         actionOriginal: initialAction,
         action: initialAction,
@@ -1525,6 +1561,7 @@
       }
       
       document.getElementById('editTodoAssignee').value = item.assignee || '';
+      document.getElementById('editTodoDeadline').value = item.deadline || '';
       document.getElementById('editTodoAction').value = item.actionOriginal || item.action || '';
       document.getElementById('editTodoIsResolved').checked = !!item.isResolved;
       document.getElementById('editTodoModal').classList.remove('hidden');
@@ -1543,6 +1580,7 @@
         const sitVal = document.getElementById('editTodoSit').value;
         item.dept = sitVal;
         item.assignee = document.getElementById('editTodoAssignee').value.trim();
+        item.deadline = document.getElementById('editTodoDeadline').value.trim();
         item.isResolved = document.getElementById('editTodoIsResolved').checked;
         if (!item.isResolved) {
           item.situation = `📌 ${sitVal}`;
@@ -1890,6 +1928,7 @@
       document.getElementById('editId').value = item.id;
       document.getElementById('editClient').value = item.client || '';
       document.getElementById('editTitle').value = item.title || '';
+      document.getElementById('editShowDate').value = item.showDate || '';
       document.getElementById('editOwner').value = item.owner || '';
       document.getElementById('editModal').classList.remove('hidden');
     }
@@ -1903,6 +1942,7 @@
       if (item) {
         item.client = document.getElementById('editClient').value;
         item.title = document.getElementById('editTitle').value;
+        item.showDate = document.getElementById('editShowDate').value.trim();
         item.owner = document.getElementById('editOwner').value;
         item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
         renderApp();
@@ -1917,6 +1957,7 @@
         id: 'p_' + Date.now(),
         title: document.getElementById('formTitle').value,
         client: document.getElementById('formClient').value,
+        showDate: document.getElementById('formShowDate').value.trim(),
         owner: document.getElementById('formOwner').value,
         currentStepIdx: 0,
         approvedSteps: [],
@@ -1933,6 +1974,7 @@
       closeNewModal();
       document.getElementById('formClient').value = '';
       document.getElementById('formTitle').value = '';
+      document.getElementById('formShowDate').value = '';
       document.getElementById('formOwner').value = '';
     }
 
