@@ -162,6 +162,18 @@
       </div>
 
       <div id="todoList"></div>
+
+      <!-- SEZIONE CARTELLINA TASK ARCHIVIATI -->
+      <div style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
+          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">
+            📂 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)
+          </div>
+          <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
+        </div>
+
+        <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
+      </div>
     </div>
   </div>
 
@@ -483,6 +495,8 @@
 
     let pratiche = [];
     let manualTodos = [];
+    let archivedTodos = [];
+    let isArchivedSectionOpen = false;
     let activeItem = null;
     let selectedStepIdx = null;
 
@@ -497,6 +511,7 @@
         if (data && data.data) {
           pratiche = data.data.pratiche || [];
           manualTodos = data.data.manualTodos || [];
+          archivedTodos = data.data.archivedTodos || [];
           
           manualTodos.forEach((t, i) => {
             t.isManual = true;
@@ -510,10 +525,12 @@
         } else {
           pratiche = getDemoData();
           manualTodos = [];
+          archivedTodos = [];
         }
       } catch(e) {
         pratiche = getDemoData();
         manualTodos = [];
+        archivedTodos = [];
       }
       initAssigneeDropdownOptions();
       renderApp();
@@ -522,7 +539,7 @@
     function saveData() {
       client
         .from('workflow')
-        .update({ data: { pratiche, manualTodos } })
+        .update({ data: { pratiche, manualTodos, archivedTodos } })
         .eq('id', 'main')
         .then(() => {})
         .catch(() => {});
@@ -551,6 +568,7 @@
     function renderApp() {
       renderFeed();
       renderTodoList();
+      renderArchivedTodoList();
       updateArchiveCount();
     }
 
@@ -1106,8 +1124,84 @@
 
     function confirmDeleteManualTodo(id) {
       if (confirm('Vuoi eliminare questo task?')) {
-        manualTodos = manualTodos.filter(t => t.id !== id);
-        renderTodoList();
+        const itemIdx = manualTodos.findIndex(t => t.id === id);
+        if (itemIdx !== -1) {
+          const removed = manualTodos.splice(itemIdx, 1)[0];
+          removed.archivedAt = getNow();
+          if (!archivedTodos) archivedTodos = [];
+          archivedTodos.unshift(removed);
+          renderApp();
+          saveData();
+        }
+      }
+    }
+
+    function toggleArchivedTodosSection() {
+      isArchivedSectionOpen = !isArchivedSectionOpen;
+      const container = document.getElementById('archivedTodosContainer');
+      const label = document.getElementById('archivedToggleLabel');
+      if (isArchivedSectionOpen) {
+        container.style.display = 'block';
+        label.innerText = '[ Clicca per chiudere ▴ ]';
+      } else {
+        container.style.display = 'none';
+        label.innerText = '[ Clicca per aprire ▾ ]';
+      }
+    }
+
+    function renderArchivedTodoList() {
+      const container = document.getElementById('archivedTodosContainer');
+      const badge = document.getElementById('archivedTodoCountBadge');
+      if (!container || !badge) return;
+
+      if (!archivedTodos) archivedTodos = [];
+      badge.innerText = archivedTodos.length;
+
+      container.innerHTML = '';
+      if (archivedTodos.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 14px;">Nessun task archiviato.</div>`;
+        return;
+      }
+
+      archivedTodos.forEach((t) => {
+        const item = document.createElement('div');
+        item.style.cssText = "background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; opacity: 0.85;";
+        
+        let assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${t.assignee}</span>` : '';
+
+        item.innerHTML = `
+          <div style="flex: 1;">
+            <div>
+              <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${t.archivedAt || 'Storico'})</span>
+              ${assigneeBadgeHTML}
+            </div>
+            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px;">${t.title}</div>
+            <div style="font-size: 13px; color: var(--text-muted);">${t.action || ''}</div>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
+            <button type="button" onclick="permanentDeleteArchivedTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function restoreArchivedTodo(id) {
+      const idx = archivedTodos.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        const restored = archivedTodos.splice(idx, 1)[0];
+        delete restored.archivedAt;
+        manualTodos.push(restored);
+        renderApp();
+        saveData();
+      }
+    }
+
+    function permanentDeleteArchivedTodo(id) {
+      if (confirm('Vuoi eliminare definitivamente questo task dall\'archivio?')) {
+        archivedTodos = archivedTodos.filter(t => t.id !== id);
+        renderApp();
         saveData();
       }
     }
