@@ -643,7 +643,7 @@
       renderApp();
     }
 
-    // SALVATAGGIO ASINCRONO
+    // SALVATAGGIO CON SYNC IMMEDIATO
     async function saveData() {
       try {
         const { error } = await client
@@ -652,34 +652,34 @@
           .eq('id', 'main');
 
         if (error) {
-          console.error('Errore di salvataggio su Supabase:', error);
+          console.error('Errore di salvataggio:', error);
         }
       } catch (err) {
-        console.error('Eccezione durante il salvataggio:', err);
+        console.error('Eccezione salvataggio:', err);
       }
       await loadData();
     }
 
-    // REALTIME: ASCOLTA LE MODIFICHE DAGLI ALTRI DISPOSITIVI (PC / SMARTPHONE)
-    function initRealtimeSync() {
-      client
-        .channel('public:workflow')
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' },
-          (payload) => {
-            // Se un altro dispositivo (es. smartphone o PC) ha salvato, aggiorna subito i dati localmente senza toccare le modali aperte
-            if (payload.new && payload.new.data) {
-              pratiche = payload.new.data.pratiche || [];
-              manualTodos = payload.new.data.manualTodos || [];
-              archivedTodos = payload.new.data.archivedTodos || [];
-              initDropdownOptions();
-              renderApp();
-            }
-          }
-        )
-        .subscribe();
-    }
+    // REALTIME LISTENER: AGGIORNAMENTO AUTOMATICO TRA PC E SMARTPHONE
+    client
+      .channel('public:workflow')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' }, payload => {
+        if (payload.new && payload.new.data) {
+          pratiche = payload.new.data.pratiche || [];
+          manualTodos = payload.new.data.manualTodos || [];
+          archivedTodos = payload.new.data.archivedTodos || [];
+          initDropdownOptions();
+          renderApp();
+        }
+      })
+      .subscribe();
+
+    // AUTO-REFRESH QUANDO LO SMARTPHONE TORNA IN PRIMO PIANO (SBLOCCO / CAMBIO SCHEDA)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    });
 
     function getDemoData() {
       return [{
@@ -2254,4 +2254,10 @@
     }
 
     function getNow() {
-      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'
+      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
