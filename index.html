@@ -196,7 +196,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GESTIONE REPARTO & STATO -->
+  <!-- MODAL: GESTIONE REPARTO (SEMPLIFICATA A 4 FUNZIONI) -->
   <div class="modal-overlay hidden" id="stepClickModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -206,16 +206,18 @@
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa al Reparto Successivo</button>
-        
+        <!-- 1. APPROVA E PASSA AVANTI -->
+        <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
         <button class="btn-gold" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
 
-        <button class="btn-sm" id="btnSetStatusModal" style="display:none; background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa (Viola)</button>
+        <!-- 2. SEGNALA STALLO / ATTESA -->
+        <button class="btn-sm" style="background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
 
-        <button class="btn-sm" id="btnSendBackModal" style="display:none; background: var(--warning-amber); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un altro Reparto</button>
+        <!-- 3. RIMANDA INDIETRO O AD ALTRO REPARTO -->
+        <button class="btn-sm" style="background: var(--warning-amber); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
 
-        <button class="btn-secondary-outline" style="text-align: left; padding: 14px; font-size:15px; background: rgba(214, 158, 46, 0.15); color: var(--gold-light);" onclick="openChatFromStepClick()">💬 Consulta Chat & Cronologia</button>
-        <button class="btn-sm" style="background:#2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">🚨 Segnala Problema / Avviso</button>
+        <!-- 4. BLOCCA (X ROSSA) -->
+        <button class="btn-sm" style="background: var(--danger-red); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
       </div>
     </div>
   </div>
@@ -266,28 +268,22 @@
     </div>
   </div>
 
-  <!-- MODAL INTERVENTO / SEGNALAZIONE PROBLEMA -->
+  <!-- MODAL INTERVENTO / BLOCCA (X ROSSA) -->
   <div class="modal-overlay hidden" id="interveneModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="interveneModalTitle">Segnala o Registra Problema</div>
+        <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeInterveneModal()">✕</button>
       </div>
-
-      <div class="form-group" id="targetDeptGroup">
-        <label>Reparto Destinatario da Avvisare</label>
-        <select id="interveneTargetSelect" class="form-control"></select>
-      </div>
-
-      <div class="form-group">
-        <label>Dettaglio / Nota del Problema o Annullamento *</label>
-        <textarea id="interveneNote" class="form-control" rows="3" placeholder="Es. Spettacolo annullato dal teatro, fondi non approvati..."></textarea>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
-        <button type="button" class="btn-sm" style="background: var(--danger-red); color: #fff;" onclick="confirmInterveneAction('REJECT')">❌ Problema Bloccato / Annullato</button>
-        <button type="button" class="btn-sm" style="background: var(--warning-amber); color: #fff;" onclick="confirmInterveneAction('WARN_DEST')">⚠️ Segnala ad Altro Reparto</button>
-      </div>
+      <form onsubmit="confirmInterveneAction(event)">
+        <div class="form-group">
+          <label>Motivo del Blocco / Annullamento *</label>
+          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato dal teatro, fondi non approvati..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -674,7 +670,7 @@
       })
       .subscribe();
 
-    // AUTO-REFRESH QUANDO LO SMARTPHONE TORNA IN PRIMO PIANO (SBLOCCO / CAMBIO SCHEDA)
+    // AUTO-REFRESH QUANDO LO SMARTPHONE TORNA IN PRIMO PIANO
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         loadData();
@@ -1420,7 +1416,7 @@
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
           
-          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
+          if (localStorage.getItem('gt_last_chatted_todo_id'] === id) {
             localStorage.removeItem('gt_last_chatted_todo_id');
           }
 
@@ -1791,13 +1787,9 @@
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
       const btnApprove = document.getElementById('btnApproveNext');
       const btnExecuteFinal = document.getElementById('btnExecuteFinal');
-      const btnSetStatus = document.getElementById('btnSetStatusModal');
-      const btnSendBack = document.getElementById('btnSendBackModal');
 
       btnApprove.style.display = 'none';
       btnExecuteFinal.style.display = 'none';
-      btnSetStatus.style.display = 'block';
-      btnSendBack.style.display = 'block';
 
       if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
@@ -1973,75 +1965,54 @@
       await saveData();
     }
 
-    let activeSenderDept = '';
-
     function openInterveneFromStepClick() {
       closeStepClickModal();
       activeSenderDept = ROUTE_STEPS[selectedStepIdx].label;
-      document.getElementById('interveneModalTitle').innerText = `Segnala da "${activeSenderDept}"`;
-
-      const select = document.getElementById('interveneTargetSelect');
-      select.innerHTML = '';
-
-      ROUTE_STEPS.forEach((s) => {
-        const option = document.createElement('option');
-        option.value = s.label;
-        option.innerText = '➡️ [Segnala a] ' + s.label;
-        select.appendChild(option);
-      });
-
+      document.getElementById('interveneModalTitle').innerText = `Blocca Reparto "${activeSenderDept}"`;
+      document.getElementById('interveneNote').value = '';
       document.getElementById('interveneModal').classList.remove('hidden');
     }
 
     function closeInterveneModal() { document.getElementById('interveneModal').classList.add('hidden'); }
 
-    async function confirmInterveneAction(actionType) {
-      if (!activeItem || !activeSenderDept) return;
-      const note = document.getElementById('interveneNote').value.trim() || 'Segnalazione';
+    async function confirmInterveneAction(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const note = document.getElementById('interveneNote').value.trim() || 'Bloccato';
 
       if (!activeItem.alertsList) activeItem.alertsList = [];
 
-      let targetDept = activeSenderDept;
-      if (actionType === 'WARN_DEST') {
-        targetDept = document.getElementById('interveneTargetSelect').value;
-      }
-
       const newAlert = {
         id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: actionType,
-        sender: activeSenderDept,
-        target: targetDept,
+        type: 'REJECT',
+        sender: senderDept,
+        target: senderDept,
         text: note
       };
 
       activeItem.alertsList.push(newAlert);
       
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
-      if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+      if (!activeItem.mailDepts.includes(senderDept)) activeItem.mailDepts.push(senderDept);
 
       activeItem.notesHistory.push({ 
         date: getNow(), 
-        dept: activeSenderDept, 
-        text: `[${actionType === 'REJECT' ? 'PROBLEMA BLOCCATO / ANNULLATO ❌' : 'SEGNALAZIONE ⚠️ a ' + targetDept}]: ${note}` 
+        dept: senderDept, 
+        text: `[REPARTO BLOCCATO ❌]: ${note}` 
       });
 
       closeInterveneModal();
       await saveData();
     }
 
-    function openChatFromStepClick() {
-      const deptLabel = selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : null;
-      closeStepClickModal();
-      openChatModal(activeItem.id, deptLabel);
-    }
-
-    async function openChatModal(id, explicitSenderDept = null) {
+    function openChatModal(id, explicitSenderDept = null) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
       
       if (explicitSenderDept && activeItem.mailDepts) {
         activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== explicitSenderDept);
-        await saveData();
+        saveData();
       }
 
       document.getElementById('chatModalTitle').innerText = `Chat & Storico: ${activeItem.client} - ${activeItem.title}`;
