@@ -673,13 +673,13 @@
             }
           });
         } else {
-          pratiche = getDemoData();
+          pratiche = [];
           manualTodos = [];
           archivedTodos = [];
           utileLinks = [];
         }
       } catch(e) {
-        pratiche = getDemoData();
+        pratiche = [];
         manualTodos = [];
         archivedTodos = [];
         utileLinks = [];
@@ -723,28 +723,6 @@
         loadData();
       }
     });
-
-    function getDemoData() {
-      return [{
-        id: 'p_1',
-        title: 'Caravaggio - Rebel Rock Musical',
-        client: 'Teatro Manzoni Cassino',
-        showDate: '2027-03-09',
-        ownerExt: 'Mario Rossi',
-        ownerInt: 'Fabrizio R.',
-        currentStepIdx: 1,
-        approvedSteps: [0],
-        statusMessages: [],
-        alertsList: [],
-        mailDepts: [],
-        isArchived: false,
-        isExpanded: false,
-        todoNotes: [],
-        notesHistory: [
-          { date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }
-        ]
-      }];
-    }
 
     function renderApp() {
       renderFeed();
