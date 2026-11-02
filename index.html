@@ -42,6 +42,12 @@
 
     .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
     
+    .card.highlighted-task { 
+      background: linear-gradient(135deg, #381a05, #1c0507); 
+      border: 3px solid var(--gold-light); 
+      box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); 
+    }
+
     .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
     .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
 
@@ -75,12 +81,6 @@
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
     
-    .todo-card.highlighted-task { 
-      background: linear-gradient(135deg, #381a05, #1c0507); 
-      border: 3px solid var(--gold-light); 
-      box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); 
-    }
-
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
@@ -593,7 +593,7 @@
   <script>
     // INIZIALIZZAZIONE SUPABASE
     const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iOiJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
     
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -873,7 +873,14 @@
         return true;
       });
 
+      const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
+
       filteredPratiche.sort((a, b) => {
+        const isHighlightedA = lastChattedId && a.id === lastChattedId;
+        const isHighlightedB = lastChattedId && b.id === lastChattedId;
+        if (isHighlightedA && !isHighlightedB) return -1;
+        if (!isHighlightedA && isHighlightedB) return 1;
+
         const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
         const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
 
@@ -1002,6 +1009,19 @@
 
         const isExpanded = !!p.isExpanded;
         const formattedShowDate = formatDateIt(p.showDate);
+        const isHighlighted = lastChattedId && p.id === lastChattedId;
+
+        let highlightBadgeHTML = isHighlighted ? `<div style="margin-bottom: 8px;"><span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span></div>` : '';
+
+        let lastChatMsgHTML = '';
+        if (p.notesHistory && p.notesHistory.length > 0) {
+          const lastMsg = p.notesHistory[p.notesHistory.length - 1];
+          lastChatMsgHTML = `
+            <div style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.12); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 10px;">
+              💬 <strong>Ultimo in chat [${lastMsg.dept} - ${lastMsg.date}]:</strong> ${linkify(lastMsg.text)}
+            </div>
+          `;
+        }
 
         let infoHeaderHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
@@ -1021,12 +1041,14 @@
         `;
 
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = isHighlighted ? 'card highlighted-task' : 'card';
         card.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
-            <div>
+            <div style="flex: 1; min-width: 0;">
+              ${highlightBadgeHTML}
               <div class="client-title-main">${p.client}</div>
               <div class="card-show-title">${p.title} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+              ${!isExpanded ? lastChatMsgHTML : ''}
             </div>
             <div></div>
           </div>
@@ -1037,7 +1059,9 @@
 
               ${bannersHTML}
 
-              <div class="stepper-box">
+              ${lastChatMsgHTML}
+
+              <div class="stepper-box" style="margin-top: 14px;">
                 <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
                   Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${phaseDisplayLabel}</strong>
                 </div>
@@ -1086,7 +1110,6 @@
       if (confirm('Vuoi eliminare definitivamente questa pratica dall\'archivio?')) {
         pratiche = pratiche.filter(p => p.id !== id);
         await saveData();
-        openArchiveModal();
       }
     }
 
@@ -1820,8 +1843,8 @@
       } else if (praticaId) {
         praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
-          if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
-          praticaObj.todoNotes.push({ date: getNow(), text: text });
+          if (!praticaObj.notesHistory) praticaObj.notesHistory = [];
+          praticaObj.notesHistory.push({ date: getNow(), dept: 'Chat Operativa', text: text });
           localStorage.setItem('gt_last_chatted_todo_id', praticaObj.id);
         }
       }
@@ -2047,6 +2070,8 @@
         text: `↩️ [Rimandato a ${targetDept}]: ${note}`
       });
 
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
+
       closeSendBackModal();
       await saveData();
     }
@@ -2097,6 +2122,8 @@
 
       activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
 
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
+
       closeStatusModal();
       await saveData();
     }
@@ -2131,6 +2158,8 @@
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
       }
 
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
+
       closeStepClickModal();
       await saveData();
     }
@@ -2150,6 +2179,8 @@
         activeItem.approvedSteps.push(selectedStepIdx);
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
       }
+
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
 
       closeStepClickModal();
       await saveData();
@@ -2191,6 +2222,8 @@
         dept: senderDept, 
         text: `[REPARTO BLOCCATO ❌]: ${note}` 
       });
+
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
 
       closeInterveneModal();
       await saveData();
