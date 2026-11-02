@@ -876,11 +876,6 @@
       const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
 
       filteredPratiche.sort((a, b) => {
-        const isHighlightedA = lastChattedId && a.id === lastChattedId;
-        const isHighlightedB = lastChattedId && b.id === lastChattedId;
-        if (isHighlightedA && !isHighlightedB) return -1;
-        if (!isHighlightedA && isHighlightedB) return 1;
-
         const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
         const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
 
@@ -1348,14 +1343,6 @@
       let allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
 
       const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
-      
-      if (lastChattedId) {
-        const foundIdx = allTasks.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
-        if (foundIdx !== -1) {
-          const item = allTasks.splice(foundIdx, 1)[0];
-          allTasks.unshift(item);
-        }
-      }
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
