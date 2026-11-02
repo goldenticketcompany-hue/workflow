@@ -547,7 +547,6 @@
     
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // NUOVI NOMI DEI REPARTI AGGIORNATI
     const ROUTE_STEPS = [
       { id: 'Prospect', label: 'Prospect' },
       { id: 'TechServ', label: 'Tech Serv' },
@@ -635,7 +634,6 @@
       renderApp();
     }
 
-    // SALVATAGGIO CON SYNC IMMEDIATO
     async function saveData() {
       try {
         const { error } = await client
@@ -652,7 +650,6 @@
       await loadData();
     }
 
-    // REALTIME LISTENER SUPABASE
     client
       .channel('public:workflow')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' }, payload => {
@@ -666,7 +663,6 @@
       })
       .subscribe();
 
-    // AUTO-REFRESH QUANDO TORNA IN PRIMO PIANO
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         loadData();
@@ -951,13 +947,23 @@
         const isExpanded = !!p.isExpanded;
         const formattedShowDate = formatDateIt(p.showDate);
 
-        let referentsHTML = '';
-        if (p.ownerExt || p.ownerInt) {
-          referentsHTML = `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; display: flex; gap: 16px; flex-wrap: wrap;">`;
-          if (p.ownerExt) referentsHTML += `<span>👤 <strong>Referente Esterno:</strong> ${p.ownerExt}</span>`;
-          if (p.ownerInt) referentsHTML += `<span>🏢 <strong>Referente Interno:</strong> ${p.ownerInt}</span>`;
-          referentsHTML += `</div>`;
-        }
+        // ZONA DATI E REFERENTI CON PULSANTE CHAT DEDICATO
+        let infoHeaderHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
+            <div>
+              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:4px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
+              ${(p.ownerExt || p.ownerInt) ? `
+                <div style="font-size:13px; color:var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
+                  ${p.ownerExt ? `<span>👤 <strong>Referente Esterno:</strong> ${p.ownerExt}</span>` : ''}
+                  ${p.ownerInt ? `<span>🏢 <strong>Referente Interno:</strong> ${p.ownerInt}</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+            <div>
+              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}', '${currentDeptLabel}')">💬 Chat Pratica</button>
+            </div>
+          </div>
+        `;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -972,8 +978,7 @@
 
           ${isExpanded ? `
             <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
-              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:6px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
-              ${referentsHTML}
+              ${infoHeaderHTML}
 
               ${bannersHTML}
 
