@@ -597,7 +597,7 @@
       return replacedText;
     }
 
-    // CARICAMENTO DATI BLINDATO ASINCRONO
+    // CARICAMENTO DATI
     async function loadData() {
       try {
         const { data, error } = await client
@@ -643,7 +643,7 @@
       renderApp();
     }
 
-    // SALVATAGGIO E REFRESH IMMEDIATO BLINDATO (ATTENDE LA SCRITTURA)
+    // SALVATAGGIO ASINCRONO
     async function saveData() {
       try {
         const { error } = await client
@@ -657,8 +657,28 @@
       } catch (err) {
         console.error('Eccezione durante il salvataggio:', err);
       }
-      // Ricarica immediata sicura dal server per allineare tutto
       await loadData();
+    }
+
+    // REALTIME: ASCOLTA LE MODIFICHE DAGLI ALTRI DISPOSITIVI (PC / SMARTPHONE)
+    function initRealtimeSync() {
+      client
+        .channel('public:workflow')
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' },
+          (payload) => {
+            // Se un altro dispositivo (es. smartphone o PC) ha salvato, aggiorna subito i dati localmente senza toccare le modali aperte
+            if (payload.new && payload.new.data) {
+              pratiche = payload.new.data.pratiche || [];
+              manualTodos = payload.new.data.manualTodos || [];
+              archivedTodos = payload.new.data.archivedTodos || [];
+              initDropdownOptions();
+              renderApp();
+            }
+          }
+        )
+        .subscribe();
     }
 
     function getDemoData() {
@@ -1656,7 +1676,6 @@
       document.getElementById('todoChatNewText').value = '';
       await saveData();
       
-      // Riapre e aggiorna la modale attiva
       if (manualId) openTodoChatModal(manualId);
       if (praticaId) openPraticaTodoChatModal(praticaId, praticaObj.title);
     }
@@ -2235,10 +2254,4 @@
     }
 
     function getNow() {
-      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
-    }
-
-    loadData();
-  </script>
-</body>
-</html>
+      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'
