@@ -53,18 +53,19 @@
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
-    .stepper-box { background: #2a080c; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
-    .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 0; gap: 8px; }
-    .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 70px; }
-    .step-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
-    .step-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; }
+    /* STEPPER OTTIMIZZATO PER IPHONE / MOBILE */
+    .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
+    .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
+    .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
+    .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
+    .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
 
     .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
     .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
-    .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
-    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 20px !important; }
-    .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 20px !important; }
-    .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 20px !important; }
+    .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
+    .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
+    .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
 
     @keyframes pulse-warn {
       0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
@@ -132,14 +133,14 @@
         </select>
         <select id="filterDept" class="select-filter" onchange="renderApp()">
           <option value="ALL">🏢 Tutti i Reparti</option>
-          <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-          <option value="Servizi Tecnici">Servizi Tecnici</option>
-          <option value="Amministrazione">Amministrazione</option>
-          <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-          <option value="Legale">Legale</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
-          <option value="Logistica">Logistica</option>
+          <option value="Logistics">Logistics</option>
         </select>
         <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
       </div>
@@ -162,14 +163,14 @@
         <input type="text" id="searchTodoInput" class="search-input" oninput="renderApp()" placeholder="Cerca task o attività...">
         <select id="filterTodoDept" class="select-filter" onchange="renderApp()">
           <option value="ALL">Tutti i Reparti</option>
-          <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-          <option value="Servizi Tecnici">Servizi Tecnici</option>
-          <option value="Amministrazione">Amministrazione</option>
-          <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-          <option value="Legale">Legale</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
-          <option value="Logistica">Logistica</option>
+          <option value="Logistics">Logistics</option>
         </select>
         <select id="filterTodoAssignee" class="select-filter" onchange="renderTodoList()">
           <option value="ALL">👤 Tutti i Responsabili</option>
@@ -196,7 +197,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GESTIONE REPARTO (SEMPLIFICATA A 4 FUNZIONI) -->
+  <!-- MODAL: GESTIONE REPARTO -->
   <div class="modal-overlay hidden" id="stepClickModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -206,23 +207,17 @@
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <!-- 1. APPROVA E PASSA AVANTI -->
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
         <button class="btn-gold" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
 
-        <!-- 2. SEGNALA STALLO / ATTESA -->
         <button class="btn-sm" style="background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
-
-        <!-- 3. RIMANDA INDIETRO O AD ALTRO REPARTO -->
         <button class="btn-sm" style="background: var(--warning-amber); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
-
-        <!-- 4. BLOCCA (X ROSSA) -->
         <button class="btn-sm" style="background: var(--danger-red); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL RIMANDA INDIETRO O AD ALTRO REPARTO -->
+  <!-- MODAL RIMANDA INDIETRO -->
   <div class="modal-overlay hidden" id="sendBackModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -236,7 +231,7 @@
         </div>
         <div class="form-group">
           <label>Motivo del rimando / Cosa bisogna rivedere *</label>
-          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a servizi tecnici per modifica rider o ricalcolo costi..."></textarea>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv per modifica rider o ricalcolo costi..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Conferma Rimando</button>
@@ -245,7 +240,7 @@
     </div>
   </div>
 
-  <!-- MODAL INSERIMENTO MOTIVO / STALLO (VIOLA) -->
+  <!-- MODAL STALLO -->
   <div class="modal-overlay hidden" id="statusModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -259,7 +254,7 @@
         </div>
         <div class="form-group">
           <label>Motivo dello Stallo / Attesa *</label>
-          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a servizi tecnici per chiarimenti su rider..."></textarea>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Conferma Stallo</button>
@@ -268,7 +263,7 @@
     </div>
   </div>
 
-  <!-- MODAL INTERVENTO / BLOCCA (X ROSSA) -->
+  <!-- MODAL BLOCCA -->
   <div class="modal-overlay hidden" id="interveneModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -278,7 +273,7 @@
       <form onsubmit="confirmInterveneAction(event)">
         <div class="form-group">
           <label>Motivo del Blocco / Annullamento *</label>
-          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato dal teatro, fondi non approvati..."></textarea>
+          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button>
@@ -321,7 +316,7 @@
         </div>
         <div class="form-group">
           <label>Referente Esterno (Opzionale)</label>
-          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi (Teatro)...">
+          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
         </div>
         <div class="form-group">
           <label>Referente Interno (Opzionale)</label>
@@ -334,7 +329,7 @@
     </div>
   </div>
 
-  <!-- MODAL MODIFICA PRATICA ESISTENTE -->
+  <!-- MODAL MODIFICA PRATICA -->
   <div class="modal-overlay hidden" id="editModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -380,32 +375,32 @@
       <form onsubmit="saveManualTodo(event)">
         <div class="form-group">
           <label>Titolo Attività *</label>
-          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro per contratto...">
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
         </div>
         <div class="form-group">
           <label>Reparto di Riferimento *</label>
           <select id="todoSit" class="form-control" required>
-            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-            <option value="Servizi Tecnici">Servizi Tecnici</option>
-            <option value="Amministrazione">Amministrazione</option>
-            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-            <option value="Legale">Legale</option>
+            <option value="Prospect">Prospect</option>
+            <option value="Tech Serv">Tech Serv</option>
+            <option value="Admin">Admin</option>
+            <option value="Deal">Deal</option>
+            <option value="Legal">Legal</option>
             <option value="Promo">Promo</option>
             <option value="PR">PR</option>
-            <option value="Logistica">Logistica</option>
+            <option value="Logistics">Logistics</option>
           </select>
         </div>
         <div class="form-group">
           <label>Chi deve farlo (Assegnato a)</label>
-          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio, Jax...">
+          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
         </div>
         <div class="form-group">
           <label>Scadenza - Entro il (Opzionale)</label>
           <input type="date" id="todoDeadline" class="form-control">
         </div>
         <div class="form-group">
-          <label>Azione da fare * (puoi incollare link lunghi)</label>
-          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare riders tecnici con link https://...">
+          <label>Azione da fare *</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare materiali con link...">
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
@@ -414,7 +409,7 @@
     </div>
   </div>
 
-  <!-- MODAL MODIFICA TASK MANUALE -->
+  <!-- MODAL MODIFICA TASK -->
   <div class="modal-overlay hidden" id="editTodoModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -430,19 +425,19 @@
         <div class="form-group">
           <label>Reparto di Riferimento *</label>
           <select id="editTodoSit" class="form-control" required>
-            <option value="Proposta (commerciale)">Proposta (commerciale)</option>
-            <option value="Servizi Tecnici">Servizi Tecnici</option>
-            <option value="Amministrazione">Amministrazione</option>
-            <option value="Accordo (commerciale)">Accordo (commerciale)</option>
-            <option value="Legale">Legale</option>
+            <option value="Prospect">Prospect</option>
+            <option value="Tech Serv">Tech Serv</option>
+            <option value="Admin">Admin</option>
+            <option value="Deal">Deal</option>
+            <option value="Legal">Legal</option>
             <option value="Promo">Promo</option>
             <option value="PR">PR</option>
-            <option value="Logistica">Logistica</option>
+            <option value="Logistics">Logistics</option>
           </select>
         </div>
         <div class="form-group">
           <label>Chi deve farlo (Assegnato a)</label>
-          <input type="text" id="editTodoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
+          <input type="text" id="editTodoAssignee" class="form-control">
         </div>
         <div class="form-group">
           <label>Scadenza - Entro il (Opzionale)</label>
@@ -465,7 +460,7 @@
     </div>
   </div>
 
-  <!-- MODAL CHAT & AGGIORNAMENTI TASK -->
+  <!-- MODAL CHAT TASK -->
   <div class="modal-overlay hidden" id="todoChatModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -478,7 +473,7 @@
       <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
         <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
         <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto o l'ultimo aggiornamento (puoi inserire link web o Google Drive)..."></textarea>
+          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
           <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
@@ -511,7 +506,7 @@
           <select id="chatTargetDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
         </div>
         <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento o i chiarimenti (puoi incollare link)..."></textarea>
+          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento..."></textarea>
         </div>
         <div style="text-align: right;">
           <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
@@ -522,7 +517,7 @@
     </div>
   </div>
 
-  <!-- MODAL MODIFICA SINGOLO MESSAGGIO CHAT -->
+  <!-- MODAL MODIFICA MESSAGGIO -->
   <div class="modal-overlay hidden" id="editChatMsgModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -552,15 +547,16 @@
     
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // NUOVI NOMI DEI REPARTI AGGIORNATI
     const ROUTE_STEPS = [
-      { id: 'Vendite', label: 'Proposta (commerciale)' },
-      { id: 'Servizi Tecnici', label: 'Servizi Tecnici' },
-      { id: 'Amministrazione', label: 'Amministrazione' },
-      { id: 'Vendite_2', label: 'Accordo (commerciale)' },
-      { id: 'Legale', label: 'Legale' },
+      { id: 'Prospect', label: 'Prospect' },
+      { id: 'TechServ', label: 'Tech Serv' },
+      { id: 'Admin', label: 'Admin' },
+      { id: 'Deal', label: 'Deal' },
+      { id: 'Legal', label: 'Legal' },
       { id: 'Promo', label: 'Promo' },
       { id: 'PR', label: 'PR' },
-      { id: 'Logistica', label: 'Logistica' }
+      { id: 'Logistics', label: 'Logistics' }
     ];
 
     let pratiche = [];
@@ -656,7 +652,7 @@
       await loadData();
     }
 
-    // REALTIME LISTENER: AGGIORNAMENTO AUTOMATICO TRA PC E SMARTPHONE
+    // REALTIME LISTENER SUPABASE
     client
       .channel('public:workflow')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' }, payload => {
@@ -670,7 +666,7 @@
       })
       .subscribe();
 
-    // AUTO-REFRESH QUANDO LO SMARTPHONE TORNA IN PRIMO PIANO
+    // AUTO-REFRESH QUANDO TORNA IN PRIMO PIANO
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         loadData();
@@ -694,7 +690,7 @@
         isExpanded: false,
         todoNotes: [],
         notesHistory: [
-          { date: '30/10 09:00', dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }
+          { date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }
         ]
       }];
     }
@@ -730,7 +726,6 @@
       if (badge) badge.innerText = count;
     }
 
-    // MENU A TENDINA SPETTACOLI CASE-INSENSITIVE
     function initDropdownOptions() {
       const selectShow = document.getElementById('filterShowTitle');
       if (!selectShow) return;
@@ -759,7 +754,6 @@
       initAssigneeDropdownOptions();
     }
 
-    // MENU A TENDINA RESPONSABILI CASE-INSENSITIVE
     function initAssigneeDropdownOptions() {
       const select = document.getElementById('filterTodoAssignee');
       if (!select) return;
@@ -896,7 +890,7 @@
           return `
             <div class="step-item" onclick="openStepClickModal('${p.id}', ${idx})">
               <div class="${cls}">${symbol}</div>
-              <div class="step-label">${s.label.split(' ')[0]}</div>
+              <div class="step-label">${s.label}</div>
             </div>
           `;
         }).join('');
@@ -946,11 +940,11 @@
           let pList = [];
           if (!p.approvedSteps.includes(5)) pList.push('Promo');
           if (!p.approvedSteps.includes(6)) pList.push('PR');
-          if (!p.approvedSteps.includes(7)) pList.push('Logistica');
+          if (!p.approvedSteps.includes(7)) pList.push('Logistics');
           if (pList.length > 0) {
             phaseDisplayLabel = `In corso su: ${pList.join(', ')}`;
           } else {
-            phaseDisplayLabel = `✅ Completato (Promo, PR & Logistica)`;
+            phaseDisplayLabel = `✅ Completato (Promo, PR & Logistics)`;
           }
         }
 
@@ -1222,11 +1216,11 @@
                 id: 'wait_auto_log_' + p.id,
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
-                dept: 'Logistica',
+                dept: 'Logistics',
                 assignee: p.ownerInt || p.ownerExt || '',
                 deadline: p.showDate || '',
-                situation: `⏳ Logistica - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da Logistica.`,
+                situation: `⏳ Logistics - IN ATTESA (parallelo)`,
+                action: `In attesa di conferma ESEGUITO da Logistics.`,
                 isManual: false,
                 todoNotes: p.todoNotes
               });
@@ -1416,7 +1410,7 @@
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
           
-          if (localStorage.getItem('gt_last_chatted_todo_id'] === id) {
+          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
             localStorage.removeItem('gt_last_chatted_todo_id');
           }
 
@@ -1932,7 +1926,7 @@
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
         
         if (activeItem.currentStepIdx === 5) {
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legale. Avviato in parallelo su Promo, PR e Logistica.` });
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
         } else {
           const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
           activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
@@ -2203,7 +2197,7 @@
         isArchived: false,
         isExpanded: false,
         todoNotes: [],
-        notesHistory: [{ date: getNow(), dept: 'Proposta (commerciale)', text: 'Creata nuova pratica.' }]
+        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
       });
       
       closeNewModal();
