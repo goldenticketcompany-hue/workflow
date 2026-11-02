@@ -210,7 +210,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GESTIONE REPARTO -->
+  <!-- MODAL: GESTIONE REPARTO (BANNERINO PALLINO) -->
   <div class="modal-overlay hidden" id="stepClickModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -223,10 +223,34 @@
         <button class="btn-gold" id="btnApproveNext" style="display:none; text-align: left; padding: 14px; font-size:15px;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
         <button class="btn-gold" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
 
+        <button class="btn-sm" style="background: #2563eb; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
         <button class="btn-sm" style="background: #a855f7; color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
         <button class="btn-sm" style="background: var(--warning-amber); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
         <button class="btn-sm" style="background: var(--danger-red); color:#fff; text-align: left; padding: 14px; font-size:15px;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
+  <div class="modal-overlay hidden" id="quickChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeQuickChatModal()">✕</button>
+      </div>
+      <form onsubmit="saveQuickChatFromStep(event)">
+        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+        </div>
+        <div class="form-group">
+          <label>Testo del messaggio (Visibile a tutti nel task principale) *</label>
+          <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Invia Messaggio in Chat</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -527,34 +551,19 @@
     </div>
   </div>
 
-  <!-- MODAL CHAT & STORICO FLUSSI -->
+  <!-- MODAL CONSULTA CHAT (SOLO CONSULTAZIONE DAL QUADRO PRINCIPALE) -->
   <div class="modal-overlay hidden" id="chatModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="chatModalTitle">Chat & Storico Pratica</div>
+        <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
         <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeChatModal()">✕</button>
       </div>
 
-      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
-        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Invia messaggio / comunicazione</div>
-        
-        <div style="font-size: 14px; color: #fff; margin-bottom: 12px; background: rgba(214, 158, 46, 0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-          Messaggio da parte di: <strong style="color: var(--gold-light);" id="chatSenderLabel">...</strong>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Invia a quale Reparto Destinatario?</label>
-          <select id="chatTargetDept" class="form-control" style="font-size: 14px; padding: 8px;"></select>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <textarea id="chatNewMsgText" class="form-control" rows="2" placeholder="Scrivi qui il commento..."></textarea>
-        </div>
-        <div style="text-align: right;">
-          <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="addChatMessage()">✉️ Invia Messaggio</button>
-        </div>
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+        ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
       </div>
 
-      <div id="chatMessages" style="max-height: 320px; overflow-y: auto;"></div>
+      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
     </div>
   </div>
 
@@ -952,7 +961,7 @@
         p.statusMessages.forEach(st => {
           bannersHTML += `
             <div class="alert-banner alert-status">
-              <span onclick="openChatModal('${p.id}', '${st.dept}')" style="cursor:pointer; flex: 1;">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
                 🟣 <strong>Stato (${st.dept}):</strong> "${st.text}"
               </span>
               <button type="button" class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
@@ -970,7 +979,7 @@
 
           bannersHTML += `
             <div class="${bannerClass}">
-              <span onclick="openChatModal('${p.id}', '${al.target}')" style="cursor:pointer; flex: 1;">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
                 ${icon} <strong>${isReject ? `Bloccato (${al.target}):` : `Da ${al.sender} a ${al.target}:`}</strong> "${previewText}"
               </span>
               <button type="button" class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
@@ -1006,7 +1015,7 @@
               ` : ''}
             </div>
             <div>
-              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}', '${currentDeptLabel}')">💬 Chat</button>
+              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}')">💬 Consulta Chat</button>
             </div>
           </div>
         `;
@@ -1953,6 +1962,39 @@
 
     function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
 
+    function openQuickChatFromStep() {
+      closeStepClickModal();
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      document.getElementById('quickChatSenderLabel').innerText = deptLabel;
+      document.getElementById('quickChatTextInput').value = '';
+      document.getElementById('quickChatModal').classList.remove('hidden');
+    }
+
+    function closeQuickChatModal() {
+      document.getElementById('quickChatModal').classList.add('hidden');
+    }
+
+    async function saveQuickChatFromStep(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      const text = document.getElementById('quickChatTextInput').value.trim();
+      if (!text) return;
+
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({
+        date: getNow(),
+        dept: deptLabel,
+        text: text
+      });
+
+      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
+
+      closeQuickChatModal();
+      await saveData();
+    }
+
     function openSendBackModal() {
       closeStepClickModal();
       const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
@@ -2154,34 +2196,11 @@
       await saveData();
     }
 
-    function openChatModal(id, explicitSenderDept = null) {
+    function openChatModal(id) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
-      
-      if (explicitSenderDept && activeItem.mailDepts) {
-        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== explicitSenderDept);
-        saveData();
-      }
 
-      document.getElementById('chatModalTitle').innerText = `Chat & Storico: ${activeItem.client} - ${activeItem.title}`;
-
-      const currentSender = explicitSenderDept || (selectedStepIdx !== null ? ROUTE_STEPS[selectedStepIdx].label : ROUTE_STEPS[activeItem.currentStepIdx || 0].label);
-      
-      activeSenderDept = currentSender;
-      document.getElementById('chatSenderLabel').innerText = currentSender;
-
-      const targetSelect = document.getElementById('chatTargetDept');
-      targetSelect.innerHTML = '';
-
-      ROUTE_STEPS.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.label;
-        opt.innerText = '➡️ ' + s.label;
-        targetSelect.appendChild(opt);
-      });
-
-      document.getElementById('chatNewMsgText').value = '';
-
+      document.getElementById('chatModalTitle').innerText = `Consulta Chat: ${activeItem.client} - ${activeItem.title}`;
       document.getElementById('chatModal').classList.remove('hidden');
       renderChatMessages();
     }
@@ -2190,6 +2209,11 @@
       const box = document.getElementById('chatMessages');
       box.innerHTML = '';
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
+
+      if (activeItem.notesHistory.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessun messaggio in questa chat.</div>`;
+        return;
+      }
 
       activeItem.notesHistory.forEach((n, index) => {
         box.innerHTML += `
@@ -2218,30 +2242,6 @@
           renderChatMessages();
         }
       }
-    }
-
-    async function addChatMessage() {
-      if (!activeItem || !activeSenderDept) return;
-      const targetDept = document.getElementById('chatTargetDept').value;
-      const text = document.getElementById('chatNewMsgText').value.trim();
-      if (!text) return;
-
-      activeItem.notesHistory.push({
-        date: getNow(),
-        dept: activeSenderDept,
-        text: `[Messaggio a ${targetDept}]: ${text}`
-      });
-
-      if (!activeItem.mailDepts) activeItem.mailDepts = [];
-      if (!activeItem.mailDepts.includes(targetDept)) {
-        activeItem.mailDepts.push(targetDept);
-      }
-
-      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
-
-      document.getElementById('chatNewMsgText').value = '';
-      await saveData();
-      renderChatMessages();
     }
 
     function openEditFlussiChatMsgModal(index) {
