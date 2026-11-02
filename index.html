@@ -23,13 +23,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
 
-    header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 14px; }
     .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
     .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
 
-    .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); }
-    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 18px; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+    .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
     .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
 
     .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
@@ -90,8 +90,8 @@
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
     .chat-msg-text, .todo-text-block { word-break: break-all; overflow-wrap: break-word; }
-    .chat-msg-text a, .todo-text-block a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
-    .chat-msg-text a:hover, .todo-text-block a:hover { color: #fff; }
+    .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
+    .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
 
     .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
@@ -121,10 +121,12 @@
     <div class="nav-tabs">
       <button class="tab-btn active" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
       <button class="tab-btn" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
+      <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
     </div>
   </header>
 
   <div class="container">
+    <!-- SEZIONE FLUSSI -->
     <div id="sectionFlussi">
       <div class="toolbar">
         <input type="text" id="searchInput" class="search-input" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
@@ -158,6 +160,7 @@
       <div id="feedList"></div>
     </div>
 
+    <!-- SEZIONE TO-DO LIST -->
     <div id="sectionTodo" style="display: none;">
       <div class="toolbar">
         <input type="text" id="searchTodoInput" class="search-input" oninput="renderApp()" placeholder="Cerca task o attività...">
@@ -195,6 +198,16 @@
         <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
       </div>
     </div>
+
+    <!-- SEZIONE LINK UTILI -->
+    <div id="sectionLinks" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchLinkInput" class="search-input" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
+        <button class="btn-gold" onclick="openLinkModal()">+ Aggiungi Link</button>
+      </div>
+
+      <div id="linksListContainer"></div>
+    </div>
   </div>
 
   <!-- MODAL: GESTIONE REPARTO -->
@@ -231,7 +244,7 @@
         </div>
         <div class="form-group">
           <label>Motivo del rimando / Cosa bisogna rivedere *</label>
-          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv per modifica rider o ricalcolo costi..."></textarea>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
         </div>
         <div style="text-align: right; margin-top: 18px;">
           <button type="submit" class="btn-gold">Conferma Rimando</button>
@@ -460,6 +473,34 @@
     </div>
   </div>
 
+  <!-- MODAL AGGIUNGI / MODIFICA LINK UTILE -->
+  <div class="modal-overlay hidden" id="linkModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
+        <button style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;" onclick="closeLinkModal()">✕</button>
+      </div>
+      <form onsubmit="saveLinkItem(event)">
+        <input type="hidden" id="editLinkId">
+        <div class="form-group">
+          <label>Titolo *</label>
+          <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
+        </div>
+        <div class="form-group">
+          <label>Descrizione *</label>
+          <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Link (URL) *</label>
+          <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Link</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CHAT TASK -->
   <div class="modal-overlay hidden" id="todoChatModal">
     <div class="modal-card">
@@ -561,6 +602,7 @@
     let pratiche = [];
     let manualTodos = [];
     let archivedTodos = [];
+    let utileLinks = [];
     let isArchivedSectionOpen = false;
     let activeItem = null;
     let selectedStepIdx = null;
@@ -601,6 +643,7 @@
           pratiche = data.data.pratiche || [];
           manualTodos = data.data.manualTodos || [];
           archivedTodos = data.data.archivedTodos || [];
+          utileLinks = data.data.utileLinks || [];
           
           pratiche.forEach(p => {
             if (p.owner && !p.ownerExt && !p.ownerInt) {
@@ -624,11 +667,13 @@
           pratiche = getDemoData();
           manualTodos = [];
           archivedTodos = [];
+          utileLinks = [];
         }
       } catch(e) {
         pratiche = getDemoData();
         manualTodos = [];
         archivedTodos = [];
+        utileLinks = [];
       }
       initDropdownOptions();
       renderApp();
@@ -638,7 +683,7 @@
       try {
         const { error } = await client
           .from('workflow')
-          .update({ data: { pratiche, manualTodos, archivedTodos } })
+          .update({ data: { pratiche, manualTodos, archivedTodos, utileLinks } })
           .eq('id', 'main');
 
         if (error) {
@@ -657,6 +702,7 @@
           pratiche = payload.new.data.pratiche || [];
           manualTodos = payload.new.data.manualTodos || [];
           archivedTodos = payload.new.data.archivedTodos || [];
+          utileLinks = payload.new.data.utileLinks || [];
           initDropdownOptions();
           renderApp();
         }
@@ -695,6 +741,7 @@
       renderFeed();
       renderTodoList();
       renderArchivedTodoList();
+      renderLinksList();
       updateArchiveCount();
     }
 
@@ -947,7 +994,6 @@
         const isExpanded = !!p.isExpanded;
         const formattedShowDate = formatDateIt(p.showDate);
 
-        // ZONA DATI E REFERENTI CON PULSANTE CHAT DEDICATO
         let infoHeaderHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
             <div>
@@ -960,7 +1006,7 @@
               ` : ''}
             </div>
             <div>
-              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}', '${currentDeptLabel}')">💬 Chat Pratica</button>
+              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}', '${currentDeptLabel}')">💬 Chat</button>
             </div>
           </div>
         `;
@@ -1392,6 +1438,109 @@
         `;
         container.appendChild(item);
       });
+    }
+
+    // GESTIONE TAB LINK UTILI
+    function renderLinksList() {
+      const container = document.getElementById('linksListContainer');
+      if (!container) return;
+
+      const search = (document.getElementById('searchLinkInput')?.value || '').toLowerCase();
+      container.innerHTML = '';
+
+      if (!utileLinks) utileLinks = [];
+
+      const filteredLinks = utileLinks.filter(l => {
+        return (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search);
+      });
+
+      if (filteredLinks.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessun link utile inserito.</div>`;
+        return;
+      }
+
+      filteredLinks.forEach((linkItem) => {
+        const card = document.createElement('div');
+        card.className = 'card link-item-card';
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 0; overflow: hidden;">
+              <div style="font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 6px; word-break: break-word;">${linkItem.title}</div>
+              <div style="font-size: 14px; color: #fff; margin-bottom: 10px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
+              <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                🔗 ${linkify(linkItem.url)}
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+              <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
+              <button type="button" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openLinkModal() {
+      document.getElementById('editLinkId').value = '';
+      document.getElementById('linkTitleInput').value = '';
+      document.getElementById('linkDescInput').value = '';
+      document.getElementById('linkUrlInput').value = '';
+      document.getElementById('linkModalTitle').innerText = 'Aggiungi Link Utile';
+      document.getElementById('linkModal').classList.remove('hidden');
+    }
+
+    function closeLinkModal() {
+      document.getElementById('linkModal').classList.add('hidden');
+    }
+
+    async function saveLinkItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('editLinkId').value;
+      const title = document.getElementById('linkTitleInput').value.trim();
+      const description = document.getElementById('linkDescInput').value.trim();
+      let url = document.getElementById('linkUrlInput').value.trim();
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      if (id) {
+        const item = utileLinks.find(l => l.id === id);
+        if (item) {
+          item.title = title;
+          item.description = description;
+          item.url = url;
+        }
+      } else {
+        utileLinks.unshift({
+          id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          title,
+          description,
+          url
+        });
+      }
+
+      closeLinkModal();
+      await saveData();
+    }
+
+    function openEditLinkModal(id) {
+      const item = utileLinks.find(l => l.id === id);
+      if (!item) return;
+      document.getElementById('editLinkId').value = item.id;
+      document.getElementById('linkTitleInput').value = item.title || '';
+      document.getElementById('linkDescInput').value = item.description || '';
+      document.getElementById('linkUrlInput').value = item.url || '';
+      document.getElementById('linkModalTitle').innerText = 'Modifica Link Utile';
+      document.getElementById('linkModal').classList.remove('hidden');
+    }
+
+    async function confirmDeleteLinkItem(id) {
+      if (confirm('Vuoi eliminare questo link utile?')) {
+        utileLinks = utileLinks.filter(l => l.id !== id);
+        await saveData();
+      }
     }
 
     async function toggleManualTodoResolved(id) {
@@ -2219,8 +2368,11 @@
     function switchTab(tab) {
       document.getElementById('sectionFlussi').style.display = tab === 'flussi' ? 'block' : 'none';
       document.getElementById('sectionTodo').style.display = tab === 'todo' ? 'block' : 'none';
+      document.getElementById('sectionLinks').style.display = tab === 'links' ? 'block' : 'none';
+      
       document.getElementById('btnTabFlussi').className = tab === 'flussi' ? 'tab-btn active' : 'tab-btn';
       document.getElementById('btnTabTodo').className = tab === 'todo' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('btnTabLinks').className = tab === 'links' ? 'tab-btn active' : 'tab-btn';
     }
 
     function getNow() {
