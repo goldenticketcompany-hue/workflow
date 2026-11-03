@@ -40,7 +40,9 @@
     .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
     .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
     .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
-    .alert-lastmsg { background: rgba(37, 99, 235, 0.15); color: #bfdbfe; border: 1.5px solid #2563eb; cursor: pointer; }
+    .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
+    .alert-pinned { background: rgba(246, 224, 94, 0.18); color: var(--gold-light); border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
+    .alert-pinned .lastmsg-text { color: #fff; }
     .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -49,7 +51,7 @@
     .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
     .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
     .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
-    .step-item.step-locked { opacity: 0.45; cursor: not-allowed; }
+    .step-item.step-locked { opacity: 0.5; }
     #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
     .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
     .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
@@ -240,9 +242,9 @@
         <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
         <button class="btn-gold stepact" id="btnGoCurrent" style="display:none; color:#000;" onclick="goToCurrentStep()">👉 Vai al reparto attuale</button>
         <button class="btn-sm stepact" id="btnResolveDept" style="display:none; background: var(--success-green);" onclick="resolveDeptMarkers()">✅ Risolvi stalli / avvisi di questo reparto</button>
-        <button class="btn-sm stepact" style="background: #a855f7;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
-        <button class="btn-sm stepact" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
-        <button class="btn-sm stepact" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
+        <button class="btn-sm stepact" id="btnStall" style="background: #a855f7;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
+        <button class="btn-sm stepact" id="btnSendBack" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
+        <button class="btn-sm stepact" id="btnBlock" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
         <button class="btn-sm stepact" style="background: #2563eb;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
       </div>
     </div>
@@ -1145,19 +1147,31 @@
           `;
         });
 
-        // Banner con l'ultimo messaggio della chat (sotto stalli e avvisi)
+        // Banner messaggio fissato + ultimo messaggio della chat (sotto stalli e avvisi)
         const chatHist = p.notesHistory || [];
         if (chatHist.length > 0) {
+          const clip = (t, n) => { let x = String(t || '').replace(/\s+/g, ' ').trim(); return x.length > n ? x.substring(0, n) + '…' : x; };
+          const openKey = `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')"`;
+          const pinnedMsg = chatHist.find(m => m.pinned);
           const lastMsg = chatHist[chatHist.length - 1];
-          let lastPreview = String(lastMsg.text || '').replace(/\s+/g, ' ').trim();
-          if (lastPreview.length > 140) lastPreview = lastPreview.substring(0, 140) + '…';
-          bannersHTML += `
-            <div class="alert-banner alert-lastmsg" role="button" tabindex="0" aria-label="Apri la chat della pratica" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')">
-              <span style="flex: 1; min-width: 0;">
-                💬 <strong>Ultimo messaggio</strong> (${esc(lastMsg.dept)} · ${esc(lastMsg.date)}): <span class="lastmsg-text">"${esc(lastPreview)}"</span>
-              </span>
-            </div>
-          `;
+          if (pinnedMsg) {
+            bannersHTML += `
+              <div class="alert-banner alert-pinned" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
+                <span style="flex: 1; min-width: 0;">
+                  📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${esc(clip(pinnedMsg.text, 220))}"</span>
+                </span>
+              </div>
+            `;
+          }
+          if (!lastMsg.pinned) {
+            bannersHTML += `
+              <div class="alert-banner alert-lastmsg" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
+                <span style="flex: 1; min-width: 0;">
+                  💬 <strong>Ultimo messaggio</strong> (${esc(lastMsg.dept)} · ${esc(lastMsg.date)}): <span class="lastmsg-text">"${esc(clip(lastMsg.text, 140))}"</span>
+                </span>
+              </div>
+            `;
+          }
         }
 
         let phaseDisplayLabel = currentDeptLabel;
@@ -1437,8 +1451,14 @@
         const lastOf = (arr) => arr[arr.length - 1];
         const commentBox = (m) => `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>`;
 
-        if (t.isManual && t.chatHistory && t.chatHistory.length > 0) displayContentHTML += commentBox(lastOf(t.chatHistory));
-        else if (!t.isManual && t.todoNotes && t.todoNotes.length > 0) displayContentHTML += commentBox(lastOf(t.todoNotes));
+        const pinBox = (m) => `<div class="todo-text-block" style="font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;">📌 <strong style="color: var(--gold-light);">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>`;
+        const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
+        if (chatArr.length > 0) {
+          const pinnedMsg = chatArr.find(m => m.pinned);
+          const lastMsg = lastOf(chatArr);
+          if (pinnedMsg) displayContentHTML += pinBox(pinnedMsg);
+          if (!lastMsg.pinned) displayContentHTML += commentBox(lastMsg);
+        }
 
         const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
 
@@ -1728,6 +1748,22 @@
 
     function closeTodoChatModal() { $('todoChatModal').classList.add('hidden'); }
 
+    async function togglePinTodoChat(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory) return;
+      pinToggle(item.chatHistory, index);
+      await saveData();
+      renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
+    }
+
+    async function togglePinPraticaTodo(praticaId, index) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.todoNotes) return;
+      pinToggle(p.todoNotes, index);
+      await saveData();
+      renderTodoChatMessages(null, pratiche.find(x => x.id === praticaId) || p);
+    }
+
     function renderTodoChatMessages(manualItem, praticaItem) {
       const box = $('todoChatMessages');
       box.innerHTML = '';
@@ -1741,23 +1777,16 @@
         return;
       }
 
+      const mid = manualItem ? String(manualItem.id).replace(/['"\\]/g, '') : '';
       let html = '';
-      messagesArray.forEach((msg, index) => {
-        const mid = manualItem ? String(manualItem.id).replace(/['"\\]/g, '') : '';
-        const editCall = manualItem ? `openEditTodoChatMessageModal('${mid}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`;
-        const delCall = manualItem ? `confirmDeleteTodoChatMessage('${mid}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
-        html += `
-          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${esc(msg.date)}</span>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${editCall}">✏️ Modifica</button>
-                <button type="button" aria-label="Elimina messaggio" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
-              </div>
-            </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(msg.text)}</div>
-          </div>
-        `;
+      pinnedFirstOrder(messagesArray).forEach(index => {
+        const msg = messagesArray[index];
+        html += chatMsgCard({
+          dept: '', date: msg.date, text: msg.text, pinned: !!msg.pinned,
+          pinCall: manualItem ? `togglePinTodoChat('${mid}', ${index})` : `togglePinPraticaTodo('${praticaItem.id}', ${index})`,
+          editCall: manualItem ? `openEditTodoChatMessageModal('${mid}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`,
+          delCall: manualItem ? `confirmDeleteTodoChatMessage('${mid}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`
+        });
       });
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
@@ -1953,12 +1982,9 @@
       if (!activeItem) return;
       const deptLabel = ROUTE_STEPS[idx].label;
 
-      if (isStepLocked(activeItem, idx) && !stepHasMarker(activeItem, deptLabel)) {
-        const cur = ROUTE_STEPS[activeItem.currentStepIdx || 0].label;
-        showToast(`🔒 "${deptLabel}" non è ancora attivo: la pratica è ferma su "${cur}". Si attiva solo dopo l'ok dei reparti precedenti.`);
-        return;
-      }
+      const chatOnly = isStepLocked(activeItem, idx) && !stepHasMarker(activeItem, deptLabel);
       selectedStepIdx = idx;
+      ['btnStall', 'btnSendBack', 'btnBlock'].forEach(b => { $(b).style.display = chatOnly ? 'none' : 'block'; });
 
       if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
         activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
@@ -1999,6 +2025,11 @@
         btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
       }
 
+      if (chatOnly) {
+        const cur = ROUTE_STEPS[activeItem.currentStepIdx || 0].label;
+        ['btnApproveNext', 'btnExecuteFinal', 'btnGoCurrent', 'btnResolveDept'].forEach(b => { $(b).style.display = 'none'; });
+        $('stepClickSub').innerText = `🔒 "${deptLabel}" non è ancora attivo (la pratica è su "${cur}"). Per ora puoi solo scrivere in chat.`;
+      }
       $('stepClickModal').classList.remove('hidden');
     }
 
@@ -2259,32 +2290,66 @@
       renderChatMessages();
     }
 
+    // Scheda messaggio condivisa dalle chat (con pulsante Fissa)
+    function chatMsgCard(o) {
+      const boxStyle = o.pinned
+        ? 'border: 2px solid var(--gold-light); background: #2e1a05; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 12px rgba(246,224,94,0.35);'
+        : 'border: 1.5px solid var(--border-color); background: #1c0507;';
+      return `
+        <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; color: var(--gold-light); font-weight: bold;">${o.pinned ? '📌 FISSATO · ' : ''}${o.dept ? esc(o.dept) + ' · ' : ''}${esc(o.date)}</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.pinCall}">${o.pinned ? '📌 Stacca' : '📌 Fissa'}</button>
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.editCall}">✏️ Modifica</button>
+              <button type="button" aria-label="Elimina messaggio" onclick="${o.delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+            </div>
+          </div>
+          <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(o.text)}</div>
+        </div>`;
+    }
+
+    // Un solo messaggio fissato per chat: fissarne un altro sostituisce il precedente
+    function pinToggle(arr, index) {
+      const m = arr[index];
+      if (!m) return;
+      const was = !!m.pinned;
+      arr.forEach(x => { delete x.pinned; });
+      if (!was) m.pinned = true;
+    }
+
+    function pinnedFirstOrder(list) {
+      const order = list.map((_, i) => i);
+      const pi = list.findIndex(m => m.pinned);
+      if (pi >= 0) { order.splice(order.indexOf(pi), 1); order.unshift(pi); }
+      return order;
+    }
+
+    async function togglePinFlussi(index) {
+      const p = activeItem;
+      if (!p || !p.notesHistory) return;
+      pinToggle(p.notesHistory, index);
+      await saveData();
+      renderChatMessages();
+    }
+
     function renderChatMessages() {
       const box = $('chatMessages');
       box.innerHTML = '';
       if (!activeItem) return;
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      const list = activeItem.notesHistory;
 
-      if (activeItem.notesHistory.length === 0) {
+      if (list.length === 0) {
         box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessun messaggio in questa chat.</div>`;
         return;
       }
 
       let html = '';
-      activeItem.notesHistory.forEach((n, index) => {
-        html += `
-          <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px; word-break: break-word;">
-            <div style="display: flex; justify-content: space-between; color: var(--gold-light); font-weight: bold; margin-bottom: 6px;">
-              <span>${esc(n.dept)}</span>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <span style="font-size: 12px; color: var(--text-muted);">${esc(n.date)}</span>
-                <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditFlussiChatMsgModal(${index})">✏️ Modifica</button>
-                <button type="button" aria-label="Elimina messaggio" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
-              </div>
-            </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(n.text)}</div>
-          </div>
-        `;
+      pinnedFirstOrder(list).forEach(index => {
+        const n = list[index];
+        html += chatMsgCard({ dept: n.dept, date: n.date, text: n.text, pinned: !!n.pinned,
+          pinCall: `togglePinFlussi(${index})`, editCall: `openEditFlussiChatMsgModal(${index})`, delCall: `confirmDeleteChatMsg(${index})` });
       });
       box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
