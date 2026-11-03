@@ -238,6 +238,8 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
         <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+        <button class="btn-gold stepact" id="btnGoCurrent" style="display:none; color:#000;" onclick="goToCurrentStep()">👉 Vai al reparto attuale</button>
+        <button class="btn-sm stepact" id="btnResolveDept" style="display:none; background: var(--success-green);" onclick="resolveDeptMarkers()">✅ Risolvi stalli / avvisi di questo reparto</button>
         <button class="btn-sm stepact" style="background: #a855f7;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
         <button class="btn-sm stepact" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
         <button class="btn-sm stepact" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
@@ -1215,7 +1217,10 @@
                   <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
                   <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="archivePratica('${p.id}')">📦 Archivia</button>
                 </div>
-                <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  ${stepIdx < 5 ? `<button type="button" class="btn-gold" style="background: var(--success-green); color:#fff;" onclick="approveCurrent('${p.id}')">▶️ Approva "${esc(currentDeptLabel)}" e manda avanti</button>` : ''}
+                  <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+                </div>
               </div>
             </div>
           ` : `
@@ -1970,6 +1975,21 @@
       btnApprove.style.display = 'none';
       btnExecuteFinal.style.display = 'none';
 
+      const curIdx = activeItem.currentStepIdx || 0;
+      const curLabel = ROUTE_STEPS[curIdx].label;
+      const inParallel = curIdx >= 5 && idx >= 5;
+      $('btnGoCurrent').style.display = 'none';
+      $('btnResolveDept').style.display = stepHasMarker(activeItem, deptLabel) ? 'block' : 'none';
+      if (!isCurrentStep && !inParallel) {
+        if (curIdx < 5) {
+          $('stepClickSub').innerText = `⚠️ La pratica è attualmente su "${curLabel}". Il pulsante per mandarla avanti è nel reparto attuale.`;
+          $('btnGoCurrent').innerText = `👉 Vai a "${curLabel}" (per mandare avanti)`;
+          $('btnGoCurrent').style.display = 'block';
+        } else {
+          $('stepClickSub').innerText = `La pratica è nella fase parallela (Promo, PR, Logistics): conferma ESEGUITO dai rispettivi pallini.`;
+        }
+      }
+
       if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
         btnExecuteFinal.style.display = 'block';
@@ -1980,6 +2000,38 @@
       }
 
       $('stepClickModal').classList.remove('hidden');
+    }
+
+    function goToCurrentStep() {
+      const p = activeItem;
+      if (!p) return;
+      const id = p.id, cur = p.currentStepIdx || 0;
+      closeStepClickModal();
+      openStepClickModal(id, cur);
+    }
+
+    async function resolveDeptMarkers() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const label = ROUTE_STEPS[selectedStepIdx].label;
+      activeItem.statusMessages = (activeItem.statusMessages || []).filter(st => st.dept !== label);
+      activeItem.alertsList = (activeItem.alertsList || []).filter(al => al.target !== label);
+      activeItem.mailDepts = (activeItem.mailDepts || []).filter(d => d !== label);
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({ date: getNow(), dept: label, text: `✅ Risolti stalli/avvisi su ${label}.` });
+      closeStepClickModal();
+      await saveData();
+    }
+
+    // Pulsante rapido sulla card: approva il reparto attuale e manda avanti
+    async function approveCurrent(id) {
+      const p = pratiche.find(x => x.id === id);
+      if (!p) return;
+      const cur = p.currentStepIdx || 0;
+      if (cur >= 5) return;
+      if (!confirm(`Approvare "${ROUTE_STEPS[cur].label}" e mandare avanti la pratica?`)) return;
+      activeItem = p;
+      selectedStepIdx = cur;
+      await approveAndNext();
     }
 
     function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
@@ -2127,6 +2179,7 @@
 
       if (activeItem.statusMessages) activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
       if (activeItem.mailDepts) activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
+      if (activeItem.alertsList) activeItem.alertsList = activeItem.alertsList.filter(al => al.target !== deptLabel);
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
