@@ -1,616 +1,616 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Golden Ticket Company - Workflow & To-Do Manager</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golden Ticket Company - To-Do & Workflow Manager</title>
 
- <style>
- :root {
- --bg-dark: #2a080c; --card-bg: #1c0507; --border-color: #5c1b22;
- --gold-main: #d69e2e; --gold-light: #f6e05e; --text-main: #e2e8f0; --text-muted: #a0aec0;
- --danger-red: #e53e3e; --warning-amber: #dd6b20; --success-green: #38a169; --status-fuchsia: #d946ef;
- }
- * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
- body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
+  <style>
+  :root {
+    --bg-dark: #2a080c; --card-bg: #1c0507; --border-color: #5c1b22;
+    --gold-main: #d69e2e; --gold-light: #f6e05e; --text-main: #e2e8f0; --text-muted: #a0aec0;
+    --danger-red: #e53e3e; --warning-amber: #dd6b20; --success-green: #38a169; --status-fuchsia: #d946ef;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
+  body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
 
- header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
- .brand { display: flex; align-items: center; gap: 14px; }
- .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
- .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+  header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
+  .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
 
- .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
- .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
- .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
+  .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
+  .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+  .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
 
- .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+  .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
 
- .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
- .search-input, .select-filter { background: var(--card-bg); border: 1.5px solid var(--border-color); color: #fff; padding: 14px; border-radius: 12px; font-size: 16px; outline: none; }
- .search-input { flex: 1; min-width: 220px; }
- .select-filter { min-width: 180px; }
- .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+  .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-input, .select-filter { background: var(--card-bg); border: 1.5px solid var(--border-color); color: #fff; padding: 14px; border-radius: 12px; font-size: 16px; outline: none; }
+  .search-input { flex: 1; min-width: 220px; }
+  .select-filter { min-width: 180px; }
+  .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
 
- .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
- .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
- .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
+  .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
+  .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
+  .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
 
- .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
- .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
- .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
- .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
- .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
+  .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
+  .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
+  .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+  .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
 
- .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+  .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
- .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
- .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
- .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
- #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
- .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
- .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
+  .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
+  .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
+  .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
+  .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
+  .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
 
- .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
- .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
- .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
- .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
- .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
- .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+  .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
+  .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
+  .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+  .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
+  .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
+  .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
 
- @keyframes pulse-warn {
- 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
- 70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
- 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
- }
+  @keyframes pulse-warn {
+    0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+  }
 
- .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 16px; position: relative; }
- .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
+  .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 16px; position: relative; }
+  .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
 
- .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
- .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
- .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
- .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
- .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
- .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
- .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
+  .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
+  .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
+  .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+  .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+  .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
+  .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
+  .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
- .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
- .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
- .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
+  .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
+  .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
+  .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
 
- .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
- .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
- .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
- .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
- .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
- .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
+  .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+  .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
+  .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
+  .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
+  .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+  .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
 
- .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
- .modal-overlay.hidden { display: none; }
- .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
- .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
- .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
- .form-group { margin-bottom: 16px; }
- .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
- .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; }
- .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.hidden { display: none; }
+  .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+  .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; }
+  .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
 
- body.logged-out .link-item-card button { display: none; }
- #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
- </style>
+  body.logged-out .link-item-card button { display: none; }
+  #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
+  </style>
 
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
- <div id="dataBanner" role="alert"></div>
- <div id="toast" role="status"></div>
+  <div id="dataBanner" role="alert"></div>
+  <div id="toast" role="status"></div>
 
- <header>
- <div class="brand">
- <div class="logo-badge">GT</div>
- <div class="brand-title">GOLDEN TICKET CLOUD</div>
- </div>
- <div class="nav-tabs">
- <button class="tab-btn active" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
- <button class="tab-btn" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
- <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
- <button class="tab-btn" id="btnBackup" style="display:none;" onclick="exportBackup()" title="Scarica una copia di tutti i dati">💾 Backup</button>
- <button class="tab-btn" id="btnAuth" onclick="onAuthButton()">🔒 Accedi</button>
- </div>
- </header>
+  <header>
+    <div class="brand">
+      <div class="logo-badge">GT</div>
+      <div class="brand-title">GOLDEN TICKET CLOUD</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
+      <button class="tab-btn" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
+      <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
+      <button class="tab-btn" id="btnBackup" style="display:none;" onclick="exportBackup()" title="Scarica una copia di tutti i dati">💾 Backup</button>
+      <button class="tab-btn" id="btnAuth" onclick="onAuthButton()">🔒 Accedi</button>
+    </div>
+  </header>
 
- <div class="container" role="main">
- <!-- SCHERMATA DI ACCESSO -->
- <div id="loginGate" style="display:none;">
- <div class="card" style="max-width: 420px; margin: 40px auto;">
- <div class="client-title-main" style="margin-bottom: 6px;">🔒 Accesso riservato</div>
- <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;">Flussi e To-Do List sono visibili solo al team. I Link Utili restano consultabili da tutti.</p>
- <form onsubmit="doLogin(event)">
- <div class="form-group">
- <label for="loginEmail">Email</label>
- <input type="email" id="loginEmail" class="form-control" autocomplete="username" required>
- </div>
- <div class="form-group">
- <label for="loginPassword">Password</label>
- <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
- </div>
- <div id="loginError" role="alert" style="display:none; color:#fc8181; font-size:14px; font-weight:bold; margin-bottom:12px;"></div>
- <button type="submit" class="btn-gold" id="loginSubmit" style="width:100%;">Accedi</button>
- </form>
- </div>
- </div>
+  <div class="container" role="main">
+    <!-- SCHERMATA DI ACCESSO -->
+    <div id="loginGate" style="display:none;">
+      <div class="card" style="max-width: 420px; margin: 40px auto;">
+        <div class="client-title-main" style="margin-bottom: 6px;">🔒 Accesso riservato</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;">To-Do List e Flussi sono visibili solo al team. I Link Utili restano consultabili da tutti.</p>
+        <form onsubmit="doLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-control" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
+          </div>
+          <div id="loginError" role="alert" style="display:none; color:#fc8181; font-size:14px; font-weight:bold; margin-bottom:12px;"></div>
+          <button type="submit" class="btn-gold" id="loginSubmit" style="width:100%;">Accedi</button>
+        </form>
+      </div>
+    </div>
 
- <!-- SEZIONE FLUSSI -->
- <div id="sectionFlussi">
- <div class="toolbar">
- <input type="text" id="searchInput" class="search-input" aria-label="Cerca spettacolo o teatro" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
- <select id="filterShowTitle" class="select-filter" aria-label="Filtra per spettacolo" onchange="renderApp()">
- <option value="ALL">🎭 Tutti gli Spettacoli</option>
- </select>
- <select id="filterDept" class="select-filter" aria-label="Filtra per reparto" onchange="renderApp()">
- <option value="ALL">🏢 Tutti i Reparti</option>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
- </div>
+    <!-- SEZIONE TO-DO LIST (DEFAULT PRINCIPALE) -->
+    <div id="sectionTodo">
+      <div class="toolbar">
+        <input type="text" id="searchTodoInput" class="search-input" aria-label="Cerca task o attività" oninput="renderApp()" placeholder="Cerca task o attività...">
+        <select id="filterTodoDept" class="select-filter" aria-label="Filtra task per reparto" onchange="renderApp()">
+          <option value="ALL">Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile interno" onchange="renderTodoList()">
+          <option value="ALL">👤 Tutti i Responsabili Interni</option>
+        </select>
+        <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
+      </div>
 
- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
- <div style="display: flex; gap: 8px;">
- <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
- <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllCards()">📁 Compatta Tutto</button>
- </div>
- <div>
- <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
- </div>
- </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllTodos()">📂 Espandi Tutto</button>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllTodos()">📁 Compatta Tutto</button>
+        </div>
+        <div>
+          <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
+        </div>
+      </div>
 
- <div id="feedList"></div>
- </div>
+      <div id="todoList"></div>
 
- <!-- SEZIONE TO-DO LIST -->
- <div id="sectionTodo" style="display: none;">
- <div class="toolbar">
- <input type="text" id="searchTodoInput" class="search-input" aria-label="Cerca task o attività" oninput="renderApp()" placeholder="Cerca task o attività...">
- <select id="filterTodoDept" class="select-filter" aria-label="Filtra task per reparto" onchange="renderApp()">
- <option value="ALL">Tutti i Reparti</option>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile" onchange="renderTodoList()">
- <option value="ALL">👤 Tutti i Responsabili</option>
- </select>
- <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
- </div>
+      <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+        <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
+          <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
+            📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
+          </div>
+          <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
+        </div>
+        <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
+      </div>
+    </div>
 
- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
- <div style="display: flex; gap: 8px;">
- <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllTodos()">📂 Espandi Tutto</button>
- <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllTodos()">📁 Compatta Tutto</button>
- </div>
- <div>
- <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
- </div>
- </div>
+    <!-- SEZIONE FLUSSI -->
+    <div id="sectionFlussi" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchInput" class="search-input" aria-label="Cerca spettacolo o teatro" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterShowTitle" class="select-filter" aria-label="Filtra per spettacolo" onchange="renderApp()">
+          <option value="ALL">🎭 Tutti gli Spettacoli</option>
+        </select>
+        <select id="filterDept" class="select-filter" aria-label="Filtra per reparto" onchange="renderApp()">
+          <option value="ALL">🏢 Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
+      </div>
 
- <div id="todoList"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllCards()">📁 Compatta Tutto</button>
+        </div>
+        <div>
+          <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
+        </div>
+      </div>
 
- <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
- <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
- <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
- 📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
- </div>
- <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
- </div>
- <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
- </div>
- </div>
+      <div id="feedList"></div>
+    </div>
 
- <!-- SEZIONE LINK UTILI -->
- <div id="sectionLinks" style="display: none;">
- <div class="toolbar">
- <input type="text" id="searchLinkInput" class="search-input" aria-label="Cerca link" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
- <button class="btn-gold" onclick="openLinkModal()">+ Aggiungi Link</button>
- </div>
- <div id="linksListContainer"></div>
- </div>
- </div>
+    <!-- SEZIONE LINK UTILI -->
+    <div id="sectionLinks" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchLinkInput" class="search-input" aria-label="Cerca link" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
+        <button class="btn-gold" onclick="openLinkModal()">+ Aggiungi Link</button>
+      </div>
+      <div id="linksListContainer"></div>
+    </div>
+  </div>
 
- <!-- MODAL: GESTIONE REPARTO -->
- <div class="modal-overlay hidden" id="stepClickModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeStepClickModal()">✕</button>
- </div>
- <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
- <div style="display: flex; flex-direction: column; gap: 12px;">
- <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
- <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
- <button class="btn-sm stepact" style="background: #a855f7; color:#fff;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
- <button class="btn-sm stepact" style="background: var(--warning-amber); color:#fff;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
- <button class="btn-sm stepact" style="background: var(--danger-red); color:#fff;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
- <button class="btn-sm stepact" style="background: #2563eb; color:#fff;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
- </div>
- </div>
- </div>
+  <!-- MODAL: GESTIONE REPARTO -->
+  <div class="modal-overlay hidden" id="stepClickModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStepClickModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
+        <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+        <button class="btn-sm stepact" style="background: #a855f7; color:#fff;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
+        <button class="btn-sm stepact" style="background: var(--warning-amber); color:#fff;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
+        <button class="btn-sm stepact" style="background: var(--danger-red); color:#fff;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
+        <button class="btn-sm stepact" style="background: #2563eb; color:#fff;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
+      </div>
+    </div>
+  </div>
 
- <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
- <div class="modal-overlay hidden" id="quickChatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
- </div>
- <form onsubmit="saveQuickChatFromStep(event)">
- <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
- <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
- <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
- </div>
- <div class="form-group">
- <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
- <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Invia Messaggio in Chat</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
+  <div class="modal-overlay hidden" id="quickChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
+      </div>
+      <form onsubmit="saveQuickChatFromStep(event)">
+        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+        </div>
+        <div class="form-group">
+          <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
+          <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Invia Messaggio in Chat</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL RIMANDA INDIETRO -->
- <div class="modal-overlay hidden" id="sendBackModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeSendBackModal()">✕</button>
- </div>
- <form onsubmit="saveSendBackAction(event)">
- <div class="form-group">
- <label for="sendBackTargetSelect">A quale Reparto vuoi rimandare la pratica?</label>
- <select id="sendBackTargetSelect" class="form-control"></select>
- </div>
- <div class="form-group">
- <label for="sendBackNoteInput">Motivo del rimando / Cosa bisogna rivedere *</label>
- <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Conferma Rimando</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL RIMANDA INDIETRO -->
+  <div class="modal-overlay hidden" id="sendBackModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeSendBackModal()">✕</button>
+      </div>
+      <form onsubmit="saveSendBackAction(event)">
+        <div class="form-group">
+          <label for="sendBackTargetSelect">A quale Reparto vuoi rimandare la pratica?</label>
+          <select id="sendBackTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="sendBackNoteInput">Motivo del rimando / Cosa bisogna rivedere *</label>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Conferma Rimando</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL STALLO -->
- <div class="modal-overlay hidden" id="statusModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeStatusModal()">✕</button>
- </div>
- <form onsubmit="saveDepartmentStatus(event)">
- <div class="form-group" id="statusTargetGroup">
- <label for="statusTargetSelect">Invia Stallo a quale Reparto?</label>
- <select id="statusTargetSelect" class="form-control"></select>
- </div>
- <div class="form-group">
- <label for="statusNoteInput">Motivo dello Stallo / Attesa *</label>
- <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Conferma Stallo</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL STALLO -->
+  <div class="modal-overlay hidden" id="statusModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStatusModal()">✕</button>
+      </div>
+      <form onsubmit="saveDepartmentStatus(event)">
+        <div class="form-group" id="statusTargetGroup">
+          <label for="statusTargetSelect">Invia Stallo a quale Reparto?</label>
+          <select id="statusTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="statusNoteInput">Motivo dello Stallo / Attesa *</label>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Conferma Stallo</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL BLOCCA -->
- <div class="modal-overlay hidden" id="interveneModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeInterveneModal()">✕</button>
- </div>
- <form onsubmit="confirmInterveneAction(event)">
- <div class="form-group">
- <label for="interveneNote">Motivo del Blocco / Annullamento *</label>
- <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL BLOCCA -->
+  <div class="modal-overlay hidden" id="interveneModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeInterveneModal()">✕</button>
+      </div>
+      <form onsubmit="confirmInterveneAction(event)">
+        <div class="form-group">
+          <label for="interveneNote">Motivo del Blocco / Annullamento *</label>
+          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL PRATICHE ARCHIVIATE -->
- <div class="modal-overlay hidden" id="archiveModal">
- <div class="modal-card" style="max-width: 700px;">
- <div class="modal-header">
- <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeArchiveModal()">✕</button>
- </div>
- <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate o annullate, riaprirle oppure eliminarle definitivamente.</p>
- <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL PRATICHE ARCHIVIATE -->
+  <div class="modal-overlay hidden" id="archiveModal">
+    <div class="modal-card" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeArchiveModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate o annullate, riaprirle oppure eliminarle definitivamente.</p>
+      <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <!-- MODAL NUOVA PRATICA -->
- <div class="modal-overlay hidden" id="newModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Nuova Pratica Spettacolo</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeNewModal()">✕</button>
- </div>
- <form onsubmit="savePratica(event)">
- <div class="form-group">
- <label for="formClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
- <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
- </div>
- <div class="form-group">
- <label for="formTitle">Titolo dello Spettacolo *</label>
- <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
- </div>
- <div class="form-group">
- <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
- <input type="date" id="formShowDate" class="form-control">
- </div>
- <div class="form-group">
- <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
- <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
- </div>
- <div class="form-group">
- <label for="formOwnerInt">Referente Interno (Opzionale)</label>
- <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Crea Pratica</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL NUOVA PRATICA -->
+  <div class="modal-overlay hidden" id="newModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Pratica Spettacolo</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeNewModal()">✕</button>
+      </div>
+      <form onsubmit="savePratica(event)">
+        <div class="form-group">
+          <label for="formClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
+        </div>
+        <div class="form-group">
+          <label for="formTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
+        </div>
+        <div class="form-group">
+          <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="formShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Crea Pratica</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA PRATICA -->
- <div class="modal-overlay hidden" id="editModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Dati Pratica</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditModal()">✕</button>
- </div>
- <form onsubmit="updatePratica(event)">
- <input type="hidden" id="editId">
- <div class="form-group">
- <label for="editClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
- <input type="text" id="editClient" class="form-control form-control-lg" required>
- </div>
- <div class="form-group">
- <label for="editTitle">Titolo dello Spettacolo *</label>
- <input type="text" id="editTitle" class="form-control" required>
- </div>
- <div class="form-group">
- <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
- <input type="date" id="editShowDate" class="form-control">
- </div>
- <div class="form-group">
- <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
- <input type="text" id="editOwnerExt" class="form-control">
- </div>
- <div class="form-group">
- <label for="editOwnerInt">Referente Interno (Opzionale)</label>
- <input type="text" id="editOwnerInt" class="form-control">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifiche</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL MODIFICA PRATICA -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Dati Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditModal()">✕</button>
+      </div>
+      <form onsubmit="updatePratica(event)">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="editClient" class="form-control form-control-lg" required>
+        </div>
+        <div class="form-group">
+          <label for="editTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="editTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="editShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="editOwnerExt" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="editOwnerInt" class="form-control">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Modifiche</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL TASK MANUALE -->
- <div class="modal-overlay hidden" id="todoModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Aggiungi Task Manuale</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeTodoModal()">✕</button>
- </div>
- <form onsubmit="saveManualTodo(event)">
- <div class="form-group">
- <label for="todoTitle">Titolo Attività *</label>
- <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
- </div>
- <div class="form-group">
- <label for="todoSit">Reparto di Riferimento *</label>
- <select id="todoSit" class="form-control" required>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- </div>
- <div class="form-group">
- <label for="todoAssignee">Chi deve farlo (Assegnato a)</label>
- <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
- </div>
- <div class="form-group">
- <label for="todoDeadline">Scadenza - Entro il (Opzionale)</label>
- <input type="date" id="todoDeadline" class="form-control">
- </div>
- <div class="form-group">
- <label for="todoAction">Azione / Descrizione generale (Opzionale)</label>
- <input type="text" id="todoAction" class="form-control" placeholder="Es. Inviare materiali con link...">
- </div>
- <div class="form-group">
- <label for="todoSubtasksInput">Elenco azioni da fare (Digita un'azione per riga o numerate: 1. ... 2. ...)</label>
- <textarea id="todoSubtasksInput" class="form-control" rows="4" placeholder="1. Contattare il referente&#10;2. Inviare preventivo&#10;3. Attendere conferma"></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Aggiungi Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveManualTodo(event)">
+        <div class="form-group">
+          <label for="todoTitle">Titolo Attività *</label>
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
+        </div>
+        <div class="form-group">
+          <label for="todoSit">Reparto di Riferimento *</label>
+          <select id="todoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option>
+            <option value="Tech Serv">Tech Serv</option>
+            <option value="Admin">Admin</option>
+            <option value="Deal">Deal</option>
+            <option value="Legal">Legal</option>
+            <option value="Promo">Promo</option>
+            <option value="PR">PR</option>
+            <option value="Logistics">Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="todoAssignee">Chi deve farlo (Assegnato a - Referente Interno)</label>
+          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
+        </div>
+        <div class="form-group">
+          <label for="todoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="todoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="todoAction">Azione / Descrizione generale (Opzionale)</label>
+          <input type="text" id="todoAction" class="form-control" placeholder="Es. Inviare materiali con link...">
+        </div>
+        <div class="form-group">
+          <label for="todoSubtasksInput">Elenco azioni da fare (Digita un'azione per riga o numerate: 1. ... 2. ...)</label>
+          <textarea id="todoSubtasksInput" class="form-control" rows="4" placeholder="1. Contattare il referente&#10;2. Inviare preventivo&#10;3. Attendere conferma"></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA TASK -->
- <div class="modal-overlay hidden" id="editTodoModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Task Manuale</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditTodoModal()">✕</button>
- </div>
- <form onsubmit="saveEditedManualTodo(event)">
- <input type="hidden" id="editTodoId">
- <div class="form-group">
- <label for="editTodoTitle">Titolo Attività *</label>
- <input type="text" id="editTodoTitle" class="form-control" required>
- </div>
- <div class="form-group">
- <label for="editTodoSit">Reparto di Riferimento *</label>
- <select id="editTodoSit" class="form-control" required>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- </div>
- <div class="form-group">
- <label for="editTodoAssignee">Chi deve farlo (Assegnato a)</label>
- <input type="text" id="editTodoAssignee" class="form-control">
- </div>
- <div class="form-group">
- <label for="editTodoDeadline">Scadenza - Entro il (Opzionale)</label>
- <input type="date" id="editTodoDeadline" class="form-control">
- </div>
- <div class="form-group">
- <label for="editTodoAction">Azione / Note generali</label>
- <textarea id="editTodoAction" class="form-control" rows="2"></textarea>
- </div>
- <div class="form-group">
- <label for="editTodoSubtasksInput">Elenco azioni da fare (Una per riga)</label>
- <textarea id="editTodoSubtasksInput" class="form-control" rows="4" placeholder="1. ...&#10;2. ..."></textarea>
- </div>
- <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
- <input type="checkbox" id="editTodoIsResolved" style="width: 18px; height: 18px; cursor: pointer;">
- <label for="editTodoIsResolved" style="margin: 0; cursor: pointer; color: var(--gold-light); font-size: 14px;">Segna come RISOLTO</label>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifiche</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL MODIFICA TASK -->
+  <div class="modal-overlay hidden" id="editTodoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedManualTodo(event)">
+        <input type="hidden" id="editTodoId">
+        <div class="form-group">
+          <label for="editTodoTitle">Titolo Attività *</label>
+          <input type="text" id="editTodoTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editTodoSit">Reparto di Riferimento *</label>
+          <select id="editTodoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option>
+            <option value="Tech Serv">Tech Serv</option>
+            <option value="Admin">Admin</option>
+            <option value="Deal">Deal</option>
+            <option value="Legal">Legal</option>
+            <option value="Promo">Promo</option>
+            <option value="PR">PR</option>
+            <option value="Logistics">Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editTodoAssignee">Chi deve farlo (Assegnato a - Referente Interno)</label>
+          <input type="text" id="editTodoAssignee" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="editTodoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoAction">Azione / Note generali</label>
+          <textarea id="editTodoAction" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editTodoSubtasksInput">Elenco azioni da fare (Una per riga)</label>
+          <textarea id="editTodoSubtasksInput" class="form-control" rows="4" placeholder="1. ...&#10;2. ..."></textarea>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <input type="checkbox" id="editTodoIsResolved" style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="editTodoIsResolved" style="margin: 0; cursor: pointer; color: var(--gold-light); font-size: 14px;">Segna come RISOLTO</label>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Modifiche</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL AGGIUNGI / MODIFICA LINK UTILE -->
- <div class="modal-overlay hidden" id="linkModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeLinkModal()">✕</button>
- </div>
- <form onsubmit="saveLinkItem(event)">
- <input type="hidden" id="editLinkId">
- <div class="form-group">
- <label for="linkTitleInput">Titolo *</label>
- <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
- </div>
- <div class="form-group">
- <label for="linkDescInput">Descrizione *</label>
- <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
- </div>
- <div class="form-group">
- <label for="linkUrlInput">Link (URL) *</label>
- <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Link</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL AGGIUNGI / MODIFICA LINK UTILE -->
+  <div class="modal-overlay hidden" id="linkModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeLinkModal()">✕</button>
+      </div>
+      <form onsubmit="saveLinkItem(event)">
+        <input type="hidden" id="editLinkId">
+        <div class="form-group">
+          <label for="linkTitleInput">Titolo *</label>
+          <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
+        </div>
+        <div class="form-group">
+          <label for="linkDescInput">Descrizione *</label>
+          <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="linkUrlInput">Link (URL) *</label>
+          <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Link</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL CHAT TASK -->
- <div class="modal-overlay hidden" id="todoChatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeTodoChatModal()">✕</button>
- </div>
- <input type="hidden" id="todoChatId">
- <input type="hidden" id="todoChatPraticaId">
- <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
- <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
- <div class="form-group" style="margin-bottom: 10px;">
- <label for="todoChatNewText" style="display:none;">Nuovo messaggio</label>
- <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
- </div>
- <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
- <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
- <div style="flex:1;"></div>
- <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
- </div>
- </div>
- <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL CHAT TASK -->
+  <div class="modal-overlay hidden" id="todoChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoChatModal()">✕</button>
+      </div>
+      <input type="hidden" id="todoChatId">
+      <input type="hidden" id="todoChatPraticaId">
+      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label for="todoChatNewText" style="display:none;">Nuovo messaggio</label>
+          <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
+          <div style="flex:1;"></div>
+          <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
+        </div>
+      </div>
+      <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <!-- MODAL CONSULTA CHAT -->
- <div class="modal-overlay hidden" id="chatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeChatModal()">✕</button>
- </div>
- <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
- ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
- </div>
- <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL CONSULTA CHAT -->
+  <div class="modal-overlay hidden" id="chatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeChatModal()">✕</button>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+        ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
+      </div>
+      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA MESSAGGIO -->
- <div class="modal-overlay hidden" id="editChatMsgModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Messaggio / Nota</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditChatMsgModal()">✕</button>
- </div>
- <form onsubmit="saveEditedChatMsg(event)">
- <input type="hidden" id="editChatType">
- <input type="hidden" id="editChatManualId">
- <input type="hidden" id="editChatPraticaId">
- <input type="hidden" id="editChatIndex">
- <div class="form-group">
- <label for="editChatText">Testo della Nota / Messaggio *</label>
- <textarea id="editChatText" class="form-control" rows="4" required></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifica</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL MODIFICA MESSAGGIO -->
+  <div class="modal-overlay hidden" id="editChatMsgModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Messaggio / Nota</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditChatMsgModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedChatMsg(event)">
+        <input type="hidden" id="editChatType">
+        <input type="hidden" id="editChatManualId">
+        <input type="hidden" id="editChatPraticaId">
+        <input type="hidden" id="editChatIndex">
+        <div class="form-group">
+          <label for="editChatText">Testo della Nota / Messaggio *</label>
+          <textarea id="editChatText" class="form-control" rows="4" required></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;">
+          <button type="submit" class="btn-gold">Salva Modifica</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <script>
+  <script>
     // INIZIALIZZAZIONE SUPABASE
     const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
@@ -724,7 +724,7 @@
       currentUserEmail = email;
       document.body.classList.remove('logged-out');
       document.getElementById('loginGate').style.display = 'none';
-      document.getElementById('sectionFlussi').style.display = 'block';
+      document.getElementById('sectionTodo').style.display = 'block';
       document.getElementById('btnAuth').innerText = `🔓 Esci (${email.split('@')[0]})`;
       const btnBackup = document.getElementById('btnBackup');
       if (btnBackup) btnBackup.style.display = 'inline-block';
@@ -734,8 +734,8 @@
       currentUserEmail = null;
       document.body.classList.add('logged-out');
       document.getElementById('loginGate').style.display = 'block';
-      document.getElementById('sectionFlussi').style.display = 'none';
       document.getElementById('sectionTodo').style.display = 'none';
+      document.getElementById('sectionFlussi').style.display = 'none';
       document.getElementById('sectionLinks').style.display = 'none';
       document.getElementById('btnAuth').innerText = '🔒 Accedi';
       const btnBackup = document.getElementById('btnBackup');
@@ -774,7 +774,7 @@
         if (data.session && data.session.user) {
           setLoggedInState(data.session.user.email);
           await loadData();
-          switchTab('flussi');
+          switchTab('todo');
           showToast("🔓 Accesso effettuato con successo!");
         }
       } catch (err) {
@@ -1011,11 +1011,10 @@
 
       manualTodos.forEach(t => addName(t.assignee));
       pratiche.filter(p => !p.isArchived).forEach(p => {
-        addName(p.ownerExt);
         addName(p.ownerInt);
       });
 
-      select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
+      select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili Interni</option>';
       Array.from(assigneesMap.values()).sort((a,b) => a.localeCompare(b, 'it', {sensitivity: 'base'})).forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
@@ -1400,7 +1399,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: st.dept,
-              assignee: p.ownerInt || p.ownerExt || '',
+              assignee: p.ownerInt || '',
               deadline: p.showDate || '',
               situation: `🟣 ${st.dept} - IN ATTESA`,
               action: `Motivo: ${st.text}`,
@@ -1418,7 +1417,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: dept,
-              assignee: p.ownerInt || p.ownerExt || '',
+              assignee: p.ownerInt || '',
               deadline: p.showDate || '',
               situation: `✉️ ${dept} - POSTA IN ARRIVO`,
               action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
@@ -1438,7 +1437,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: al.target,
-              assignee: p.ownerInt || p.ownerExt || '',
+              assignee: p.ownerInt || '',
               deadline: p.showDate || '',
               situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
               action: `Nota: ${al.text}`,
@@ -1457,7 +1456,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Promo',
-                assignee: p.ownerInt || p.ownerExt || '',
+                assignee: p.ownerInt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ Promo - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Promo.`,
@@ -1472,7 +1471,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'PR',
-                assignee: p.ownerInt || p.ownerExt || '',
+                assignee: p.ownerInt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ PR - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da PR.`,
@@ -1487,7 +1486,7 @@
                 praticaId: p.id,
                 title: `${p.client} - ${p.title}`,
                 dept: 'Logistics',
-                assignee: p.ownerInt || p.ownerExt || '',
+                assignee: p.ownerInt || '',
                 deadline: p.showDate || '',
                 situation: `⏳ Logistics - IN ATTESA (parallelo)`,
                 action: `In attesa di conferma ESEGUITO da Logistics.`,
@@ -1502,7 +1501,7 @@
               praticaId: p.id,
               title: `${p.client} - ${p.title}`,
               dept: currentDept,
-              assignee: p.ownerInt || p.ownerExt || '',
+              assignee: p.ownerInt || '',
               deadline: p.showDate || '',
               situation: `⏳ ${currentDept} - IN ATTESA`,
               action: `Pratica ferma in attesa di approvazione o avanzamento.`,
@@ -2650,12 +2649,12 @@
     }
 
     function switchTab(tab) {
-      document.getElementById('sectionFlussi').style.display = tab === 'flussi' ? 'block' : 'none';
       document.getElementById('sectionTodo').style.display = tab === 'todo' ? 'block' : 'none';
+      document.getElementById('sectionFlussi').style.display = tab === 'flussi' ? 'block' : 'none';
       document.getElementById('sectionLinks').style.display = tab === 'links' ? 'block' : 'none';
       
-      document.getElementById('btnTabFlussi').className = tab === 'flussi' ? 'tab-btn active' : 'tab-btn';
       document.getElementById('btnTabTodo').className = tab === 'todo' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('btnTabFlussi').className = tab === 'flussi' ? 'tab-btn active' : 'tab-btn';
       document.getElementById('btnTabLinks').className = tab === 'links' ? 'tab-btn active' : 'tab-btn';
     }
 
