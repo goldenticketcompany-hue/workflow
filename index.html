@@ -152,6 +152,7 @@
           <option value="Admin">Admin</option>
           <option value="Deal">Deal</option>
           <option value="Legal">Legal</option>
+          <option value="Art Director">Art Director</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
           <option value="Logistics">Logistics</option>
@@ -199,6 +200,7 @@
           <option value="Admin">Admin</option>
           <option value="Deal">Deal</option>
           <option value="Legal">Legal</option>
+          <option value="Art Director">Art Director</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
           <option value="Logistics">Logistics</option>
@@ -439,6 +441,7 @@
             <option value="Admin">Admin</option>
             <option value="Deal">Deal</option>
             <option value="Legal">Legal</option>
+            <option value="Art Director">Art Director</option>
             <option value="Promo">Promo</option>
             <option value="PR">PR</option>
             <option value="Logistics">Logistics</option>
@@ -488,6 +491,7 @@
             <option value="Admin">Admin</option>
             <option value="Deal">Deal</option>
             <option value="Legal">Legal</option>
+            <option value="Art Director">Art Director</option>
             <option value="Promo">Promo</option>
             <option value="PR">PR</option>
             <option value="Logistics">Logistics</option>
@@ -628,6 +632,7 @@
       { id: 'Admin', label: 'Admin' },
       { id: 'Deal', label: 'Deal' },
       { id: 'Legal', label: 'Legal' },
+      { id: 'ArtDirector', label: 'Art Director' },
       { id: 'Promo', label: 'Promo' },
       { id: 'PR', label: 'PR' },
       { id: 'Logistics', label: 'Logistics' }
@@ -1100,7 +1105,7 @@
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
 
-        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6) && p.approvedSteps.includes(7);
+        const isFullyDone = p.approvedSteps.length === ROUTE_STEPS.length && ROUTE_STEPS.every((s, idx) => p.approvedSteps.includes(idx));
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -1121,14 +1126,6 @@
           } else if (isFullyDone) {
             cls += ' done';
             symbol = '✓';
-          } else if (idx >= 5) {
-            if (p.approvedSteps.includes(idx)) {
-              cls += ' done';
-              symbol = '✓';
-            } else if (stepIdx >= 5) {
-              cls += ' current-fuchsia';
-              symbol = '●';
-            }
           } else if (p.approvedSteps.includes(idx)) {
             cls += ' done';
             symbol = '✓';
@@ -1185,19 +1182,6 @@
           `;
         });
 
-        let phaseDisplayLabel = currentDeptLabel;
-        if (stepIdx >= 5) {
-          let pList = [];
-          if (!p.approvedSteps.includes(5)) pList.push('Promo');
-          if (!p.approvedSteps.includes(6)) pList.push('PR');
-          if (!p.approvedSteps.includes(7)) pList.push('Logistics');
-          if (pList.length > 0) {
-            phaseDisplayLabel = `In corso su: ${pList.join(', ')}`;
-          } else {
-            phaseDisplayLabel = `✅ Completato (Promo, PR & Logistics)`;
-          }
-        }
-
         const isExpanded = !!p.isExpanded;
         const formattedShowDate = formatDateIt(p.showDate);
         const isHighlighted = (lastChattedId && p.id === lastChattedId);
@@ -1241,7 +1225,7 @@
 
               <div class="stepper-box">
                 <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
-                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${escapeHtml(phaseDisplayLabel)}</strong>
+                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${escapeHtml(currentDeptLabel)}</strong>
                 </div>
                 <div class="stepper">${stepperHTML}</div>
               </div>
@@ -1449,67 +1433,19 @@
         }
 
         if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
-          if (stepIdx >= 5) {
-            if (!p.approvedSteps.includes(5)) {
-              autoTasks.push({
-                id: 'wait_auto_promo_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'Promo',
-                assignee: p.ownerInt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ Promo - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da Promo.`,
-                isManual: false,
-                todoNotes: p.todoNotes,
-                isExpanded: true
-              });
-            }
-            if (!p.approvedSteps.includes(6)) {
-              autoTasks.push({
-                id: 'wait_auto_pr_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'PR',
-                assignee: p.ownerInt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ PR - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da PR.`,
-                isManual: false,
-                todoNotes: p.todoNotes,
-                isExpanded: true
-              });
-            }
-            if (!p.approvedSteps.includes(7)) {
-              autoTasks.push({
-                id: 'wait_auto_log_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'Logistics',
-                assignee: p.ownerInt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ Logistics - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da Logistics.`,
-                isManual: false,
-                todoNotes: p.todoNotes,
-                isExpanded: true
-              });
-            }
-          } else {
-            autoTasks.push({
-              id: 'wait_auto_' + p.id,
-              praticaId: p.id,
-              title: `${p.client} - ${p.title}`,
-              dept: currentDept,
-              assignee: p.ownerInt || '',
-              deadline: p.showDate || '',
-              situation: `⏳ ${currentDept} - IN ATTESA`,
-              action: `Pratica ferma in attesa di approvazione o avanzamento.`,
-              isManual: false,
-              todoNotes: p.todoNotes,
-              isExpanded: true
-            });
-          }
+          autoTasks.push({
+            id: 'wait_auto_' + p.id,
+            praticaId: p.id,
+            title: `${p.client} - ${p.title}`,
+            dept: currentDept,
+            assignee: p.ownerInt || '',
+            deadline: p.showDate || '',
+            situation: `⏳ ${currentDept} - IN ATTESA`,
+            action: `Pratica ferma in attesa di approvazione o avanzamento.`,
+            isManual: false,
+            todoNotes: p.todoNotes,
+            isExpanded: true
+          });
         }
       });
 
@@ -1533,49 +1469,60 @@
       sortTasksByDeadline(resolvedManuals);
       sortTasksByDeadline(autoTasks);
 
-      let allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
+      const filterSingleList = (list) => {
+        return list.filter(t => {
+          const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
+          if (!matchSearch) return false;
+
+          if (filterDept !== 'ALL') {
+            if (t.isManual) {
+              const matchDept = (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
+              if (!matchDept) return false;
+            } else {
+              if ((t.dept || '').toLowerCase() !== filterDept.toLowerCase()) return false;
+            }
+          }
+
+          if (filterAssignee !== 'ALL') {
+            const taskAssignee = (t.assignee || '').toLowerCase().trim();
+            const selectedAssignee = filterAssignee.toLowerCase().trim();
+            if (taskAssignee !== selectedAssignee) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+      };
+
+      let filteredManuals = filterSingleList(formattedManuals);
+      let filteredAutoTasks = filterSingleList(autoTasks);
+      let filteredResolvedManuals = filterSingleList(resolvedManuals);
 
       const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
       
       if (lastChattedId) {
-        const foundIdx = allTasks.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
-        if (foundIdx !== -1) {
-          const item = allTasks.splice(foundIdx, 1)[0];
-          allTasks.unshift(item);
+        const foundManualIdx = filteredManuals.findIndex(t => t.id === lastChattedId);
+        if (foundManualIdx !== -1) {
+          const item = filteredManuals.splice(foundManualIdx, 1)[0];
+          filteredManuals.unshift(item);
+        } else {
+          const foundAutoIdx = filteredAutoTasks.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
+          if (foundAutoIdx !== -1) {
+            const item = filteredAutoTasks.splice(foundAutoIdx, 1)[0];
+            filteredAutoTasks.unshift(item);
+          }
         }
       }
 
-      const filteredTasks = allTasks.filter(t => {
-        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search);
-        if (!matchSearch) return false;
-
-        if (filterDept !== 'ALL') {
-          if (t.isManual) {
-            const matchDept = (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
-            if (!matchDept) return false;
-          } else {
-            if ((t.dept || '').toLowerCase() !== filterDept.toLowerCase()) return false;
-          }
-        }
-
-        if (filterAssignee !== 'ALL') {
-          const taskAssignee = (t.assignee || '').toLowerCase().trim();
-          const selectedAssignee = filterAssignee.toLowerCase().trim();
-          if (taskAssignee !== selectedAssignee) {
-            return false;
-          }
-        }
-
-        return true;
-      });
-
-      if (filteredTasks.length === 0) {
+      if (filteredManuals.length === 0 && filteredAutoTasks.length === 0 && filteredResolvedManuals.length === 0) {
         container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna attività in sospeso per i filtri selezionati.</div>`;
         return;
       }
 
       container.innerHTML = '';
-      filteredTasks.forEach((t) => {
+
+      const renderTaskCard = (t) => {
         let badgeClass = 'todo-badge';
         if (t.isResolved) badgeClass += ' green';
         else if (t.situation && t.situation.includes('BLOCCATO')) badgeClass += ' red';
@@ -1681,8 +1628,29 @@
           </div>
           ${innerContentHTML}
         `;
-        container.appendChild(item);
-      });
+        return item;
+      };
+
+      // SEZIONE 1: Task Manuali
+      if (filteredManuals.length > 0 || filteredResolvedManuals.length > 0) {
+        const sectionHeader = document.createElement('div');
+        sectionHeader.style.cssText = "font-size: 18px; font-weight: 900; color: var(--gold-light); margin: 20px 0 12px 4px; display: flex; align-items: center; gap: 8px;";
+        sectionHeader.innerHTML = `📌 Task Manuali`;
+        container.appendChild(sectionHeader);
+
+        filteredManuals.forEach(t => container.appendChild(renderTaskCard(t)));
+        filteredResolvedManuals.forEach(t => container.appendChild(renderTaskCard(t)));
+      }
+
+      // SEZIONE 2: Task Derivanti dai Flussi
+      if (filteredAutoTasks.length > 0) {
+        const sectionHeader = document.createElement('div');
+        sectionHeader.style.cssText = "font-size: 18px; font-weight: 900; color: var(--gold-light); margin: 30px 0 12px 4px; display: flex; align-items: center; gap: 8px; border-top: 2px solid var(--border-color); padding-top: 20px;";
+        sectionHeader.innerHTML = `📊 Task Derivanti dai Flussi`;
+        container.appendChild(sectionHeader);
+
+        filteredAutoTasks.forEach(t => container.appendChild(renderTaskCard(t)));
+      }
     }
 
     async function toggleSubtaskDone(todoId, subIdx) {
@@ -2226,16 +2194,10 @@
 
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
       const btnApprove = document.getElementById('btnApproveNext');
-      const btnExecuteFinal = document.getElementById('btnExecuteFinal');
 
       btnApprove.style.display = 'none';
-      btnExecuteFinal.style.display = 'none';
 
-      if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
-        const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
-        btnExecuteFinal.style.display = 'block';
-        btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
-      } else if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+      if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         btnApprove.style.display = 'block';
         btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
       }
@@ -2403,35 +2365,10 @@
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
-        
-        if (activeItem.currentStepIdx === 5) {
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
-        } else {
-          const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
-        }
+        const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
       } else {
         activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
-      }
-
-      closeStepClickModal();
-      await saveData();
-    }
-
-    async function executeFinalDepartment() {
-      if (!activeItem || selectedStepIdx < 5) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-
-      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
-
-      const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
-
-      if (isAlreadyDone) {
-        activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
-      } else {
-        activeItem.approvedSteps.push(selectedStepIdx);
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
       }
 
       closeStepClickModal();
