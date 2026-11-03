@@ -49,6 +49,8 @@
     .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
     .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
     .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
+    .step-item.step-locked { opacity: 0.45; cursor: not-allowed; }
+    #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
     .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
     .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
 
@@ -106,6 +108,7 @@
 <body>
 
   <div id="dataBanner" role="alert"></div>
+  <div id="toast" role="status"></div>
 
   <header>
     <div class="brand">
@@ -1093,7 +1096,7 @@
           else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
 
           return `
-            <div class="step-item" role="button" tabindex="0" aria-label="Gestisci reparto ${esc(s.label)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openStepClickModal('${p.id}', ${idx})">
+            <div class="step-item${isStepLocked(p, idx) && !stepHasMarker(p, s.label) ? ' step-locked' : ''}" role="button" tabindex="0" aria-label="Gestisci reparto ${esc(s.label)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openStepClickModal('${p.id}', ${idx})">
               <div class="${cls}">${symbol}</div>
               <div class="step-label">${esc(s.label)}</div>
             </div>
@@ -1914,11 +1917,43 @@
     }
 
     // ============ GESTIONE REPARTI (STEPPER) ============
+    // ---- Regola di sequenza: un reparto è attivo solo dopo l'ok di quello precedente ----
+    // (Promo, PR e Logistics partono insieme dopo Legal)
+    function isStepLocked(p, idx) {
+      const cur = p.currentStepIdx || 0;
+      if (idx >= 5) return cur < 5;
+      return idx > cur;
+    }
+    function reachMax(p) {
+      const cur = p.currentStepIdx || 0;
+      return cur >= 5 ? ROUTE_STEPS.length - 1 : cur;
+    }
+    // un reparto "bloccato" ma con segnalazioni già presenti (dati vecchi) resta apribile per poterle chiudere
+    function stepHasMarker(p, label) {
+      return (p.mailDepts || []).includes(label)
+        || (p.statusMessages || []).some(st => st.dept === label)
+        || (p.alertsList || []).some(al => al.target === label);
+    }
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+
     function openStepClickModal(id, idx) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
-      selectedStepIdx = idx;
       const deptLabel = ROUTE_STEPS[idx].label;
+
+      if (isStepLocked(activeItem, idx) && !stepHasMarker(activeItem, deptLabel)) {
+        const cur = ROUTE_STEPS[activeItem.currentStepIdx || 0].label;
+        showToast(`🔒 "${deptLabel}" non è ancora attivo: la pratica è ferma su "${cur}". Si attiva solo dopo l'ok dei reparti precedenti.`);
+        return;
+      }
+      selectedStepIdx = idx;
 
       if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
         activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
@@ -1982,7 +2017,9 @@
       const select = $('sendBackTargetSelect');
       select.innerHTML = '';
 
+      const maxIdxBack = reachMax(activeItem);
       ROUTE_STEPS.forEach((s, idx) => {
+        if (idx > maxIdxBack) return;
         const opt = document.createElement('option');
         opt.value = idx;
         opt.innerText = s.label + (idx < selectedStepIdx ? ' (Indietro)' : idx === selectedStepIdx ? ' (Stesso reparto)' : ' (Avanti)');
@@ -2038,7 +2075,9 @@
       const select = $('statusTargetSelect');
       select.innerHTML = '';
 
-      ROUTE_STEPS.forEach(s => {
+      const maxIdxStatus = reachMax(activeItem);
+      ROUTE_STEPS.forEach((s, idx) => {
+        if (idx > maxIdxStatus) return;
         const opt = document.createElement('option');
         opt.value = s.label;
         opt.innerText = s.label + (s.label === currentDeptLabel ? ' (Questo reparto)' : ' (Rimanda a questo reparto)');
