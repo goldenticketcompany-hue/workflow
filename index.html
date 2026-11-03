@@ -1,591 +1,591 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Golden Ticket Company - Workflow & To-Do Manager</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golden Ticket Company - Workflow & To-Do Manager</title>
 
- <style>
- :root {
- --bg-dark: #2a080c; --card-bg: #1c0507; --border-color: #5c1b22;
- --gold-main: #d69e2e; --gold-light: #f6e05e; --text-main: #e2e8f0; --text-muted: #a0aec0;
- --danger-red: #e53e3e; --warning-amber: #dd6b20; --success-green: #38a169; --status-fuchsia: #d946ef;
- }
- * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
- body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
+  <style>
+    :root {
+      --bg-dark: #2a080c; --card-bg: #1c0507; --border-color: #5c1b22;
+      --gold-main: #d69e2e; --gold-light: #f6e05e; --text-main: #e2e8f0; --text-muted: #a0aec0;
+      --danger-red: #e53e3e; --warning-amber: #dd6b20; --success-green: #38a169; --status-fuchsia: #d946ef;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
 
- header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
- .brand { display: flex; align-items: center; gap: 14px; }
- .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
- .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+    header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
+    .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
 
- .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
- .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
- .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
+    .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+    .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
 
- .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
 
- .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
- .search-input, .select-filter { background: var(--card-bg); border: 1.5px solid var(--border-color); color: #fff; padding: 14px; border-radius: 12px; font-size: 16px; outline: none; }
- .search-input { flex: 1; min-width: 220px; }
- .select-filter { min-width: 180px; }
- .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+    .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-input, .select-filter { background: var(--card-bg); border: 1.5px solid var(--border-color); color: #fff; padding: 14px; border-radius: 12px; font-size: 16px; outline: none; }
+    .search-input { flex: 1; min-width: 220px; }
+    .select-filter { min-width: 180px; }
+    .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
 
- .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
- .card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
+    .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
+    .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
 
- .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
- .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
+    .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
+    .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
+    .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
+    .alert-lastmsg { background: rgba(37, 99, 235, 0.15); color: #bfdbfe; border: 1.5px solid #2563eb; cursor: pointer; }
+    .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
- .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
- .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
- .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
- .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
- .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
+    .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
- .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
+    .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
+    .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
+    .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
+    .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
+    .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
 
- .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
- .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
- .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
- .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
- .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
- .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
+    .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
+    .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
+    .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
+    .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
+    .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
 
- .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
- .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
- .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
- .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
- .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
- .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+    @keyframes pulse-warn {
+      0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+    }
 
- @keyframes pulse-warn {
- 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
- 70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
- 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
- }
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
+    .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
 
- .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
- .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
+    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
+    .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
+    .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+    .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
+    .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
+    .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
- .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
- .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
- .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
- .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
- .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
- .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
- .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
+    .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
+    .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
+    .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
 
- .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
- .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
- .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
+    .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
+    .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
+    .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
+    .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+    .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
 
- .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
- .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
- .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
- .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
- .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
- .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+    .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; }
+    .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
 
- .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
- .modal-overlay.hidden { display: none; }
- .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
- .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
- .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
- .form-group { margin-bottom: 16px; }
- .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
- .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; }
- .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
+    body.logged-out .link-item-card button { display: none; }
+    #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
+  </style>
 
- #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
- </style>
-
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
- <div id="dataBanner" role="alert"></div>
+  <div id="dataBanner" role="alert"></div>
 
- <header>
- <div class="brand">
- <div class="logo-badge">GT</div>
- <div class="brand-title">GOLDEN TICKET CLOUD</div>
- </div>
- <div class="nav-tabs">
- <button class="tab-btn active" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
- <button class="tab-btn" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
- <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
- <button class="tab-btn" onclick="exportBackup()" title="Scarica una copia di tutti i dati">💾 Backup</button>
- </div>
- </header>
+  <header>
+    <div class="brand">
+      <div class="logo-badge">GT</div>
+      <div class="brand-title">GOLDEN TICKET CLOUD</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
+      <button class="tab-btn" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
+      <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
+      <button class="tab-btn" id="btnBackup" style="display:none;" onclick="exportBackup()" title="Scarica una copia di tutti i dati">💾 Backup</button>
+      <button class="tab-btn" id="btnAuth" onclick="onAuthButton()">🔒 Accedi</button>
+    </div>
+  </header>
 
- <div class="container" role="main">
- <!-- SEZIONE FLUSSI -->
- <div id="sectionFlussi">
- <div class="toolbar">
- <input type="text" id="searchInput" class="search-input" aria-label="Cerca spettacolo o teatro" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
- <select id="filterShowTitle" class="select-filter" aria-label="Filtra per spettacolo" onchange="renderApp()">
- <option value="ALL">🎭 Tutti gli Spettacoli</option>
- </select>
- <select id="filterDept" class="select-filter" aria-label="Filtra per reparto" onchange="renderApp()">
- <option value="ALL">🏢 Tutti i Reparti</option>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
- </div>
+  <div class="container" role="main">
+    <!-- SCHERMATA DI ACCESSO (Flussi e To-Do) -->
+    <div id="loginGate" style="display:none;">
+      <div class="card" style="max-width: 420px; margin: 40px auto;">
+        <div class="client-title-main" style="margin-bottom: 6px;">🔒 Accesso riservato</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;">Flussi e To-Do List sono visibili solo al team. I Link Utili restano consultabili da tutti.</p>
+        <form onsubmit="doLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-control" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
+          </div>
+          <div id="loginError" role="alert" style="display:none; color:#fc8181; font-size:14px; font-weight:bold; margin-bottom:12px;"></div>
+          <button type="submit" class="btn-gold" id="loginSubmit" style="width:100%;">Accedi</button>
+        </form>
+      </div>
+    </div>
 
- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
- <div style="display: flex; gap: 8px;">
- <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
- <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllCards()">📁 Compatta Tutto</button>
- </div>
- <div>
- <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
- </div>
- </div>
+    <!-- SEZIONE FLUSSI -->
+    <div id="sectionFlussi">
+      <div class="toolbar">
+        <input type="text" id="searchInput" class="search-input" aria-label="Cerca spettacolo o teatro" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterShowTitle" class="select-filter" aria-label="Filtra per spettacolo" onchange="renderApp()">
+          <option value="ALL">🎭 Tutti gli Spettacoli</option>
+        </select>
+        <select id="filterDept" class="select-filter" aria-label="Filtra per reparto" onchange="renderApp()">
+          <option value="ALL">🏢 Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
+      </div>
 
- <div id="feedList"></div>
- </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="expandAllCards()">📂 Espandi Tutto</button>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="collapseAllCards()">📁 Compatta Tutto</button>
+        </div>
+        <div>
+          <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
+        </div>
+      </div>
 
- <!-- SEZIONE TO-DO LIST -->
- <div id="sectionTodo" style="display: none;">
- <div class="toolbar">
- <input type="text" id="searchTodoInput" class="search-input" aria-label="Cerca task o attività" oninput="renderApp()" placeholder="Cerca task o attività...">
- <select id="filterTodoDept" class="select-filter" aria-label="Filtra task per reparto" onchange="renderApp()">
- <option value="ALL">Tutti i Reparti</option>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile" onchange="renderTodoList()">
- <option value="ALL">👤 Tutti i Responsabili</option>
- </select>
- <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
- </div>
+      <div id="feedList"></div>
+    </div>
 
- <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 16px;">
- <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
- </div>
+    <!-- SEZIONE TO-DO LIST -->
+    <div id="sectionTodo" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchTodoInput" class="search-input" aria-label="Cerca task o attività" oninput="renderApp()" placeholder="Cerca task o attività...">
+        <select id="filterTodoDept" class="select-filter" aria-label="Filtra task per reparto" onchange="renderApp()">
+          <option value="ALL">Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile" onchange="renderTodoList()">
+          <option value="ALL">👤 Tutti i Responsabili</option>
+        </select>
+        <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
+      </div>
 
- <div id="todoList"></div>
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 16px;">
+        <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
+      </div>
 
- <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
- <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
- <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
- 📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
- </div>
- <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
- </div>
- <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
- </div>
- </div>
+      <div id="todoList"></div>
 
- <!-- SEZIONE LINK UTILI -->
- <div id="sectionLinks" style="display: none;">
- <div class="toolbar">
- <input type="text" id="searchLinkInput" class="search-input" aria-label="Cerca link" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
- <button class="btn-gold" onclick="openLinkModal()">+ Aggiungi Link</button>
- </div>
- <div id="linksListContainer"></div>
- </div>
- </div>
+      <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+        <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
+          <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
+            📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
+          </div>
+          <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
+        </div>
+        <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
+      </div>
+    </div>
 
- <!-- MODAL: GESTIONE REPARTO -->
- <div class="modal-overlay hidden" id="stepClickModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeStepClickModal()">✕</button>
- </div>
- <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
- <div style="display: flex; flex-direction: column; gap: 12px;">
- <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
- <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
- <button class="btn-sm stepact" style="background: #a855f7; color:#fff;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
- <button class="btn-sm stepact" style="background: var(--warning-amber); color:#fff;" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
- <button class="btn-sm stepact" style="background: var(--danger-red); color:#fff;" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
- <button class="btn-sm stepact" style="background: #2563eb; color:#fff;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
- </div>
- </div>
- </div>
+    <!-- SEZIONE LINK UTILI -->
+    <div id="sectionLinks" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchLinkInput" class="search-input" aria-label="Cerca link" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
+        <button class="btn-gold" id="btnAddLink" style="display:none;" onclick="openLinkModal()">+ Aggiungi Link</button>
+      </div>
+      <div id="linksListContainer"></div>
+    </div>
+  </div>
 
- <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
- <div class="modal-overlay hidden" id="quickChatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
- </div>
- <form onsubmit="saveQuickChatFromStep(event)">
- <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
- <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
- <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
- </div>
- <div class="form-group">
- <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
- <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Invia Messaggio in Chat</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL: GESTIONE REPARTO -->
+  <div class="modal-overlay hidden" id="stepClickModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStepClickModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
+        <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+        <button class="btn-sm stepact" style="background: #a855f7;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
+        <button class="btn-sm stepact" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
+        <button class="btn-sm stepact" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
+        <button class="btn-sm stepact" style="background: #2563eb;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
+      </div>
+    </div>
+  </div>
 
- <!-- MODAL RIMANDA INDIETRO -->
- <div class="modal-overlay hidden" id="sendBackModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeSendBackModal()">✕</button>
- </div>
- <form onsubmit="saveSendBackAction(event)">
- <div class="form-group">
- <label for="sendBackTargetSelect">A quale Reparto vuoi rimandare la pratica?</label>
- <select id="sendBackTargetSelect" class="form-control"></select>
- </div>
- <div class="form-group">
- <label for="sendBackNoteInput">Motivo del rimando / Cosa bisogna rivedere *</label>
- <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Conferma Rimando</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
+  <div class="modal-overlay hidden" id="quickChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
+      </div>
+      <form onsubmit="saveQuickChatFromStep(event)">
+        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+        </div>
+        <div class="form-group">
+          <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
+          <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Invia Messaggio in Chat</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL STALLO -->
- <div class="modal-overlay hidden" id="statusModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeStatusModal()">✕</button>
- </div>
- <form onsubmit="saveDepartmentStatus(event)">
- <div class="form-group" id="statusTargetGroup">
- <label for="statusTargetSelect">Invia Stallo a quale Reparto?</label>
- <select id="statusTargetSelect" class="form-control"></select>
- </div>
- <div class="form-group">
- <label for="statusNoteInput">Motivo dello Stallo / Attesa *</label>
- <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Conferma Stallo</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL RIMANDA INDIETRO -->
+  <div class="modal-overlay hidden" id="sendBackModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeSendBackModal()">✕</button>
+      </div>
+      <form onsubmit="saveSendBackAction(event)">
+        <div class="form-group">
+          <label for="sendBackTargetSelect">A quale Reparto vuoi rimandare la pratica?</label>
+          <select id="sendBackTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="sendBackNoteInput">Motivo del rimando / Cosa bisogna rivedere *</label>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Conferma Rimando</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL BLOCCA -->
- <div class="modal-overlay hidden" id="interveneModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeInterveneModal()">✕</button>
- </div>
- <form onsubmit="confirmInterveneAction(event)">
- <div class="form-group">
- <label for="interveneNote">Motivo del Blocco / Annullamento *</label>
- <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL STALLO -->
+  <div class="modal-overlay hidden" id="statusModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStatusModal()">✕</button>
+      </div>
+      <form onsubmit="saveDepartmentStatus(event)">
+        <div class="form-group" id="statusTargetGroup">
+          <label for="statusTargetSelect">Invia Stallo a quale Reparto?</label>
+          <select id="statusTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="statusNoteInput">Motivo dello Stallo / Attesa *</label>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Conferma Stallo</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL PRATICHE ARCHIVIATE -->
- <div class="modal-overlay hidden" id="archiveModal">
- <div class="modal-card" style="max-width: 700px;">
- <div class="modal-header">
- <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeArchiveModal()">✕</button>
- </div>
- <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate o annullate, riaprirle oppure eliminarle definitivamente.</p>
- <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL BLOCCA -->
+  <div class="modal-overlay hidden" id="interveneModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeInterveneModal()">✕</button>
+      </div>
+      <form onsubmit="confirmInterveneAction(event)">
+        <div class="form-group">
+          <label for="interveneNote">Motivo del Blocco / Annullamento *</label>
+          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL NUOVA PRATICA -->
- <div class="modal-overlay hidden" id="newModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Nuova Pratica Spettacolo</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeNewModal()">✕</button>
- </div>
- <form onsubmit="savePratica(event)">
- <div class="form-group">
- <label for="formClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
- <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
- </div>
- <div class="form-group">
- <label for="formTitle">Titolo dello Spettacolo *</label>
- <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
- </div>
- <div class="form-group">
- <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
- <input type="date" id="formShowDate" class="form-control">
- </div>
- <div class="form-group">
- <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
- <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
- </div>
- <div class="form-group">
- <label for="formOwnerInt">Referente Interno (Opzionale)</label>
- <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Crea Pratica</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL PRATICHE ARCHIVIATE -->
+  <div class="modal-overlay hidden" id="archiveModal">
+    <div class="modal-card" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeArchiveModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate o annullate, riaprirle oppure eliminarle definitivamente.</p>
+      <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA PRATICA -->
- <div class="modal-overlay hidden" id="editModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Dati Pratica</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditModal()">✕</button>
- </div>
- <form onsubmit="updatePratica(event)">
- <input type="hidden" id="editId">
- <div class="form-group">
- <label for="editClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
- <input type="text" id="editClient" class="form-control form-control-lg" required>
- </div>
- <div class="form-group">
- <label for="editTitle">Titolo dello Spettacolo *</label>
- <input type="text" id="editTitle" class="form-control" required>
- </div>
- <div class="form-group">
- <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
- <input type="date" id="editShowDate" class="form-control">
- </div>
- <div class="form-group">
- <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
- <input type="text" id="editOwnerExt" class="form-control">
- </div>
- <div class="form-group">
- <label for="editOwnerInt">Referente Interno (Opzionale)</label>
- <input type="text" id="editOwnerInt" class="form-control">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifiche</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL NUOVA PRATICA -->
+  <div class="modal-overlay hidden" id="newModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Pratica Spettacolo</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeNewModal()">✕</button>
+      </div>
+      <form onsubmit="savePratica(event)">
+        <div class="form-group">
+          <label for="formClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
+        </div>
+        <div class="form-group">
+          <label for="formTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
+        </div>
+        <div class="form-group">
+          <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="formShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Crea Pratica</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL TASK MANUALE -->
- <div class="modal-overlay hidden" id="todoModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Aggiungi Task Manuale</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeTodoModal()">✕</button>
- </div>
- <form onsubmit="saveManualTodo(event)">
- <div class="form-group">
- <label for="todoTitle">Titolo Attività *</label>
- <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
- </div>
- <div class="form-group">
- <label for="todoSit">Reparto di Riferimento *</label>
- <select id="todoSit" class="form-control" required>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- </div>
- <div class="form-group">
- <label for="todoAssignee">Chi deve farlo (Assegnato a)</label>
- <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
- </div>
- <div class="form-group">
- <label for="todoDeadline">Scadenza - Entro il (Opzionale)</label>
- <input type="date" id="todoDeadline" class="form-control">
- </div>
- <div class="form-group">
- <label for="todoAction">Azione da fare *</label>
- <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare materiali con link...">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Aggiungi a To-Do</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL MODIFICA PRATICA -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Dati Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditModal()">✕</button>
+      </div>
+      <form onsubmit="updatePratica(event)">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="editClient" class="form-control form-control-lg" required>
+        </div>
+        <div class="form-group">
+          <label for="editTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="editTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="editShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="editOwnerExt" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="editOwnerInt" class="form-control">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifiche</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA TASK -->
- <div class="modal-overlay hidden" id="editTodoModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Task Manuale</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditTodoModal()">✕</button>
- </div>
- <form onsubmit="saveEditedManualTodo(event)">
- <input type="hidden" id="editTodoId">
- <div class="form-group">
- <label for="editTodoTitle">Titolo Attività *</label>
- <input type="text" id="editTodoTitle" class="form-control" required>
- </div>
- <div class="form-group">
- <label for="editTodoSit">Reparto di Riferimento *</label>
- <select id="editTodoSit" class="form-control" required>
- <option value="Prospect">Prospect</option>
- <option value="Tech Serv">Tech Serv</option>
- <option value="Admin">Admin</option>
- <option value="Deal">Deal</option>
- <option value="Legal">Legal</option>
- <option value="Promo">Promo</option>
- <option value="PR">PR</option>
- <option value="Logistics">Logistics</option>
- </select>
- </div>
- <div class="form-group">
- <label for="editTodoAssignee">Chi deve farlo (Assegnato a)</label>
- <input type="text" id="editTodoAssignee" class="form-control">
- </div>
- <div class="form-group">
- <label for="editTodoDeadline">Scadenza - Entro il (Opzionale)</label>
- <input type="date" id="editTodoDeadline" class="form-control">
- </div>
- <div class="form-group">
- <label for="editTodoAction">Azione / Note *</label>
- <textarea id="editTodoAction" class="form-control" rows="3" required></textarea>
- </div>
- <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
- <input type="checkbox" id="editTodoIsResolved" style="width: 18px; height: 18px; cursor: pointer;">
- <label for="editTodoIsResolved" style="margin: 0; cursor: pointer; color: var(--gold-light); font-size: 14px;">Segna come RISOLTO</label>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifiche</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Aggiungi Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveManualTodo(event)">
+        <div class="form-group">
+          <label for="todoTitle">Titolo Attività *</label>
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
+        </div>
+        <div class="form-group">
+          <label for="todoSit">Reparto di Riferimento *</label>
+          <select id="todoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="todoAssignee">Chi deve farlo (Assegnato a)</label>
+          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
+        </div>
+        <div class="form-group">
+          <label for="todoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="todoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="todoAction">Azione da fare *</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare materiali con link...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Aggiungi a To-Do</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL AGGIUNGI / MODIFICA LINK UTILE -->
- <div class="modal-overlay hidden" id="linkModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeLinkModal()">✕</button>
- </div>
- <form onsubmit="saveLinkItem(event)">
- <input type="hidden" id="editLinkId">
- <div class="form-group">
- <label for="linkTitleInput">Titolo *</label>
- <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
- </div>
- <div class="form-group">
- <label for="linkDescInput">Descrizione *</label>
- <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
- </div>
- <div class="form-group">
- <label for="linkUrlInput">Link (URL) *</label>
- <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Link</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL MODIFICA TASK -->
+  <div class="modal-overlay hidden" id="editTodoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedManualTodo(event)">
+        <input type="hidden" id="editTodoId">
+        <div class="form-group">
+          <label for="editTodoTitle">Titolo Attività *</label>
+          <input type="text" id="editTodoTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editTodoSit">Reparto di Riferimento *</label>
+          <select id="editTodoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editTodoAssignee">Chi deve farlo (Assegnato a)</label>
+          <input type="text" id="editTodoAssignee" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="editTodoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoAction">Azione / Note *</label>
+          <textarea id="editTodoAction" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <input type="checkbox" id="editTodoIsResolved" style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="editTodoIsResolved" style="margin: 0; cursor: pointer; color: var(--gold-light); font-size: 14px;">Segna come RISOLTO</label>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifiche</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL CHAT TASK -->
- <div class="modal-overlay hidden" id="todoChatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeTodoChatModal()">✕</button>
- </div>
- <input type="hidden" id="todoChatId">
- <input type="hidden" id="todoChatPraticaId">
- <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
- <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
- <div class="form-group" style="margin-bottom: 10px;">
- <label for="todoChatNewText" style="display:none;">Nuovo messaggio</label>
- <textarea id="todoChatNewText" class="form-control" rows="3" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
- </div>
- <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
- <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
- <div style="flex:1;"></div>
- <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
- </div>
- </div>
- <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL LINK UTILE -->
+  <div class="modal-overlay hidden" id="linkModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeLinkModal()">✕</button>
+      </div>
+      <form onsubmit="saveLinkItem(event)">
+        <input type="hidden" id="editLinkId">
+        <div class="form-group">
+          <label for="linkTitleInput">Titolo *</label>
+          <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
+        </div>
+        <div class="form-group">
+          <label for="linkDescInput">Descrizione *</label>
+          <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="linkUrlInput">Link (URL) *</label>
+          <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Link</button></div>
+      </form>
+    </div>
+  </div>
 
- <!-- MODAL CONSULTA CHAT -->
- <div class="modal-overlay hidden" id="chatModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeChatModal()">✕</button>
- </div>
- <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
- ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
- </div>
- <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
- </div>
- </div>
+  <!-- MODAL CHAT TASK -->
+  <div class="modal-overlay hidden" id="todoChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoChatModal()">✕</button>
+      </div>
+      <input type="hidden" id="todoChatId">
+      <input type="hidden" id="todoChatPraticaId">
+      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <textarea id="todoChatNewText" class="form-control" rows="3" aria-label="Commento" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
+          <div style="flex:1;"></div>
+          <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
+        </div>
+      </div>
+      <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <!-- MODAL MODIFICA MESSAGGIO -->
- <div class="modal-overlay hidden" id="editChatMsgModal">
- <div class="modal-card">
- <div class="modal-header">
- <div class="modal-title">Modifica Messaggio / Nota</div>
- <button class="close-x" aria-label="Chiudi" onclick="closeEditChatMsgModal()">✕</button>
- </div>
- <form onsubmit="saveEditedChatMsg(event)">
- <input type="hidden" id="editChatType">
- <input type="hidden" id="editChatManualId">
- <input type="hidden" id="editChatPraticaId">
- <input type="hidden" id="editChatIndex">
- <div class="form-group">
- <label for="editChatText">Testo della Nota / Messaggio *</label>
- <textarea id="editChatText" class="form-control" rows="4" required></textarea>
- </div>
- <div style="text-align: right; margin-top: 18px;">
- <button type="submit" class="btn-gold">Salva Modifica</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- MODAL CONSULTA CHAT -->
+  <div class="modal-overlay hidden" id="chatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeChatModal()">✕</button>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+        ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
+      </div>
+      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
+    </div>
+  </div>
 
- <script>
-    // INIZIALIZZAZIONE SUPABASE
+  <!-- MODAL MODIFICA MESSAGGIO -->
+  <div class="modal-overlay hidden" id="editChatMsgModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Messaggio / Nota</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditChatMsgModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedChatMsg(event)">
+        <input type="hidden" id="editChatType">
+        <input type="hidden" id="editChatManualId">
+        <input type="hidden" id="editChatPraticaId">
+        <input type="hidden" id="editChatIndex">
+        <div class="form-group">
+          <label for="editChatText">Testo della Nota / Messaggio *</label>
+          <textarea id="editChatText" class="form-control" rows="4" required></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifica</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ============ UTILITÀ ============
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // localStorage sicuro (Safari privato può lanciare eccezioni)
+    const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+    const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+
+    function showBanner(msg) {
+      const b = $('dataBanner');
+      if (!msg) { b.style.display = 'none'; return; }
+      b.textContent = msg;
+      b.style.display = 'block';
+    }
+
+    // ============ SUPABASE ============
     const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
-    
-    let client;
-    try {
-      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(e) {
-      console.error("Errore inizializzazione Supabase:", e);
-    }
+
+    const client = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } })
+      : null;
 
     const ROUTE_STEPS = [
       { id: 'Prospect', label: 'Prospect' },
@@ -603,158 +603,323 @@
     let archivedTodos = [];
     let utileLinks = [];
     let isArchivedSectionOpen = false;
-    let activeItem = null;
     let selectedStepIdx = null;
 
-    function showBanner(msg) {
-      const b = document.getElementById('dataBanner');
-      if(b) {
-        b.innerText = msg;
-        b.style.display = 'block';
-      }
-    }
+    // Protezioni dati
+    let dataLoaded = false;   // finché è false NON si salva mai (evita di sovrascrivere i dati veri)
+    let linksLoaded = false;  // idem per i link utili
+    let legacyLinks = [];     // copia dei link ancora presenti nella riga 'main' (vecchio formato)
+    let session = null;       // sessione di login (null = visitatore senza accesso)
+    let currentTab = 'flussi';
+    let rtChannel = null;
+    let linksError = '';      // motivo per cui i link non si caricano (per mostrarlo a schermo)
+    let pendingSaves = 0;     // salvataggi in corso/in coda
 
-    function hideBanner() {
-      const b = document.getElementById('dataBanner');
-      if(b) b.style.display = 'none';
-    }
+    // "activeItem" ora punta sempre all'oggetto aggiornato (cerca per id ad ogni lettura)
+    let activeItemId = null;
+    Object.defineProperty(window, 'activeItem', {
+      get() { return pratiche.find(p => p.id === activeItemId) || null; },
+      set(v) { activeItemId = v ? v.id : null; }
+    });
 
     function formatDateIt(dateStr) {
       if (!dateStr) return '';
       if (dateStr.includes('/')) return dateStr;
       const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
       return dateStr;
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
+    // linkify ora fa l'escape del testo PRIMA di creare i link
     function linkify(inputText) {
       if (!inputText) return '';
-      let replacedText = escapeHtml(inputText);
-      
+      let replacedText = esc(inputText);
       const downloadUrlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
       replacedText = replacedText.replace(downloadUrlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-
       const wwwPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
       replacedText = replacedText.replace(wwwPattern, '$1<a href="http://$2" target="_blank" rel="noopener noreferrer">$2</a>');
-
       return replacedText;
     }
 
-    async function loadData() {
-      if(!client) {
-        loadDemoFallback();
-        return;
-      }
-      try {
-        const { data, error } = await client
-          .from('workflow')
-          .select('data')
-          .eq('id', 'main')
-          .single();
+    // ============ CARICAMENTO / SALVATAGGIO ============
+    function applyData(d) {
+      pratiche = d.pratiche || [];
+      manualTodos = d.manualTodos || [];
+      archivedTodos = d.archivedTodos || [];
+      legacyLinks = d.utileLinks || [];
 
-        if (error) throw error;
+      pratiche.forEach(p => {
+        if (p.owner && !p.ownerExt && !p.ownerInt) p.ownerExt = p.owner;
+        if (!p.notesHistory) p.notesHistory = [];
+      });
 
-        if (data && data.data) {
-          pratiche = data.data.pratiche || [];
-          manualTodos = data.data.manualTodos || [];
-          archivedTodos = data.data.archivedTodos || [];
-          utileLinks = data.data.utileLinks || [];
-          
-          pratiche.forEach(p => {
-            if (p.owner && !p.ownerExt && !p.ownerInt) {
-              p.ownerExt = p.owner;
-            }
-          });
-
-          manualTodos.forEach((t, i) => {
-            t.isManual = true;
-            if (!t.id) {
-              t.id = 'mt_fixed_' + i + '_' + Date.now();
-            }
-            if (!t.actionOriginal && t.action) {
-              t.actionOriginal = t.action;
-            }
-            if (!t.chatHistory) {
-              t.chatHistory = t.actionOriginal ? [{ date: 'Storico', text: t.actionOriginal }] : [];
-            }
-          });
-          hideBanner();
-        } else {
-          loadDemoFallback();
-        }
-      } catch(e) {
-        console.error("Errore caricamento dati:", e);
-        showBanner("⚠️ Errore di connessione al database. Caricamento dati locali o di fallback.");
-        loadDemoFallback();
-      }
-      initDropdownOptions();
-      renderApp();
+      manualTodos.forEach((t, i) => {
+        t.isManual = true;
+        if (!t.id) t.id = 'mt_fixed_' + i + '_' + Date.now();
+        if (!t.actionOriginal && t.action) t.actionOriginal = t.action;
+        if (!t.chatHistory) t.chatHistory = t.actionOriginal ? [{ date: 'Storico', text: t.actionOriginal }] : [];
+      });
     }
 
-    function loadDemoFallback() {
-      pratiche = getDemoData();
-      manualTodos = [];
-      archivedTodos = [];
-      utileLinks = [];
-      initDropdownOptions();
-      renderApp();
-    }
-
-    async function saveData() {
-      if(!client) {
-        renderApp();
-        return;
-      }
+    // Dati riservati (riga 'main'): solo con login
+    async function loadData(canRetry = true) {
+      if (!client || !session) return;
       try {
-        const { error } = await client
-          .from('workflow')
-          .update({ data: { pratiche, manualTodos, archivedTodos, utileLinks } })
-          .eq('id', 'main');
+        const { data, error } = await client.from('workflow').select('data').eq('id', 'main').maybeSingle();
 
         if (error) {
-          throw error;
+          console.error('Errore di caricamento:', error);
+          if (/jwt|token/i.test(error.message || '') && canRetry) {
+            const { data: r, error: rErr } = await client.auth.refreshSession();
+            if (!rErr && r && r.session) { session = r.session; return loadData(false); }
+            client.auth.signOut(); // rinnovo impossibile: sessione davvero scaduta
+            return;
+          }
+          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati: il salvataggio è disattivato per non sovrascrivere i dati esistenti. Ricarica la pagina.');
+          return;
         }
-        hideBanner();
-      } catch (err) {
-        console.error('Eccezione salvataggio:', err);
-        showBanner("⚠️ Impossibile salvare le modifiche sul server remoto. Controlla la connessione.");
+
+        if (data && data.data) {
+          applyData(data.data);
+        } else {
+          pratiche = getDemoData();
+          manualTodos = []; archivedTodos = []; legacyLinks = [];
+        }
+        dataLoaded = true;
+        showBanner('');
+      } catch (e) {
+        console.error('Eccezione di caricamento:', e);
+        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati. Ricarica la pagina.');
       }
-      await loadData();
     }
 
-    if(client) {
-      client
-        .channel('public:workflow')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workflow', filter: 'id=eq.main' }, payload => {
-          if (payload.new && payload.new.data) {
-            pratiche = payload.new.data.pratiche || [];
-            manualTodos = payload.new.data.manualTodos || [];
-            archivedTodos = payload.new.data.archivedTodos || [];
-            utileLinks = payload.new.data.utileLinks || [];
+    // Link utili (riga 'links'): leggibili da tutti. Alla prima volta copia quelli già esistenti in 'main'.
+    async function loadLinks() {
+      if (!client) return;
+      try {
+        const { data, error } = await client.from('workflow').select('data').eq('id', 'links').maybeSingle();
+        if (error) { console.error('Errore link:', error); linksError = error.message || 'errore sconosciuto'; return; }
+        linksError = '';
+        if (data && data.data) {
+          utileLinks = data.data.utileLinks || [];
+          linksLoaded = true;
+        } else if (session && dataLoaded) {
+          utileLinks = legacyLinks.slice();
+          linksLoaded = true;
+          const err = await writeRow('links', { utileLinks });
+          if (err) {
+            console.error('Migrazione link non riuscita:', err);
+            showBanner('⚠️ I link NON sono pubblicati per i visitatori: ' + (err.message || 'errore database'));
+          }
+        } else if (!session) {
+          linksError = 'NOROW';
+        }
+      } catch (e) { console.error('Eccezione link:', e); linksError = 'rete non raggiungibile'; }
+    }
+
+    async function loadAll() {
+      await loadData();
+      await loadLinks();
+      initDropdownOptions();
+      renderApp();
+    }
+
+    async function writeRow(id, payload) {
+      let { data, error } = await client.from('workflow').update({ data: payload }).eq('id', id).select('id');
+      if (!error && (!data || data.length === 0)) {
+        ({ error } = await client.from('workflow').insert({ id, data: payload }));
+      }
+      return error;
+    }
+
+    let saveChain = Promise.resolve();
+    function enqueue(fn) {
+      pendingSaves++;
+      saveChain = saveChain.then(fn, fn).then(() => { pendingSaves--; }, () => { pendingSaves--; });
+      return saveChain;
+    }
+    const saveData = () => enqueue(doSave);
+    const saveLinks = () => enqueue(doSaveLinks);
+
+    async function doSave() {
+      if (!client || !dataLoaded || !session) {
+        alert('Salvataggio bloccato: accesso scaduto o dati non caricati. Ricarica la pagina e rifai l\'accesso.');
+        return;
+      }
+      try {
+        await client.auth.getSession();
+        const error = await writeRow('main', { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks });
+        if (error) throw error;
+        showBanner('');
+        renderApp();
+      } catch (err) {
+        console.error('Errore di salvataggio:', err);
+        showBanner('⚠️ Salvataggio NON riuscito. Ricarico i dati dal server: ripeti l\'ultima modifica.');
+        setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
+      }
+    }
+
+    async function doSaveLinks() {
+      if (!client || !linksLoaded || !session) {
+        alert('Salvataggio link bloccato: serve l\'accesso. Ricarica la pagina e rifai l\'accesso.');
+        return;
+      }
+      try {
+        await client.auth.getSession();
+        const error = await writeRow('links', { utileLinks });
+        if (error) throw error;
+        showBanner('');
+        renderApp();
+      } catch (err) {
+        console.error('Errore salvataggio link:', err);
+        showBanner('⚠️ Salvataggio dei link NON riuscito. Ricarico: ripeti la modifica.');
+        setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
+      }
+    }
+
+    function exportBackup() {
+      if (!session) return;
+      const blob = new Blob([JSON.stringify({ pratiche, manualTodos, archivedTodos, utileLinks }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'golden-ticket-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ============ REALTIME ============
+    function stopRealtime() {
+      if (client && rtChannel) { client.removeChannel(rtChannel); rtChannel = null; }
+    }
+
+    function startRealtime() {
+      if (!client) return;
+      stopRealtime();
+      rtChannel = client
+        .channel('workflow-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workflow' }, payload => {
+          const row = payload.new;
+          if (!row || !row.id || !row.data) return;
+          if (pendingSaves > 0) return; // non sovrascrivere modifiche locali non ancora salvate
+          if (row.id === 'main' && session) {
+            applyData(row.data);
+            dataLoaded = true;
             initDropdownOptions();
             renderApp();
+          } else if (row.id === 'links') {
+            utileLinks = row.data.utileLinks || [];
+            linksLoaded = true;
+            renderLinksList();
           }
         })
         .subscribe();
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        loadData();
-      }
+      if (document.visibilityState !== 'visible' || pendingSaves > 0) return;
+      if (session) client.auth.getSession().then(() => loadAll());
+      else loadLinks().then(renderApp);
     });
+
+    // ============ LOGIN ============
+    function updateAuthUI() {
+      document.body.classList.toggle('logged-out', !session);
+      $('btnBackup').style.display = session ? '' : 'none';
+      $('btnAddLink').style.display = session ? '' : 'none';
+      $('btnAuth').textContent = session ? '🚪 Esci' : '🔒 Accedi';
+    }
+
+    function updateView() {
+      const locked = !session && currentTab !== 'links';
+      $('loginGate').style.display = locked ? 'block' : 'none';
+      $('sectionFlussi').style.display = (!locked && currentTab === 'flussi') ? 'block' : 'none';
+      $('sectionTodo').style.display = (!locked && currentTab === 'todo') ? 'block' : 'none';
+      $('sectionLinks').style.display = currentTab === 'links' ? 'block' : 'none';
+      $('btnTabFlussi').className = currentTab === 'flussi' ? 'tab-btn active' : 'tab-btn';
+      $('btnTabTodo').className = currentTab === 'todo' ? 'tab-btn active' : 'tab-btn';
+      $('btnTabLinks').className = currentTab === 'links' ? 'tab-btn active' : 'tab-btn';
+    }
+
+    function switchTab(tab) { currentTab = tab; updateView(); }
+
+    async function doLogin(e) {
+      e.preventDefault();
+      const err = $('loginError');
+      const btn = $('loginSubmit');
+      err.style.display = 'none';
+      if (!client) { err.textContent = 'Connessione non disponibile. Ricarica la pagina.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = 'Accesso in corso…';
+      const { error } = await client.auth.signInWithPassword({ email: $('loginEmail').value.trim(), password: $('loginPassword').value });
+      btn.disabled = false; btn.textContent = 'Accedi';
+      if (error) {
+        err.textContent = 'Email o password non corretti.';
+        err.style.display = 'block';
+        return;
+      }
+      lsSet('gt_login_email', $('loginEmail').value.trim());
+      $('loginPassword').value = '';
+      // il resto lo gestisce onAuthStateChange -> handleSignedIn
+    }
+
+    function onAuthButton() {
+      if (session) {
+        if (confirm('Vuoi uscire?')) client.auth.signOut();
+      } else {
+        if (currentTab === 'links') currentTab = 'flussi';
+        updateView();
+        const em = $('loginEmail'); if (em) em.focus();
+      }
+    }
+
+    async function handleSignedIn(sess) {
+      session = sess;
+      updateAuthUI();
+      updateView();
+      await loadAll();
+      startRealtime();
+    }
+
+    function handleSignedOut() {
+      session = null;
+      dataLoaded = false;
+      pratiche = []; manualTodos = []; archivedTodos = []; legacyLinks = [];
+      selectedStepIdx = null;
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+      updateAuthUI();
+      updateView();
+      renderApp();
+      loadLinks().then(() => { renderApp(); startRealtime(); });
+    }
+
+    async function initAuth() {
+      const savedEmail = lsGet('gt_login_email');
+      if (savedEmail) $('loginEmail').value = savedEmail;
+      updateAuthUI();
+      updateView();
+      if (!client) {
+        showBanner('⚠️ Impossibile caricare la libreria di connessione (Supabase). Controlla la rete e ricarica la pagina.');
+        return;
+      }
+      client.auth.onAuthStateChange((event, sess) => {
+        if (event === 'SIGNED_OUT') {
+          setTimeout(handleSignedOut, 0);
+        } else if (event === 'SIGNED_IN' && sess && !session) {
+          setTimeout(() => handleSignedIn(sess), 0);
+        } else if (sess) {
+          session = sess; // rinnovo del token
+        }
+      });
+      const { data } = await client.auth.getSession();
+      if (data && data.session) {
+        await handleSignedIn(data.session);
+      } else {
+        await loadLinks();
+        renderApp();
+        startRealtime();
+      }
+    }
 
     function getDemoData() {
       return [{
@@ -772,9 +937,7 @@
         isArchived: false,
         isExpanded: false,
         todoNotes: [],
-        notesHistory: [
-          { date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }
-        ]
+        notesHistory: [{ date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }]
       }];
     }
 
@@ -786,32 +949,21 @@
       updateArchiveCount();
     }
 
-    function expandAllCards() {
-      pratiche.forEach(p => p.isExpanded = true);
-      renderFeed();
-    }
-
-    function collapseAllCards() {
-      pratiche.forEach(p => p.isExpanded = false);
-      renderFeed();
-    }
+    function expandAllCards() { pratiche.forEach(p => p.isExpanded = true); renderFeed(); }
+    function collapseAllCards() { pratiche.forEach(p => p.isExpanded = false); renderFeed(); }
 
     function toggleCardExpand(id) {
       const p = pratiche.find(item => item.id === id);
-      if (p) {
-        p.isExpanded = !p.isExpanded;
-        renderFeed();
-      }
+      if (p) { p.isExpanded = !p.isExpanded; renderFeed(); }
     }
 
     function updateArchiveCount() {
-      const count = pratiche.filter(p => p.isArchived).length;
-      const badge = document.getElementById('archiveCountBadge');
-      if (badge) badge.innerText = count;
+      const badge = $('archiveCountBadge');
+      if (badge) badge.innerText = pratiche.filter(p => p.isArchived).length;
     }
 
     function initDropdownOptions() {
-      const selectShow = document.getElementById('filterShowTitle');
+      const selectShow = $('filterShowTitle');
       if (!selectShow) return;
       const currentShowVal = selectShow.value;
 
@@ -820,14 +972,12 @@
         if (p.title && p.title.trim() !== '') {
           const original = p.title.trim();
           const lower = original.toLowerCase();
-          if (!showsMap.has(lower)) {
-            showsMap.set(lower, original);
-          }
+          if (!showsMap.has(lower)) showsMap.set(lower, original);
         }
       });
 
       selectShow.innerHTML = '<option value="ALL">🎭 Tutti gli Spettacoli</option>';
-      Array.from(showsMap.values()).sort((a,b) => a.localeCompare(b, 'it', {sensitivity: 'base'})).forEach(showTitle => {
+      Array.from(showsMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(showTitle => {
         const opt = document.createElement('option');
         opt.value = showTitle;
         opt.innerText = '🎭 ' + showTitle;
@@ -839,7 +989,7 @@
     }
 
     function initAssigneeDropdownOptions() {
-      const select = document.getElementById('filterTodoAssignee');
+      const select = $('filterTodoAssignee');
       if (!select) return;
       const currentVal = select.value;
 
@@ -848,20 +998,15 @@
         if (name && name.trim() !== '') {
           const original = name.trim();
           const lower = original.toLowerCase();
-          if (!assigneesMap.has(lower)) {
-            assigneesMap.set(lower, original);
-          }
+          if (!assigneesMap.has(lower)) assigneesMap.set(lower, original);
         }
       };
 
       manualTodos.forEach(t => addName(t.assignee));
-      pratiche.filter(p => !p.isArchived).forEach(p => {
-        addName(p.ownerExt);
-        addName(p.ownerInt);
-      });
+      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerExt); addName(p.ownerInt); });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili</option>';
-      Array.from(assigneesMap.values()).sort((a,b) => a.localeCompare(b, 'it', {sensitivity: 'base'})).forEach(name => {
+      Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.innerText = '👤 ' + name;
@@ -873,11 +1018,11 @@
     function renderFeed() {
       initDropdownOptions();
 
-      const container = document.getElementById('feedList');
-      if(!container) return;
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const filterShow = document.getElementById('filterShowTitle').value;
-      const filterDept = document.getElementById('filterDept').value;
+      const container = $('feedList');
+      if (!container) return;
+      const search = $('searchInput').value.toLowerCase();
+      const filterShow = $('filterShowTitle').value;
+      const filterDept = $('filterDept').value;
       container.innerHTML = '';
 
       const activePratiche = pratiche.filter(p => !p.isArchived);
@@ -893,40 +1038,21 @@
         if (filterDept !== 'ALL') {
           const stepIdx = p.currentStepIdx || 0;
           const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
-
           const isCurrent = (currentDeptLabel === filterDept);
           const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filterDept);
           const hasAlertHere = (p.alertsList || []).some(al => al.target === filterDept);
           const hasMailHere = (p.mailDepts || []).includes(filterDept);
-
           if (!isCurrent && !hasStatusHere && !hasAlertHere && !hasMailHere) return false;
         }
-
         return true;
       });
 
-      // Ordinamento in cima alla lista per la pratica che ha ricevuto l'ultimo messaggio in chat
-      const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
-      if (lastChattedId) {
-        const foundIdx = filteredPratiche.findIndex(p => p.id === lastChattedId);
-        if (foundIdx !== -1) {
-          const item = filteredPratiche.splice(foundIdx, 1)[0];
-          filteredPratiche.unshift(item);
-        }
-      }
-
       filteredPratiche.sort((a, b) => {
-        // Se a è quella appena aggiornata in chat e non è la prima per data, manteniamo l'ordine in cima
-        if (lastChattedId && a.id === lastChattedId) return -1;
-        if (lastChattedId && b.id === lastChattedId) return 1;
-
         const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
         const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
-
         if (!hasDateA && hasDateB) return 1;
         if (hasDateA && !hasDateB) return -1;
         if (!hasDateA && !hasDateB) return 0;
-
         return a.showDate.localeCompare(b.showDate);
       });
 
@@ -954,41 +1080,22 @@
           let cls = 'step-circle';
           let symbol = idx + 1;
 
-          if (rejectedTargets.includes(s.label)) {
-            cls += ' rejected';
-            symbol = '✕';
-          } else if (statusDepts.includes(s.label)) {
-            cls += ' status-purple';
-            symbol = '🟣';
-          } else if (warnedTargets.includes(s.label)) {
-            cls += ' warning-alert';
-            symbol = '⚠️';
-          } else if (p.mailDepts.includes(s.label)) {
-            cls += ' has-mail';
-            symbol = '✉️';
-          } else if (isFullyDone) {
-            cls += ' done';
-            symbol = '✓';
-          } else if (idx >= 5) {
-            if (p.approvedSteps.includes(idx)) {
-              cls += ' done';
-              symbol = '✓';
-            } else if (stepIdx >= 5) {
-              cls += ' current-fuchsia';
-              symbol = '●';
-            }
-          } else if (p.approvedSteps.includes(idx)) {
-            cls += ' done';
-            symbol = '✓';
-          } else if (idx === stepIdx) {
-            cls += ' current-fuchsia';
-            symbol = '●';
+          if (rejectedTargets.includes(s.label)) { cls += ' rejected'; symbol = '✕'; }
+          else if (statusDepts.includes(s.label)) { cls += ' status-purple'; symbol = '🟣'; }
+          else if (warnedTargets.includes(s.label)) { cls += ' warning-alert'; symbol = '⚠️'; }
+          else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
+          else if (isFullyDone) { cls += ' done'; symbol = '✓'; }
+          else if (idx >= 5) {
+            if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
+            else if (stepIdx >= 5) { cls += ' current-fuchsia'; symbol = '●'; }
           }
+          else if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
+          else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
 
           return `
-            <div class="step-item" onclick="openStepClickModal('${p.id}', ${idx})">
+            <div class="step-item" role="button" tabindex="0" aria-label="Gestisci reparto ${esc(s.label)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openStepClickModal('${p.id}', ${idx})">
               <div class="${cls}">${symbol}</div>
-              <div class="step-label">${escapeHtml(s.label)}</div>
+              <div class="step-label">${esc(s.label)}</div>
             </div>
           `;
         }).join('');
@@ -999,7 +1106,7 @@
           bannersHTML += `
             <div class="alert-banner alert-archive">
               <span>📦 Tutti i reparti hanno completato. Vuoi archiviare questa pratica?</span>
-              <button type="button" class="btn-solve-sm" style="background: var(--success-green);" onclick="archivePratica('${p.id}')">Sì, Archivia</button>
+              <button type="button" class="btn-solve-sm" onclick="archivePratica('${p.id}')">Sì, Archivia</button>
             </div>
           `;
         }
@@ -1008,7 +1115,7 @@
           bannersHTML += `
             <div class="alert-banner alert-status">
               <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
-                🟣 <strong>Stato (${escapeHtml(st.dept)}):</strong> "${escapeHtml(st.text)}"
+                🟣 <strong>Stato (${esc(st.dept)}):</strong> "${esc(st.text)}"
               </span>
               <button type="button" class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
             </div>
@@ -1019,19 +1126,34 @@
           const isReject = al.type === 'REJECT';
           const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
           const icon = isReject ? '❌' : '⚠️';
-          
+
           let previewText = al.text || '';
           if (previewText.length > 50) previewText = previewText.substring(0, 50) + '...';
 
           bannersHTML += `
             <div class="${bannerClass}">
               <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
-                ${icon} <strong>${isReject ? `Bloccato (${escapeHtml(al.target)}):` : `Da ${escapeHtml(al.sender)} a ${escapeHtml(al.target)}:`}</strong> "${escapeHtml(previewText)}"
+                ${icon} <strong>${isReject ? `Bloccato (${esc(al.target)}):` : `Da ${esc(al.sender)} a ${esc(al.target)}:`}</strong> "${esc(previewText)}"
               </span>
               <button type="button" class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
             </div>
           `;
         });
+
+        // Banner con l'ultimo messaggio della chat (sotto stalli e avvisi)
+        const chatHist = p.notesHistory || [];
+        if (chatHist.length > 0) {
+          const lastMsg = chatHist[chatHist.length - 1];
+          let lastPreview = String(lastMsg.text || '').replace(/\s+/g, ' ').trim();
+          if (lastPreview.length > 140) lastPreview = lastPreview.substring(0, 140) + '…';
+          bannersHTML += `
+            <div class="alert-banner alert-lastmsg" role="button" tabindex="0" aria-label="Apri la chat della pratica" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')">
+              <span style="flex: 1; min-width: 0;">
+                💬 <strong>Ultimo messaggio</strong> (${esc(lastMsg.dept)} · ${esc(lastMsg.date)}): <span class="lastmsg-text">"${esc(lastPreview)}"</span>
+              </span>
+            </div>
+          `;
+        }
 
         let phaseDisplayLabel = currentDeptLabel;
         if (stepIdx >= 5) {
@@ -1039,25 +1161,20 @@
           if (!p.approvedSteps.includes(5)) pList.push('Promo');
           if (!p.approvedSteps.includes(6)) pList.push('PR');
           if (!p.approvedSteps.includes(7)) pList.push('Logistics');
-          if (pList.length > 0) {
-            phaseDisplayLabel = `In corso su: ${pList.join(', ')}`;
-          } else {
-            phaseDisplayLabel = `✅ Completato (Promo, PR & Logistics)`;
-          }
+          phaseDisplayLabel = pList.length > 0 ? `In corso su: ${pList.join(', ')}` : `✅ Completato (Promo, PR & Logistics)`;
         }
 
         const isExpanded = !!p.isExpanded;
-        const formattedShowDate = formatDateIt(p.showDate);
-        const isHighlighted = (lastChattedId && p.id === lastChattedId);
+        const formattedShowDate = esc(formatDateIt(p.showDate));
 
         let infoHeaderHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
             <div>
-              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:4px;">🎭 Data dello Spettacolo: <strong>${escapeHtml(formattedShowDate)}</strong></div>` : ''}
+              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:4px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
               ${(p.ownerExt || p.ownerInt) ? `
                 <div style="font-size:13px; color:var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
-                  ${p.ownerExt ? `<span>👤 <strong>Referente Esterno:</strong> ${escapeHtml(p.ownerExt)}</span>` : ''}
-                  ${p.ownerInt ? `<span>🏢 <strong>Referente Interno:</strong> ${escapeHtml(p.ownerInt)}</span>` : ''}
+                  ${p.ownerExt ? `<span>👤 <strong>Referente Esterno:</strong> ${esc(p.ownerExt)}</span>` : ''}
+                  ${p.ownerInt ? `<span>🏢 <strong>Referente Interno:</strong> ${esc(p.ownerInt)}</span>` : ''}
                 </div>
               ` : ''}
             </div>
@@ -1067,16 +1184,13 @@
           </div>
         `;
 
-        let highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px; margin-bottom: 8px; display: inline-block;">⭐ ULTIMO AGGIORNATO IN CHAT</span><br>` : '';
-
         const card = document.createElement('div');
-        card.className = isHighlighted ? 'card highlighted-task' : 'card';
+        card.className = 'card';
         card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
+          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
             <div>
-              ${highlightBadgeHTML}
-              <div class="client-title-main">${escapeHtml(p.client)}</div>
-              <div class="card-show-title">${escapeHtml(p.title)} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${escapeHtml(formattedShowDate)}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+              <div class="client-title-main">${esc(p.client)}</div>
+              <div class="card-show-title">${esc(p.title)} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
             </div>
             <div></div>
           </div>
@@ -1084,12 +1198,10 @@
           ${isExpanded ? `
             <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
               ${infoHeaderHTML}
-
               ${bannersHTML}
-
               <div class="stepper-box">
                 <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
-                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${escapeHtml(phaseDisplayLabel)}</strong>
+                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${esc(phaseDisplayLabel)}</strong>
                 </div>
                 <div class="stepper">${stepperHTML}</div>
               </div>
@@ -1098,7 +1210,7 @@
                 <div style="display: flex; gap: 8px;">
                   <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
                   <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
-                  <button type="button" class="btn-secondary-outline btn-sm" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391;" onclick="archivePratica('${p.id}')">📦 Archivia</button>
+                  <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="archivePratica('${p.id}')">📦 Archivia</button>
                 </div>
                 <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
               </div>
@@ -1114,22 +1226,13 @@
     async function archivePratica(id) {
       if (confirm('Vuoi archiviare questa pratica?')) {
         const p = pratiche.find(item => item.id === id);
-        if (p) {
-          p.isArchived = true;
-          p.isExpanded = false;
-          await saveData();
-        }
+        if (p) { p.isArchived = true; p.isExpanded = false; await saveData(); }
       }
     }
 
     async function unarchivePratica(id) {
       const p = pratiche.find(item => item.id === id);
-      if (p) {
-        p.isArchived = false;
-        p.isExpanded = true;
-        await saveData();
-        openArchiveModal();
-      }
+      if (p) { p.isArchived = false; p.isExpanded = true; await saveData(); openArchiveModal(); }
     }
 
     async function permanentDeletePratica(id) {
@@ -1141,9 +1244,8 @@
     }
 
     function openArchiveModal() {
-      const container = document.getElementById('archiveListContainer');
+      const container = $('archiveListContainer');
       container.innerHTML = '';
-
       const archivedItems = pratiche.filter(p => p.isArchived);
 
       if (archivedItems.length === 0) {
@@ -1152,36 +1254,32 @@
         archivedItems.forEach(p => {
           const item = document.createElement('div');
           item.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
-          const formattedShowDate = formatDateIt(p.showDate);
+          const formattedShowDate = esc(formatDateIt(p.showDate));
           item.innerHTML = `
             <div>
-              <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${escapeHtml(p.client)}</div>
-              <div style="font-size: 14px; color: var(--text-muted);">${escapeHtml(p.title)} ${formattedShowDate ? `(${escapeHtml(formattedShowDate)})` : ''}</div>
+              <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${esc(p.client)}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${esc(p.title)} ${formattedShowDate ? `(${formattedShowDate})` : ''}</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
               <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri</button>
-              <button type="button" onclick="permanentDeletePratica('${p.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina definitivamente">✕</button>
+              <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeletePratica('${p.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina definitivamente">✕</button>
             </div>
           `;
           container.appendChild(item);
         });
       }
-
-      document.getElementById('archiveModal').classList.remove('hidden');
+      $('archiveModal').classList.remove('hidden');
     }
 
-    function closeArchiveModal() {
-      document.getElementById('archiveModal').classList.add('hidden');
-    }
+    function closeArchiveModal() { $('archiveModal').classList.add('hidden'); }
 
     async function removeStatusMessage(praticaId, statusId) {
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.statusMessages) return;
-      
       const removed = item.statusMessages.find(st => st.id === statusId);
       item.statusMessages = item.statusMessages.filter(st => st.id !== statusId);
-
       if (removed) {
+        if (!item.notesHistory) item.notesHistory = [];
         item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto stallo su ${removed.dept}: "${removed.text}"` });
       }
       await saveData();
@@ -1190,16 +1288,11 @@
     async function removeSingleAlert(praticaId, alertId) {
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.alertsList) return;
-      
       const removed = item.alertsList.find(a => a.id === alertId);
       item.alertsList = item.alertsList.filter(a => a.id !== alertId);
-      
       if (removed) {
-        item.notesHistory.push({ 
-          date: getNow(), 
-          dept: 'Sistema', 
-          text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` 
-        });
+        if (!item.notesHistory) item.notesHistory = [];
+        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` });
       }
       await saveData();
     }
@@ -1207,12 +1300,12 @@
     function renderTodoList() {
       initAssigneeDropdownOptions();
 
-      const container = document.getElementById('todoList');
-      if(!container) return;
+      const container = $('todoList');
+      if (!container) return;
 
-      const search = (document.getElementById('searchTodoInput')?.value || '').toLowerCase();
-      const filterDept = document.getElementById('filterTodoDept')?.value || 'ALL';
-      const filterAssignee = document.getElementById('filterTodoAssignee')?.value || 'ALL';
+      const search = (($('searchTodoInput') || {}).value || '').toLowerCase();
+      const filterDept = ($('filterTodoDept') || {}).value || 'ALL';
+      const filterAssignee = ($('filterTodoAssignee') || {}).value || 'ALL';
 
       const formattedManuals = [];
       const resolvedManuals = [];
@@ -1222,12 +1315,7 @@
         if (!item.id) item.id = 'mt_fallback_' + Math.random().toString(36).substr(2, 6);
         if (!item.actionOriginal && item.action) item.actionOriginal = item.action;
         if (!item.chatHistory) item.chatHistory = item.actionOriginal ? [{ date: 'Storico', text: item.actionOriginal }] : [];
-        
-        if (item.isResolved) {
-          resolvedManuals.push(item);
-        } else {
-          formattedManuals.push(item);
-        }
+        if (item.isResolved) resolvedManuals.push(item); else formattedManuals.push(item);
       });
 
       let autoTasks = [];
@@ -1235,138 +1323,48 @@
       pratiche.filter(p => !p.isArchived).forEach(p => {
         const stepIdx = p.currentStepIdx || 0;
         const currentDept = ROUTE_STEPS[stepIdx].label;
-
         if (!p.todoNotes) p.todoNotes = [];
+        if (!p.approvedSteps) p.approvedSteps = [];
+        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || p.ownerExt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes };
 
         if (p.statusMessages && p.statusMessages.length > 0) {
           p.statusMessages.forEach(st => {
-            autoTasks.push({
-              id: 'st_auto_' + st.id,
-              praticaId: p.id,
-              title: `${p.client} - ${p.title}`,
-              dept: st.dept,
-              assignee: p.ownerInt || p.ownerExt || '',
-              deadline: p.showDate || '',
-              situation: `🟣 ${st.dept} - IN ATTESA`,
-              action: `Motivo: ${st.text}`,
-              isManual: false,
-              todoNotes: p.todoNotes
-            });
+            autoTasks.push({ ...base, id: 'st_auto_' + st.id, dept: st.dept, situation: `🟣 ${st.dept} - IN ATTESA`, action: `Motivo: ${st.text}` });
           });
         }
 
         if (p.mailDepts && p.mailDepts.length > 0) {
           p.mailDepts.forEach(dept => {
-            autoTasks.push({
-              id: 'mail_auto_' + dept + '_' + p.id,
-              praticaId: p.id,
-              title: `${p.client} - ${p.title}`,
-              dept: dept,
-              assignee: p.ownerInt || p.ownerExt || '',
-              deadline: p.showDate || '',
-              situation: `✉️ ${dept} - POSTA IN ARRIVO`,
-              action: `Nuovo messaggio o comunicazione ricevuta in chat.`,
-              isManual: false,
-              mailDeptName: dept,
-              todoNotes: p.todoNotes
-            });
+            autoTasks.push({ ...base, id: 'mail_auto_' + dept + '_' + p.id, dept: dept, situation: `✉️ ${dept} - POSTA IN ARRIVO`, action: `Nuovo messaggio o comunicazione ricevuta in chat.`, mailDeptName: dept });
           });
         }
 
         if (p.alertsList && p.alertsList.length > 0) {
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
-            autoTasks.push({
-              id: 'al_auto_' + al.id,
-              praticaId: p.id,
-              title: `${p.client} - ${p.title}`,
-              dept: al.target,
-              assignee: p.ownerInt || p.ownerExt || '',
-              deadline: p.showDate || '',
-              situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`,
-              action: `Nota: ${al.text}`,
-              isManual: false,
-              todoNotes: p.todoNotes
-            });
+            autoTasks.push({ ...base, id: 'al_auto_' + al.id, dept: al.target, situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`, action: `Nota: ${al.text}` });
           });
         }
 
         if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
           if (stepIdx >= 5) {
-            if (!p.approvedSteps.includes(5)) {
-              autoTasks.push({
-                id: 'wait_auto_promo_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'Promo',
-                assignee: p.ownerInt || p.ownerExt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ Promo - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da Promo.`,
-                isManual: false,
-                todoNotes: p.todoNotes
-              });
-            }
-            if (!p.approvedSteps.includes(6)) {
-              autoTasks.push({
-                id: 'wait_auto_pr_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'PR',
-                assignee: p.ownerInt || p.ownerExt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ PR - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da PR.`,
-                isManual: false,
-                todoNotes: p.todoNotes
-              });
-            }
-            if (!p.approvedSteps.includes(7)) {
-              autoTasks.push({
-                id: 'wait_auto_log_' + p.id,
-                praticaId: p.id,
-                title: `${p.client} - ${p.title}`,
-                dept: 'Logistics',
-                assignee: p.ownerInt || p.ownerExt || '',
-                deadline: p.showDate || '',
-                situation: `⏳ Logistics - IN ATTESA (parallelo)`,
-                action: `In attesa di conferma ESEGUITO da Logistics.`,
-                isManual: false,
-                todoNotes: p.todoNotes
-              });
-            }
+            if (!p.approvedSteps.includes(5)) autoTasks.push({ ...base, id: 'wait_auto_promo_' + p.id, dept: 'Promo', situation: `⏳ Promo - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Promo.` });
+            if (!p.approvedSteps.includes(6)) autoTasks.push({ ...base, id: 'wait_auto_pr_' + p.id, dept: 'PR', situation: `⏳ PR - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da PR.` });
+            if (!p.approvedSteps.includes(7)) autoTasks.push({ ...base, id: 'wait_auto_log_' + p.id, dept: 'Logistics', situation: `⏳ Logistics - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Logistics.` });
           } else {
-            autoTasks.push({
-              id: 'wait_auto_' + p.id,
-              praticaId: p.id,
-              title: `${p.client} - ${p.title}`,
-              dept: currentDept,
-              assignee: p.ownerInt || p.ownerExt || '',
-              deadline: p.showDate || '',
-              situation: `⏳ ${currentDept} - IN ATTESA`,
-              action: `Pratica ferma in attesa di approvazione o avanzamento.`,
-              isManual: false,
-              todoNotes: p.todoNotes
-            });
+            autoTasks.push({ ...base, id: 'wait_auto_' + p.id, dept: currentDept, situation: `⏳ ${currentDept} - IN ATTESA`, action: `Pratica ferma in attesa di approvazione o avanzamento.` });
           }
         }
       });
 
-      const sortTasksByDeadline = (list) => {
-        return list.sort((a, b) => {
-          const deadlineA = (a.deadline || '').trim();
-          const deadlineB = (b.deadline || '').trim();
-
-          const hasDateA = deadlineA !== '';
-          const hasDateB = deadlineB !== '';
-
-          if (hasDateA && !hasDateB) return -1;
-          if (!hasDateA && hasDateB) return 1;
-          if (!hasDateA && !hasDateB) return 0;
-
-          return deadlineA.localeCompare(deadlineB);
-        });
-      };
+      const sortTasksByDeadline = (list) => list.sort((a, b) => {
+        const dA = (a.deadline || '').trim();
+        const dB = (b.deadline || '').trim();
+        if (dA && !dB) return -1;
+        if (!dA && dB) return 1;
+        if (!dA && !dB) return 0;
+        return dA.localeCompare(dB);
+      });
 
       sortTasksByDeadline(formattedManuals);
       sortTasksByDeadline(resolvedManuals);
@@ -1374,8 +1372,7 @@
 
       let allTasks = [...formattedManuals, ...autoTasks, ...resolvedManuals];
 
-      const lastChattedId = localStorage.getItem('gt_last_chatted_todo_id');
-      
+      const lastChattedId = lsGet('gt_last_chatted_todo_id');
       if (lastChattedId) {
         const foundIdx = allTasks.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
         if (foundIdx !== -1) {
@@ -1392,19 +1389,12 @@
           if (t.isManual) {
             const matchDept = (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
             if (!matchDept) return false;
-          } else {
-            if ((t.dept || '').toLowerCase() !== filterDept.toLowerCase()) return false;
-          }
+          } else if ((t.dept || '').toLowerCase() !== filterDept.toLowerCase()) return false;
         }
 
         if (filterAssignee !== 'ALL') {
-          const taskAssignee = (t.assignee || '').toLowerCase().trim();
-          const selectedAssignee = filterAssignee.toLowerCase().trim();
-          if (taskAssignee !== selectedAssignee) {
-            return false;
-          }
+          if ((t.assignee || '').toLowerCase().trim() !== filterAssignee.toLowerCase().trim()) return false;
         }
-
         return true;
       });
 
@@ -1422,15 +1412,8 @@
         else if (t.situation && t.situation.includes('POSTA IN ARRIVO')) badgeClass += ' amber';
         else if (t.situation && t.situation.includes('IN ATTESA')) badgeClass += ' fuchsia';
 
-        let assigneeBadgeHTML = '';
-        if (t.assignee) {
-          assigneeBadgeHTML = `<span class="todo-badge assignee">👤 ${escapeHtml(t.assignee)}</span>`;
-        }
-
-        let deadlineBadgeHTML = '';
-        if (t.deadline) {
-          deadlineBadgeHTML = `<span class="todo-badge deadline">⏳ Entro il: ${escapeHtml(formatDateIt(t.deadline))}</span>`;
-        }
+        const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${esc(t.assignee)}</span>` : '';
+        const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
         const isHighlighted = (lastChattedId && (t.id === lastChattedId || t.praticaId === lastChattedId)) && !t.isResolved;
 
@@ -1438,26 +1421,23 @@
         item.className = isHighlighted ? 'todo-card highlighted-task' : 'todo-card';
         if (t.isResolved) item.style.opacity = '0.75';
 
-        const safeId = t.id ? t.id.replace(/'/g, "\\'") : '';
+        const safeId = t.id ? String(t.id).replace(/['"\\]/g, '') : '';
 
         const originalActionText = t.actionOriginal || t.action || '';
         let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
 
-        if (t.isManual && t.chatHistory && t.chatHistory.length > 0) {
-          const lastMsg = t.chatHistory[t.chatHistory.length - 1];
-          displayContentHTML += `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${escapeHtml(lastMsg.date)}]:</strong> ${linkify(lastMsg.text)}</div>`;
-        } else if (!t.isManual && t.todoNotes && t.todoNotes.length > 0) {
-          const lastMsg = t.todoNotes[t.todoNotes.length - 1];
-          displayContentHTML += `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${escapeHtml(lastMsg.date)}]:</strong> ${linkify(lastMsg.text)}</div>`;
-        }
+        const lastOf = (arr) => arr[arr.length - 1];
+        const commentBox = (m) => `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>`;
 
-        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}', '${t.title.replace(/'/g, "\\'")}')`;
+        if (t.isManual && t.chatHistory && t.chatHistory.length > 0) displayContentHTML += commentBox(lastOf(t.chatHistory));
+        else if (!t.isManual && t.todoNotes && t.todoNotes.length > 0) displayContentHTML += commentBox(lastOf(t.todoNotes));
+
+        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
 
         let actionTabsHTML = '';
         if (t.isManual) {
           const resolveBtnStyle = t.isResolved ? 'background: #d69e2e; color: #000;' : 'background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid var(--success-green);';
           const resolveBtnText = t.isResolved ? '↩️ Riapri' : '✅ Risolto';
-          
           actionTabsHTML = `
             <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
               <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${safeId}')">${resolveBtnText}</button>
@@ -1466,31 +1446,29 @@
           `;
         }
 
-        let highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
+        const highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
             <div style="width: 10px; flex-shrink: 0;"></div>
-            
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
                   ${highlightBadgeHTML}
-                  <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : escapeHtml(t.situation)}</span>
+                  <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : esc(t.situation)}</span>
                   ${assigneeBadgeHTML}
                   ${deadlineBadgeHTML}
                 </div>
                 ${actionTabsHTML}
               </div>
-              <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;">${escapeHtml(t.title)}</div>
+              <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;">${esc(t.title)}</div>
               ${displayContentHTML}
             </div>
-
             <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
               ${t.isManual ? `
-                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="openEditTodoModal('${safeId}')">✏️</button>
-                <button type="button" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${safeId}')">✏️</button>
+                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               ` : ''}
             </div>
           </div>
@@ -1499,22 +1477,22 @@
       });
     }
 
-    // GESTIONE TAB LINK UTILI
+    // ============ LINK UTILI ============
     function renderLinksList() {
-      const container = document.getElementById('linksListContainer');
+      const container = $('linksListContainer');
       if (!container) return;
 
-      const search = (document.getElementById('searchLinkInput')?.value || '').toLowerCase();
+      const search = (($('searchLinkInput') || {}).value || '').toLowerCase();
       container.innerHTML = '';
-
       if (!utileLinks) utileLinks = [];
 
-      const filteredLinks = utileLinks.filter(l => {
-        return (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search);
-      });
+      const filteredLinks = utileLinks.filter(l => (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search));
 
       if (filteredLinks.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessun link utile inserito.</div>`;
+        let emptyMsg = 'Nessun link utile inserito.';
+        if (linksError === 'NOROW') emptyMsg = 'I link non sono ancora stati pubblicati. Chiedi a chi ha l\'accesso di aprire l\'app almeno una volta.';
+        else if (linksError) emptyMsg = 'Impossibile caricare i link (' + linksError + ').';
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">${esc(emptyMsg)}</div>`;
         return;
       }
 
@@ -1524,7 +1502,7 @@
         card.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 0; overflow: hidden;">
-              <div style="font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 6px; word-break: break-word;">${escapeHtml(linkItem.title)}</div>
+              <div style="font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 6px; word-break: break-word;">${esc(linkItem.title)}</div>
               <div style="font-size: 14px; color: #fff; margin-bottom: 10px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
               <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
                 🔗 ${linkify(linkItem.url)}
@@ -1532,7 +1510,7 @@
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
               <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
-              <button type="button" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
+              <button type="button" aria-label="Elimina link" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
             </div>
           </div>
         `;
@@ -1541,75 +1519,62 @@
     }
 
     function openLinkModal() {
-      document.getElementById('editLinkId').value = '';
-      document.getElementById('linkTitleInput').value = '';
-      document.getElementById('linkDescInput').value = '';
-      document.getElementById('linkUrlInput').value = '';
-      document.getElementById('linkModalTitle').innerText = 'Aggiungi Link Utile';
-      document.getElementById('linkModal').classList.remove('hidden');
+      $('editLinkId').value = '';
+      $('linkTitleInput').value = '';
+      $('linkDescInput').value = '';
+      $('linkUrlInput').value = '';
+      $('linkModalTitle').innerText = 'Aggiungi Link Utile';
+      $('linkModal').classList.remove('hidden');
     }
 
-    function closeLinkModal() {
-      document.getElementById('linkModal').classList.add('hidden');
-    }
+    function closeLinkModal() { $('linkModal').classList.add('hidden'); }
 
     async function saveLinkItem(e) {
       e.preventDefault();
-      const id = document.getElementById('editLinkId').value;
-      const title = document.getElementById('linkTitleInput').value.trim();
-      const description = document.getElementById('linkDescInput').value.trim();
-      let url = document.getElementById('linkUrlInput').value.trim();
+      const id = $('editLinkId').value;
+      const title = $('linkTitleInput').value.trim();
+      const description = $('linkDescInput').value.trim();
+      let url = $('linkUrlInput').value.trim();
 
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
 
       if (id) {
         const item = utileLinks.find(l => l.id === id);
-        if (item) {
-          item.title = title;
-          item.description = description;
-          item.url = url;
-        }
+        if (item) { item.title = title; item.description = description; item.url = url; }
       } else {
-        utileLinks.unshift({
-          id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-          title,
-          description,
-          url
-        });
+        utileLinks.unshift({ id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), title, description, url });
       }
 
       closeLinkModal();
-      await saveData();
+      await saveLinks();
     }
 
     function openEditLinkModal(id) {
       const item = utileLinks.find(l => l.id === id);
       if (!item) return;
-      document.getElementById('editLinkId').value = item.id;
-      document.getElementById('linkTitleInput').value = item.title || '';
-      document.getElementById('linkDescInput').value = item.description || '';
-      document.getElementById('linkUrlInput').value = item.url || '';
-      document.getElementById('linkModalTitle').innerText = 'Modifica Link Utile';
-      document.getElementById('linkModal').classList.remove('hidden');
+      $('editLinkId').value = item.id;
+      $('linkTitleInput').value = item.title || '';
+      $('linkDescInput').value = item.description || '';
+      $('linkUrlInput').value = item.url || '';
+      $('linkModalTitle').innerText = 'Modifica Link Utile';
+      $('linkModal').classList.remove('hidden');
     }
 
     async function confirmDeleteLinkItem(id) {
       if (confirm('Vuoi eliminare questo link utile?')) {
         utileLinks = utileLinks.filter(l => l.id !== id);
-        await saveData();
+        await saveLinks();
       }
     }
 
+    // ============ TASK MANUALI ============
     async function toggleManualTodoResolved(id) {
       const item = manualTodos.find(t => t.id === id);
       if (item) {
         item.isResolved = !item.isResolved;
         if (!item.chatHistory) item.chatHistory = [];
         item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
-        
-        localStorage.setItem('gt_last_chatted_todo_id', item.id);
+        lsSet('gt_last_chatted_todo_id', item.id);
         await saveData();
       }
     }
@@ -1622,11 +1587,7 @@
           removed.archivedAt = getNow();
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
-          
-          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
-            localStorage.removeItem('gt_last_chatted_todo_id');
-          }
-
+          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
           await saveData();
         }
       }
@@ -1637,9 +1598,7 @@
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
           manualTodos.splice(itemIdx, 1);
-          if (localStorage.getItem('gt_last_chatted_todo_id') === id) {
-            localStorage.removeItem('gt_last_chatted_todo_id');
-          }
+          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
           await saveData();
         }
       }
@@ -1647,36 +1606,24 @@
 
     function toggleArchivedTodosSection() {
       isArchivedSectionOpen = !isArchivedSectionOpen;
-      const container = document.getElementById('archivedTodosContainer');
-      const label = document.getElementById('archivedToggleLabel');
-      if (isArchivedSectionOpen) {
-        container.style.display = 'block';
-        label.innerText = '[ Clicca per chiudere ▴ ]';
-      } else {
-        container.style.display = 'none';
-        label.innerText = '[ Clicca per aprire ▾ ]';
-      }
+      $('archivedTodosContainer').style.display = isArchivedSectionOpen ? 'block' : 'none';
+      $('archivedToggleLabel').innerText = isArchivedSectionOpen ? '[ Clicca per chiudere ▴ ]' : '[ Clicca per aprire ▾ ]';
     }
 
     function jumpToArchivedTodos() {
       if (!isArchivedSectionOpen) {
         isArchivedSectionOpen = true;
-        const container = document.getElementById('archivedTodosContainer');
-        const label = document.getElementById('archivedToggleLabel');
-        if (container) container.style.display = 'block';
-        if (label) label.innerText = '[ Clicca per chiudere ▴ ]';
+        $('archivedTodosContainer').style.display = 'block';
+        $('archivedToggleLabel').innerText = '[ Clicca per chiudere ▴ ]';
       }
-      
-      const anchor = document.getElementById('archivedTodosAnchorSection');
-      if (anchor) {
-        anchor.scrollIntoView({ behavior: 'smooth' });
-      }
+      const anchor = $('archivedTodosAnchorSection');
+      if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
     }
 
     function renderArchivedTodoList() {
-      const container = document.getElementById('archivedTodosContainer');
-      const badgeTop = document.getElementById('archivedTodoCountBadge');
-      const badgeBottom = document.getElementById('archivedTodoCountBadgeBottom');
+      const container = $('archivedTodosContainer');
+      const badgeTop = $('archivedTodoCountBadge');
+      const badgeBottom = $('archivedTodoCountBadgeBottom');
       if (!container || !badgeTop || !badgeBottom) return;
 
       if (!archivedTodos) archivedTodos = [];
@@ -1692,23 +1639,24 @@
       archivedTodos.forEach((t) => {
         const item = document.createElement('div');
         item.style.cssText = "background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; opacity: 0.85;";
-        
-        let assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${escapeHtml(t.assignee)}</span>` : '';
-        let deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${escapeHtml(formatDateIt(t.deadline))}</span>` : '';
+
+        const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${esc(t.assignee)}</span>` : '';
+        const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
+        const safeId = String(t.id || '').replace(/['"\\]/g, '');
 
         item.innerHTML = `
           <div style="flex: 1; min-width: 0; overflow: hidden;">
             <div>
-              <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${escapeHtml(t.archivedAt || 'Storico')})</span>
+              <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${esc(t.archivedAt || 'Storico')})</span>
               ${assigneeBadgeHTML}
               ${deadlineBadgeHTML}
             </div>
-            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px; word-break: break-word;">${escapeHtml(t.title)}</div>
-            <div style="font-size: 13px; color: var(--text-muted); word-break: break-word;">${linkify(t.actionOriginal || t.action || '')}</div>
+            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px; word-break: break-word;">${esc(t.title)}</div>
+            <div class="todo-text-block" style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
-            <button type="button" onclick="permanentDeleteArchivedTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
+            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${safeId}')">↩️ Ripristina</button>
+            <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeleteArchivedTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
           </div>
         `;
         container.appendChild(item);
@@ -1732,51 +1680,48 @@
       }
     }
 
+    // ============ CHAT TASK ============
     function openTodoChatModal(id) {
       const item = manualTodos.find(t => t.id === id);
       if (!item) return;
-      document.getElementById('todoChatId').value = item.id;
-      document.getElementById('todoChatPraticaId').value = '';
-      document.getElementById('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
-      document.getElementById('todoChatNewText').value = '';
-      document.getElementById('btnTodoResolveToggle').style.display = 'block';
+      $('todoChatId').value = item.id;
+      $('todoChatPraticaId').value = '';
+      $('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
+      $('todoChatNewText').value = '';
+      $('btnTodoResolveToggle').style.display = 'block';
 
-      const btnResolveToggle = document.getElementById('btnTodoResolveToggle');
+      const btn = $('btnTodoResolveToggle');
       if (item.isResolved) {
-        btnResolveToggle.innerText = '↩️ Riapri Task';
-        btnResolveToggle.style.background = '#d69e2e';
-        btnResolveToggle.style.color = '#000';
+        btn.innerText = '↩️ Riapri Task';
+        btn.style.background = '#d69e2e';
+        btn.style.color = '#000';
       } else {
-        btnResolveToggle.innerText = '✅ Segna Risolto';
-        btnResolveToggle.style.background = 'var(--success-green)';
-        btnResolveToggle.style.color = '#fff';
+        btn.innerText = '✅ Segna Risolto';
+        btn.style.background = 'var(--success-green)';
+        btn.style.color = '#fff';
       }
 
-      document.getElementById('todoChatModal').classList.remove('hidden');
+      $('todoChatModal').classList.remove('hidden');
       renderTodoChatMessages(item, null);
     }
 
-    function openPraticaTodoChatModal(praticaId, praticaTitle) {
+    function openPraticaTodoChatModal(praticaId) {
       const p = pratiche.find(item => item.id === praticaId);
       if (!p) return;
-      document.getElementById('todoChatId').value = '';
-      document.getElementById('todoChatPraticaId').value = p.id;
-      document.getElementById('todoChatModalTitle').innerText = `Chat Operativa: ${praticaTitle}`;
-      document.getElementById('todoChatNewText').value = '';
-      document.getElementById('btnTodoResolveToggle').style.display = 'none';
-
+      $('todoChatId').value = '';
+      $('todoChatPraticaId').value = p.id;
+      $('todoChatModalTitle').innerText = `Chat Operativa: ${p.client} - ${p.title}`;
+      $('todoChatNewText').value = '';
+      $('btnTodoResolveToggle').style.display = 'none';
       if (!p.todoNotes) p.todoNotes = [];
-
-      document.getElementById('todoChatModal').classList.remove('hidden');
+      $('todoChatModal').classList.remove('hidden');
       renderTodoChatMessages(null, p);
     }
 
-    function closeTodoChatModal() {
-      document.getElementById('todoChatModal').classList.add('hidden');
-    }
+    function closeTodoChatModal() { $('todoChatModal').classList.add('hidden'); }
 
     function renderTodoChatMessages(manualItem, praticaItem) {
-      const box = document.getElementById('todoChatMessages');
+      const box = $('todoChatMessages');
       box.innerHTML = '';
 
       let messagesArray = [];
@@ -1788,45 +1733,48 @@
         return;
       }
 
+      let html = '';
       messagesArray.forEach((msg, index) => {
-        const editCall = manualItem ? `openEditTodoChatMessageModal('${manualItem.id}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`;
-        const delCall = manualItem ? `confirmDeleteTodoChatMessage('${manualItem.id}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
-        box.innerHTML += `
+        const mid = manualItem ? String(manualItem.id).replace(/['"\\]/g, '') : '';
+        const editCall = manualItem ? `openEditTodoChatMessageModal('${mid}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`;
+        const delCall = manualItem ? `confirmDeleteTodoChatMessage('${mid}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`;
+        html += `
           <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${escapeHtml(msg.date)}</span>
+              <span style="font-size: 11px; color: var(--gold-light); font-weight: bold;">${esc(msg.date)}</span>
               <div style="display: flex; gap: 8px; align-items: center;">
                 <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${editCall}">✏️ Modifica</button>
-                <button type="button" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+                <button type="button" aria-label="Elimina messaggio" onclick="${delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4; word-break: break-word;">${linkify(msg.text)}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(msg.text)}</div>
           </div>
         `;
       });
+      box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
     }
 
     function openEditTodoChatMessageModal(itemId, index) {
       const item = manualTodos.find(t => t.id === itemId);
       if (!item || !item.chatHistory || !item.chatHistory[index]) return;
-      document.getElementById('editChatType').value = 'manualTodo';
-      document.getElementById('editChatManualId').value = itemId;
-      document.getElementById('editChatPraticaId').value = '';
-      document.getElementById('editChatIndex').value = index;
-      document.getElementById('editChatText').value = item.chatHistory[index].text;
-      document.getElementById('editChatMsgModal').classList.remove('hidden');
+      $('editChatType').value = 'manualTodo';
+      $('editChatManualId').value = itemId;
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = item.chatHistory[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
     }
 
     function openEditPraticaTodoMessageModal(praticaId, index) {
       const p = pratiche.find(item => item.id === praticaId);
       if (!p || !p.todoNotes || !p.todoNotes[index]) return;
-      document.getElementById('editChatType').value = 'praticaTodo';
-      document.getElementById('editChatManualId').value = '';
-      document.getElementById('editChatPraticaId').value = praticaId;
-      document.getElementById('editChatIndex').value = index;
-      document.getElementById('editChatText').value = p.todoNotes[index].text;
-      document.getElementById('editChatMsgModal').classList.remove('hidden');
+      $('editChatType').value = 'praticaTodo';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = praticaId;
+      $('editChatIndex').value = index;
+      $('editChatText').value = p.todoNotes[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
     }
 
     async function confirmDeleteTodoChatMessage(itemId, msgIndex) {
@@ -1835,7 +1783,7 @@
         if (item && item.chatHistory) {
           item.chatHistory.splice(msgIndex, 1);
           await saveData();
-          renderTodoChatMessages(item, null);
+          renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
         }
       }
     }
@@ -1846,79 +1794,75 @@
         if (p && p.todoNotes) {
           p.todoNotes.splice(msgIndex, 1);
           await saveData();
-          renderTodoChatMessages(null, p);
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
         }
       }
     }
 
     async function addTodoChatMessage() {
-      const manualId = document.getElementById('todoChatId').value;
-      const praticaId = document.getElementById('todoChatPraticaId').value;
-      const text = document.getElementById('todoChatNewText').value.trim();
+      const manualId = $('todoChatId').value;
+      const praticaId = $('todoChatPraticaId').value;
+      const text = $('todoChatNewText').value.trim();
       if (!text) return;
 
-      let manualObj = null;
-      let praticaObj = null;
-
       if (manualId) {
-        manualObj = manualTodos.find(t => t.id === manualId);
+        const manualObj = manualTodos.find(t => t.id === manualId);
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
-          localStorage.setItem('gt_last_chatted_todo_id', manualObj.id);
+          lsSet('gt_last_chatted_todo_id', manualObj.id);
         }
       } else if (praticaId) {
-        praticaObj = pratiche.find(item => item.id === praticaId);
+        const praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
           if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
           praticaObj.todoNotes.push({ date: getNow(), text: text });
-          localStorage.setItem('gt_last_chatted_todo_id', praticaObj.id);
+          lsSet('gt_last_chatted_todo_id', praticaObj.id);
         }
       }
 
-      document.getElementById('todoChatNewText').value = '';
+      $('todoChatNewText').value = '';
       await saveData();
-      
+
       if (manualId) openTodoChatModal(manualId);
-      if (praticaId) openPraticaTodoChatModal(praticaId, praticaObj.title);
+      if (praticaId) openPraticaTodoChatModal(praticaId);
     }
 
     async function toggleResolveFromChat() {
-      const id = document.getElementById('todoChatId').value;
+      const id = $('todoChatId').value;
       if (!id) return;
       const item = manualTodos.find(t => t.id === id);
       if (item) {
         item.isResolved = !item.isResolved;
         if (!item.chatHistory) item.chatHistory = [];
         item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
-        
-        localStorage.setItem('gt_last_chatted_todo_id', item.id);
+        lsSet('gt_last_chatted_todo_id', item.id);
         await saveData();
         closeTodoChatModal();
       }
     }
 
-    function openTodoModal() { 
-      document.getElementById('todoTitle').value = '';
-      document.getElementById('todoAssignee').value = '';
-      document.getElementById('todoDeadline').value = '';
-      document.getElementById('todoAction').value = '';
-      document.getElementById('todoModal').classList.remove('hidden'); 
+    function openTodoModal() {
+      $('todoTitle').value = '';
+      $('todoAssignee').value = '';
+      $('todoDeadline').value = '';
+      $('todoAction').value = '';
+      $('todoModal').classList.remove('hidden');
     }
-    function closeTodoModal() { document.getElementById('todoModal').classList.add('hidden'); }
+    function closeTodoModal() { $('todoModal').classList.add('hidden'); }
 
     async function saveManualTodo(e) {
       e.preventDefault();
-      const sitVal = document.getElementById('todoSit').value;
-      const initialAction = document.getElementById('todoAction').value;
+      const sitVal = $('todoSit').value;
+      const initialAction = $('todoAction').value;
       const newId = 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
       manualTodos.unshift({
         id: newId,
-        title: document.getElementById('todoTitle').value,
+        title: $('todoTitle').value,
         dept: sitVal,
-        assignee: document.getElementById('todoAssignee').value.trim(),
-        deadline: document.getElementById('todoDeadline').value.trim(),
+        assignee: $('todoAssignee').value.trim(),
+        deadline: $('todoDeadline').value.trim(),
         situation: `📌 ${sitVal}`,
         actionOriginal: initialAction,
         action: initialAction,
@@ -1927,8 +1871,7 @@
         isResolved: false
       });
 
-      localStorage.setItem('gt_last_chatted_todo_id', newId);
-
+      lsSet('gt_last_chatted_todo_id', newId);
       closeTodoModal();
       await saveData();
     }
@@ -1936,47 +1879,41 @@
     function openEditTodoModal(id) {
       const item = manualTodos.find(t => t.id === id);
       if (!item) return;
-      document.getElementById('editTodoId').value = item.id;
-      document.getElementById('editTodoTitle').value = item.title || '';
-      
-      const selectSit = document.getElementById('editTodoSit');
-      if (item.dept && [...selectSit.options].some(o => o.value === item.dept)) {
-        selectSit.value = item.dept;
-      }
-      
-      document.getElementById('editTodoAssignee').value = item.assignee || '';
-      document.getElementById('editTodoDeadline').value = item.deadline || '';
-      document.getElementById('editTodoAction').value = item.actionOriginal || item.action || '';
-      document.getElementById('editTodoIsResolved').checked = !!item.isResolved;
-      document.getElementById('editTodoModal').classList.remove('hidden');
+      $('editTodoId').value = item.id;
+      $('editTodoTitle').value = item.title || '';
+
+      const selectSit = $('editTodoSit');
+      if (item.dept && [...selectSit.options].some(o => o.value === item.dept)) selectSit.value = item.dept;
+
+      $('editTodoAssignee').value = item.assignee || '';
+      $('editTodoDeadline').value = item.deadline || '';
+      $('editTodoAction').value = item.actionOriginal || item.action || '';
+      $('editTodoIsResolved').checked = !!item.isResolved;
+      $('editTodoModal').classList.remove('hidden');
     }
 
-    function closeEditTodoModal() {
-      document.getElementById('editTodoModal').classList.add('hidden');
-    }
+    function closeEditTodoModal() { $('editTodoModal').classList.add('hidden'); }
 
     async function saveEditedManualTodo(e) {
       e.preventDefault();
-      const id = document.getElementById('editTodoId').value;
+      const id = $('editTodoId').value;
       const item = manualTodos.find(t => t.id === id);
       if (item) {
-        item.title = document.getElementById('editTodoTitle').value;
-        const sitVal = document.getElementById('editTodoSit').value;
+        item.title = $('editTodoTitle').value;
+        const sitVal = $('editTodoSit').value;
         item.dept = sitVal;
-        item.assignee = document.getElementById('editTodoAssignee').value.trim();
-        item.deadline = document.getElementById('editTodoDeadline').value.trim();
-        item.isResolved = document.getElementById('editTodoIsResolved').checked;
-        if (!item.isResolved) {
-          item.situation = `📌 ${sitVal}`;
-        }
-        item.actionOriginal = document.getElementById('editTodoAction').value;
+        item.assignee = $('editTodoAssignee').value.trim();
+        item.deadline = $('editTodoDeadline').value.trim();
+        item.isResolved = $('editTodoIsResolved').checked;
+        if (!item.isResolved) item.situation = `📌 ${sitVal}`;
+        item.actionOriginal = $('editTodoAction').value;
         item.action = item.actionOriginal;
-        
         closeEditTodoModal();
         await saveData();
       }
     }
 
+    // ============ GESTIONE REPARTI (STEPPER) ============
     function openStepClickModal(id, idx) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
@@ -1988,12 +1925,12 @@
         saveData();
       }
 
-      document.getElementById('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
-      document.getElementById('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
+      $('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
+      $('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
 
       const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
-      const btnApprove = document.getElementById('btnApproveNext');
-      const btnExecuteFinal = document.getElementById('btnExecuteFinal');
+      const btnApprove = $('btnApproveNext');
+      const btnExecuteFinal = $('btnExecuteFinal');
 
       btnApprove.style.display = 'none';
       btnExecuteFinal.style.display = 'none';
@@ -2007,40 +1944,31 @@
         btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
       }
 
-      document.getElementById('stepClickModal').classList.remove('hidden');
+      $('stepClickModal').classList.remove('hidden');
     }
 
-    function closeStepClickModal() { document.getElementById('stepClickModal').classList.add('hidden'); }
+    function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
 
     function openQuickChatFromStep() {
       closeStepClickModal();
       if (!activeItem || selectedStepIdx === null) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      document.getElementById('quickChatSenderLabel').innerText = deptLabel;
-      document.getElementById('quickChatTextInput').value = '';
-      document.getElementById('quickChatModal').classList.remove('hidden');
+      $('quickChatSenderLabel').innerText = ROUTE_STEPS[selectedStepIdx].label;
+      $('quickChatTextInput').value = '';
+      $('quickChatModal').classList.remove('hidden');
     }
 
-    function closeQuickChatModal() {
-      document.getElementById('quickChatModal').classList.add('hidden');
-    }
+    function closeQuickChatModal() { $('quickChatModal').classList.add('hidden'); }
 
     async function saveQuickChatFromStep(e) {
       e.preventDefault();
       if (!activeItem || selectedStepIdx === null) return;
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      const text = document.getElementById('quickChatTextInput').value.trim();
+      const text = $('quickChatTextInput').value.trim();
       if (!text) return;
 
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
-      activeItem.notesHistory.push({
-        date: getNow(),
-        dept: deptLabel,
-        text: text
-      });
-
-      // Salva l'ID della pratica come ultimo aggiornato in chat per evidenziarlo sia nei task che nei flussi
-      localStorage.setItem('gt_last_chatted_todo_id', activeItem.id);
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
+      lsSet('gt_last_chatted_todo_id', activeItem.id);
 
       closeQuickChatModal();
       await saveData();
@@ -2049,9 +1977,9 @@
     function openSendBackModal() {
       closeStepClickModal();
       const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      document.getElementById('sendBackModalTitle').innerText = `Rimanda da "${currentDeptLabel}" ad altro reparto`;
+      $('sendBackModalTitle').innerText = `Rimanda da "${currentDeptLabel}" ad altro reparto`;
 
-      const select = document.getElementById('sendBackTargetSelect');
+      const select = $('sendBackTargetSelect');
       select.innerHTML = '';
 
       ROUTE_STEPS.forEach((s, idx) => {
@@ -2062,23 +1990,27 @@
         select.appendChild(opt);
       });
 
-      document.getElementById('sendBackNoteInput').value = '';
-      document.getElementById('sendBackModal').classList.remove('hidden');
+      $('sendBackNoteInput').value = '';
+      $('sendBackModal').classList.remove('hidden');
     }
 
-    function closeSendBackModal() {
-      document.getElementById('sendBackModal').classList.add('hidden');
-    }
+    function closeSendBackModal() { $('sendBackModal').classList.add('hidden'); }
 
     async function saveSendBackAction(e) {
       e.preventDefault();
       if (!activeItem || selectedStepIdx === null) return;
       const senderDept = ROUTE_STEPS[selectedStepIdx].label;
-      const targetStepIdx = parseInt(document.getElementById('sendBackTargetSelect').value);
+      const targetStepIdx = parseInt($('sendBackTargetSelect').value);
       const targetDept = ROUTE_STEPS[targetStepIdx].label;
-      const note = document.getElementById('sendBackNoteInput').value.trim();
+      const note = $('sendBackNoteInput').value.trim();
 
       activeItem.currentStepIdx = targetStepIdx;
+
+      // Rimandando indietro, i passi da rifare non devono restare "approvati"
+      if (targetStepIdx <= selectedStepIdx) {
+        const bothParallel = targetStepIdx >= 5 && selectedStepIdx >= 5;
+        activeItem.approvedSteps = (activeItem.approvedSteps || []).filter(i => bothParallel ? i !== targetStepIdx : i < targetStepIdx);
+      }
 
       if (!activeItem.alertsList) activeItem.alertsList = [];
       activeItem.alertsList.push({
@@ -2092,11 +2024,7 @@
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
       if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
 
-      activeItem.notesHistory.push({
-        date: getNow(),
-        dept: senderDept,
-        text: `↩️ [Rimandato a ${targetDept}]: ${note}`
-      });
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `↩️ [Rimandato a ${targetDept}]: ${note}` });
 
       closeSendBackModal();
       await saveData();
@@ -2105,9 +2033,9 @@
     function openStatusModal() {
       closeStepClickModal();
       const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      document.getElementById('statusModalTitle').innerText = `Segnala Stallo / Metti in Attesa da "${currentDeptLabel}"`;
+      $('statusModalTitle').innerText = `Segnala Stallo / Metti in Attesa da "${currentDeptLabel}"`;
 
-      const select = document.getElementById('statusTargetSelect');
+      const select = $('statusTargetSelect');
       select.innerHTML = '';
 
       ROUTE_STEPS.forEach(s => {
@@ -2118,21 +2046,20 @@
         select.appendChild(opt);
       });
 
-      document.getElementById('statusNoteInput').value = '';
-      document.getElementById('statusModal').classList.remove('hidden');
+      $('statusNoteInput').value = '';
+      $('statusModal').classList.remove('hidden');
     }
 
-    function closeStatusModal() { document.getElementById('statusModal').classList.add('hidden'); }
+    function closeStatusModal() { $('statusModal').classList.add('hidden'); }
 
     async function saveDepartmentStatus(event) {
       event.preventDefault();
       if (!activeItem || selectedStepIdx === null) return;
       const senderDept = ROUTE_STEPS[selectedStepIdx].label;
-      const targetDept = document.getElementById('statusTargetSelect').value;
-      const text = document.getElementById('statusNoteInput').value.trim();
+      const targetDept = $('statusTargetSelect').value;
+      const text = $('statusNoteInput').value.trim();
 
       if (!activeItem.statusMessages) activeItem.statusMessages = [];
-
       activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
 
       activeItem.statusMessages.push({
@@ -2157,21 +2084,14 @@
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
 
       if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
-      if (!activeItem.approvedSteps.includes(selectedStepIdx)) {
-        activeItem.approvedSteps.push(selectedStepIdx);
-      }
+      if (!activeItem.approvedSteps.includes(selectedStepIdx)) activeItem.approvedSteps.push(selectedStepIdx);
 
-      if (activeItem.statusMessages) {
-        activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
-      }
-
-      if (activeItem.mailDepts) {
-        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
-      }
+      if (activeItem.statusMessages) activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
+      if (activeItem.mailDepts) activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
 
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
-        
+
         if (activeItem.currentStepIdx === 5) {
           activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
         } else {
@@ -2191,7 +2111,6 @@
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
 
       if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
-
       const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
 
       if (isAlreadyDone) {
@@ -2208,57 +2127,50 @@
 
     function openInterveneFromStepClick() {
       closeStepClickModal();
-      let activeSenderDept = ROUTE_STEPS[selectedStepIdx].label;
-      document.getElementById('interveneModalTitle').innerText = `Blocca Reparto "${activeSenderDept}"`;
-      document.getElementById('interveneNote').value = '';
-      document.getElementById('interveneModal').classList.remove('hidden');
+      $('interveneModalTitle').innerText = `Blocca Reparto "${ROUTE_STEPS[selectedStepIdx].label}"`;
+      $('interveneNote').value = '';
+      $('interveneModal').classList.remove('hidden');
     }
 
-    function closeInterveneModal() { document.getElementById('interveneModal').classList.add('hidden'); }
+    function closeInterveneModal() { $('interveneModal').classList.add('hidden'); }
 
     async function confirmInterveneAction(e) {
       e.preventDefault();
       if (!activeItem || selectedStepIdx === null) return;
       const senderDept = ROUTE_STEPS[selectedStepIdx].label;
-      const note = document.getElementById('interveneNote').value.trim() || 'Bloccato';
+      const note = $('interveneNote').value.trim() || 'Bloccato';
 
       if (!activeItem.alertsList) activeItem.alertsList = [];
-
-      const newAlert = {
+      activeItem.alertsList.push({
         id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         type: 'REJECT',
         sender: senderDept,
         target: senderDept,
         text: note
-      };
+      });
 
-      activeItem.alertsList.push(newAlert);
-      
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
       if (!activeItem.mailDepts.includes(senderDept)) activeItem.mailDepts.push(senderDept);
 
-      activeItem.notesHistory.push({ 
-        date: getNow(), 
-        dept: senderDept, 
-        text: `[REPARTO BLOCCATO ❌]: ${note}` 
-      });
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `[REPARTO BLOCCATO ❌]: ${note}` });
 
       closeInterveneModal();
       await saveData();
     }
 
+    // ============ CHAT PRATICA ============
     function openChatModal(id) {
       activeItem = pratiche.find(p => p.id === id);
       if (!activeItem) return;
-
-      document.getElementById('chatModalTitle').innerText = `Consulta Chat: ${activeItem.client} - ${activeItem.title}`;
-      document.getElementById('chatModal').classList.remove('hidden');
+      $('chatModalTitle').innerText = `Consulta Chat: ${activeItem.client} - ${activeItem.title}`;
+      $('chatModal').classList.remove('hidden');
       renderChatMessages();
     }
 
     function renderChatMessages() {
-      const box = document.getElementById('chatMessages');
+      const box = $('chatMessages');
       box.innerHTML = '';
+      if (!activeItem) return;
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
 
       if (activeItem.notesHistory.length === 0) {
@@ -2266,22 +2178,23 @@
         return;
       }
 
+      let html = '';
       activeItem.notesHistory.forEach((n, index) => {
-        box.innerHTML += `
+        html += `
           <div style="background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px; word-break: break-word;">
             <div style="display: flex; justify-content: space-between; color: var(--gold-light); font-weight: bold; margin-bottom: 6px;">
-              <span>${escapeHtml(n.dept)}</span>
+              <span>${esc(n.dept)}</span>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <span style="font-size: 12px; color: var(--text-muted);">${escapeHtml(n.date)}</span>
+                <span style="font-size: 12px; color: var(--text-muted);">${esc(n.date)}</span>
                 <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openEditFlussiChatMsgModal(${index})">✏️ Modifica</button>
-                <button type="button" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+                <button type="button" aria-label="Elimina messaggio" onclick="confirmDeleteChatMsg(${index})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
               </div>
             </div>
-            <div class="chat-msg-text" style="color: #fff; line-height: 1.4; word-break: break-word;">${linkify(n.text)}</div>
+            <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(n.text)}</div>
           </div>
         `;
       });
-
+      box.innerHTML = html;
       box.scrollTop = box.scrollHeight;
     }
 
@@ -2296,26 +2209,25 @@
     }
 
     function openEditFlussiChatMsgModal(index) {
+      if (!activeItem) return;
       const note = activeItem.notesHistory[index];
       if (!note) return;
-      document.getElementById('editChatType').value = 'flussi';
-      document.getElementById('editChatManualId').value = '';
-      document.getElementById('editChatPraticaId').value = '';
-      document.getElementById('editChatIndex').value = index;
-      document.getElementById('editChatText').value = note.text;
-      document.getElementById('editChatMsgModal').classList.remove('hidden');
+      $('editChatType').value = 'flussi';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = note.text;
+      $('editChatMsgModal').classList.remove('hidden');
     }
 
-    function closeEditChatMsgModal() {
-      document.getElementById('editChatMsgModal').classList.add('hidden');
-    }
+    function closeEditChatMsgModal() { $('editChatMsgModal').classList.add('hidden'); }
 
     async function saveEditedChatMsg(e) {
       e.preventDefault();
-      const type = document.getElementById('editChatType').value;
-      const index = parseInt(document.getElementById('editChatIndex').value);
-      const newText = document.getElementById('editChatText').value.trim();
-      
+      const type = $('editChatType').value;
+      const index = parseInt($('editChatIndex').value);
+      const newText = $('editChatText').value.trim();
+
       if (type === 'flussi') {
         if (activeItem && activeItem.notesHistory[index]) {
           activeItem.notesHistory[index].text = newText;
@@ -2323,63 +2235,64 @@
           renderChatMessages();
         }
       } else if (type === 'manualTodo') {
-        const manualId = document.getElementById('editChatManualId').value;
+        const manualId = $('editChatManualId').value;
         const item = manualTodos.find(t => t.id === manualId);
         if (item && item.chatHistory && item.chatHistory[index]) {
           item.chatHistory[index].text = newText;
           await saveData();
-          renderTodoChatMessages(item, null);
+          renderTodoChatMessages(manualTodos.find(t => t.id === manualId) || item, null);
         }
       } else if (type === 'praticaTodo') {
-        const praticaId = document.getElementById('editChatPraticaId').value;
+        const praticaId = $('editChatPraticaId').value;
         const p = pratiche.find(item => item.id === praticaId);
         if (p && p.todoNotes && p.todoNotes[index]) {
           p.todoNotes[index].text = newText;
           await saveData();
-          renderTodoChatMessages(null, p);
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
         }
       }
       closeEditChatMsgModal();
     }
 
-    function closeChatModal() { document.getElementById('chatModal').classList.add('hidden'); }
+    function closeChatModal() { $('chatModal').classList.add('hidden'); }
 
-    function openNewModal() { 
-      document.getElementById('formClient').value = '';
-      document.getElementById('formTitle').value = '';
-      document.getElementById('formShowDate').value = '';
-      document.getElementById('formOwnerExt').value = '';
-      document.getElementById('formOwnerInt').value = '';
-      document.getElementById('newModal').classList.remove('hidden'); 
+    // ============ PRATICHE ============
+    function openNewModal() {
+      $('formClient').value = '';
+      $('formTitle').value = '';
+      $('formShowDate').value = '';
+      $('formOwnerExt').value = '';
+      $('formOwnerInt').value = '';
+      $('newModal').classList.remove('hidden');
     }
-    function closeNewModal() { document.getElementById('newModal').classList.add('hidden'); }
+    function closeNewModal() { $('newModal').classList.add('hidden'); }
 
     function openEditModal(id) {
       const item = pratiche.find(p => p.id === id);
       if (!item) return;
-      document.getElementById('editId').value = item.id;
-      document.getElementById('editClient').value = item.client || '';
-      document.getElementById('editTitle').value = item.title || '';
-      document.getElementById('editShowDate').value = item.showDate || '';
-      document.getElementById('editOwnerExt').value = item.ownerExt || '';
-      document.getElementById('editOwnerInt').value = item.ownerInt || '';
-      document.getElementById('editModal').classList.remove('hidden');
+      $('editId').value = item.id;
+      $('editClient').value = item.client || '';
+      $('editTitle').value = item.title || '';
+      $('editShowDate').value = item.showDate || '';
+      $('editOwnerExt').value = item.ownerExt || '';
+      $('editOwnerInt').value = item.ownerInt || '';
+      $('editModal').classList.remove('hidden');
     }
 
-    function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
+    function closeEditModal() { $('editModal').classList.add('hidden'); }
 
     async function updatePratica(e) {
       e.preventDefault();
-      const id = document.getElementById('editId').value;
+      const id = $('editId').value;
       const item = pratiche.find(p => p.id === id);
       if (item) {
-        item.client = document.getElementById('editClient').value;
-        item.title = document.getElementById('editTitle').value;
-        item.showDate = document.getElementById('editShowDate').value.trim();
-        item.ownerExt = document.getElementById('editOwnerExt').value.trim();
-        item.ownerInt = document.getElementById('editOwnerInt').value.trim();
+        item.client = $('editClient').value;
+        item.title = $('editTitle').value;
+        item.showDate = $('editShowDate').value.trim();
+        item.ownerExt = $('editOwnerExt').value.trim();
+        item.ownerInt = $('editOwnerInt').value.trim();
+        if (!item.notesHistory) item.notesHistory = [];
         item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
-        
         closeEditModal();
         await saveData();
       }
@@ -2389,11 +2302,11 @@
       e.preventDefault();
       pratiche.unshift({
         id: 'p_' + Date.now(),
-        title: document.getElementById('formTitle').value,
-        client: document.getElementById('formClient').value,
-        showDate: document.getElementById('formShowDate').value.trim(),
-        ownerExt: document.getElementById('formOwnerExt').value.trim(),
-        ownerInt: document.getElementById('formOwnerInt').value.trim(),
+        title: $('formTitle').value,
+        client: $('formClient').value,
+        showDate: $('formShowDate').value.trim(),
+        ownerExt: $('formOwnerExt').value.trim(),
+        ownerInt: $('formOwnerInt').value.trim(),
         currentStepIdx: 0,
         approvedSteps: [],
         statusMessages: [],
@@ -2404,7 +2317,7 @@
         todoNotes: [],
         notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
       });
-      
+
       closeNewModal();
       await saveData();
     }
@@ -2416,32 +2329,19 @@
       }
     }
 
-    function switchTab(tab) {
-      document.getElementById('sectionFlussi').style.display = tab === 'flussi' ? 'block' : 'none';
-      document.getElementById('sectionTodo').style.display = tab === 'todo' ? 'block' : 'none';
-      document.getElementById('sectionLinks').style.display = tab === 'links' ? 'block' : 'none';
-      
-      document.getElementById('btnTabFlussi').className = tab === 'flussi' ? 'tab-btn active' : 'tab-btn';
-      document.getElementById('btnTabTodo').className = tab === 'todo' ? 'tab-btn active' : 'tab-btn';
-      document.getElementById('btnTabLinks').className = tab === 'links' ? 'tab-btn active' : 'tab-btn';
-    }
-
-    function exportBackup() {
-      const dataObj = { pratiche, manualTodos, archivedTodos, utileLinks, exportDate: new Date().toISOString() };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `golden_ticket_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
     function getNow() {
-      return new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+      return new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
     }
 
-    loadData();
+    // Accessibilità modali: ruolo dialog + chiusura con Esc
+    document.querySelectorAll('.modal-overlay').forEach(m => { m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const open = [...document.querySelectorAll('.modal-overlay:not(.hidden)')].pop();
+      if (open) { const b = open.querySelector('.close-x'); if (b) b.click(); }
+    });
+
+    initAuth();
   </script>
 </body>
 </html>
