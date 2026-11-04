@@ -1252,11 +1252,14 @@
         }
 
         const chatHist = p.notesHistory || [];
+        // Filtriamo i messaggi per l'anteprima escludendo quelli automatici di sistema (es. approvato, rimandato, ecc.)
+        const userChatHist = chatHist.filter(m => !isSystemLogMessage(m.text));
+
         if (chatHist.length > 0) {
           const clip = (t, n) => clipKeepUrls(String(t || '').replace(/\s+/g, ' ').trim(), n);
           const openKey = `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')"`;
           const pinnedMsg = chatHist.find(m => m.pinned);
-          const lastMsgs = chatHist.slice(-3).reverse();
+          const lastMsgs = userChatHist.slice(-3).reverse();
 
           if (pinnedMsg) {
             const pinIdx = chatHist.indexOf(pinnedMsg);
@@ -1265,7 +1268,7 @@
                 <span style="flex: 1; min-width: 0;">
                   📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${linkify(clip(pinnedMsg.text, 220))}"</span>
                 </span>
-                <button type="button" aria-label="Elimina messaggio" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${pinIdx})">✕</button>
+                <button type="button" aria-label="Elimina messaggio" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:2px 6px;" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${pinIdx})">✕</button>
               </div>
             `;
           }
@@ -1278,7 +1281,7 @@
                 <span style="flex: 1; min-width: 0;">
                   💬 (${esc(m.dept)} · ${esc(m.date)}): <span class="lastmsg-text">"${linkify(clip(m.text, 140))}"</span>
                 </span>
-                <button type="button" aria-label="Elimina messaggio" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${mIdx})">✕</button>
+                <button type="button" aria-label="Elimina messaggio" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:2px 6px;" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${mIdx})">✕</button>
               </div>
             `;
           });
@@ -1596,13 +1599,15 @@
 
         const clip = (text, n) => clipKeepUrls(String(text || '').replace(/\s+/g, ' ').trim(), n);
         const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
+        const userChatArr = chatArr.filter(m => !isSystemLogMessage(m.text));
+
         if (chatArr.length > 0) {
           const pinnedMsg = chatArr.find(m => m.pinned);
-          const lastMsgs = chatArr.slice(-3).reverse();
+          const lastMsgs = userChatArr.slice(-3).reverse();
 
           if (pinnedMsg) {
             const pinIdx = chatArr.indexOf(pinnedMsg);
-            const pinBox = `<div class="todo-text-block" style="font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); margin-top: 6px; display:flex; justify-content:space-between; align-items:center;"><span>📌 <strong style="color: var(--gold-light);">Fissato [${esc(pinnedMsg.date)}]:</strong> ${linkify(clip(pinnedMsg.text, 180))}</span><button type="button" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${pinIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${pinIdx})`}">✕</button></div>`;
+            const pinBox = `<div class="todo-text-block" style="font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); margin-top: 6px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}"><span>📌 <strong style="color: var(--gold-light);">Fissato [${esc(pinnedMsg.date)}]:</strong> ${linkify(clip(pinnedMsg.text, 180))}</span><button type="button" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:2px 6px;" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${pinIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${pinIdx})`}">✕</button></div>`;
             displayContentHTML += pinBox;
             collapsedHTML += pinBox;
           }
@@ -1610,7 +1615,7 @@
           lastMsgs.forEach(m => {
             const mIdx = chatArr.indexOf(m);
             if (m.pinned) return;
-            const commentBox = `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px; display:flex; justify-content:space-between; align-items:center;"><span>💬 [${esc(m.date)}]: ${linkify(clip(m.text, 120))}</span><button type="button" class="btn-solve-sm" style="background:var(--danger-red); padding:4px 8px; font-size:10px;" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${mIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${mIdx})`}">✕</button></div>`;
+            const commentBox = `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}"><span>💬 [${esc(m.date)}]: ${linkify(clip(m.text, 120))}</span><button type="button" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:2px 6px;" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${mIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${mIdx})`}">✕</button></div>`;
             displayContentHTML += commentBox;
           });
         }
@@ -2702,6 +2707,26 @@
       }
     }
 
+    // Helper per verificare se un messaggio è un log di sistema da non mostrare nell'anteprima card
+    function isSystemLogMessage(text) {
+      if (!text) return false;
+      const t = String(text).trim();
+      return (
+        t.startsWith('✅ Approvato') ||
+        t.startsWith('✅ Ultimo reparto') ||
+        t.startsWith('✅ Risolto') ||
+        t.startsWith('✅ Risolti') ||
+        t.startsWith('↩️ [Rimandato') ||
+        t.startsWith('↩️ Annullato') ||
+        t.startsWith('🟣 [Stato Stallo') ||
+        t.startsWith('[REPARTO BLOCCATO') ||
+        t.startsWith('🙋') ||
+        t.startsWith('🚀') ||
+        t.startsWith('⏹') ||
+        t === 'Creata nuova pratica.'
+      );
+    }
+
     async function savePratica(e) {
       e.preventDefault();
       pratiche.unshift({
@@ -2720,7 +2745,7 @@
         isArchived: false,
         isExpanded: false,
         todoNotes: [],
-        notesHistory: []
+        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
       });
 
       closeNewModal();
