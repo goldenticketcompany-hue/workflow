@@ -13,7 +13,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
-
+aa
     header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 14px; }
     .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
@@ -737,8 +737,9 @@
     // ============ CARICAMENTO / SALVATAGGIO ============
     function applyData(d) {
       pratiche = d.pratiche || [];
-      manualTodos = d.manualTodos || [];
-      archivedTodos = d.archivedTodos || [];
+      // Ripristino e normalizzazione sicura dei task manuali e archiviati
+      manualTodos = Array.isArray(d.manualTodos) ? d.manualTodos : [];
+      archivedTodos = Array.isArray(d.archivedTodos) ? d.archivedTodos : [];
       legacyLinks = d.utileLinks || [];
 
       pratiche.forEach(p => {
@@ -762,6 +763,8 @@
         delete t.subtasks;
         if (t.isExpanded === undefined) t.isExpanded = false;
       });
+
+      initDropdownOptions();
     }
 
     async function loadData(canRetry = true) {
@@ -777,21 +780,22 @@
             client.auth.signOut();
             return;
           }
-          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati: il salvataggio è disattivato per non sovrascrivere i dati esistenti. Ricarica la pagina.');
+          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati. Ricarica la pagina.');
           return;
         }
 
         if (data && data.data) {
           applyData(data.data);
-        } else {
-          pratiche = getDemoData();
-          manualTodos = []; archivedTodos = []; legacyLinks = [];
+        } else if (!dataLoaded) {
+          // Se non esiste ancora la riga o i dati sono vuoti sul DB, inizializziamo conservando eventuali dati locali o demo
+          if (pratiche.length === 0) pratiche = getDemoData();
         }
         dataLoaded = true;
         showBanner('');
+        renderApp();
       } catch (e) {
         console.error('Eccezione di caricamento:', e);
-        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati. Ricarica la pagina.');
+        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati.');
       }
     }
 
@@ -843,19 +847,24 @@
     const saveLinks = () => enqueue(doSaveLinks);
 
     async function doSave() {
-      if (!client || !dataLoaded || !session) {
-        alert('Salvataggio bloccato: accesso scaduto o dati non caricati. Ricarica la pagina e rifai l\'accesso.');
+      if (!client || !session) {
+        alert('Salvataggio bloccato: accesso scaduto o non autenticato. Effettua nuovamente l\'accesso.');
         return;
       }
       try {
         await client.auth.getSession();
-        const error = await writeRow('main', { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks });
-        if (error) throw error;
+        const payload = { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks };
+        let { error } = await client.from('workflow').update({ data: payload }).eq('id', 'main');
+        if (error) {
+          // Se la riga non esiste ancora, proviamo l'inserimento
+          const { error: insErr } = await client.from('workflow').insert({ id: 'main', data: payload });
+          if (insErr) throw insErr;
+        }
         showBanner('');
         renderApp();
       } catch (err) {
         console.error('Errore di salvataggio:', err);
-        showBanner('⚠️ Salvataggio NON riuscito. Ricarico i dati dal server: ripeti l\'ultima modifica.');
+        showBanner('⚠️ Salvataggio NON riuscito. Riprovo in corso...');
         setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
       }
     }
@@ -1290,25 +1299,32 @@
           const clip = (t, n) => clipKeepUrls(String(t || '').replace(/\s+/g, ' ').trim(), n);
           const openKey = `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')"`;
           const pinnedMsg = chatHist.find(m => m.pinned);
-          const lastMsg = chatHist[chatHist.length - 1];
+          
           if (pinnedMsg) {
             bannersHTML += `
               <div class="alert-banner alert-pinned" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
                 <span style="flex: 1; min-width: 0;">
                   📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${linkify(clip(pinnedMsg.text, 220))}"</span>
                 </span>
+                <button type="button" aria-label="Elimina messaggio fissato" title="Elimina messaggio" onclick="event.stopPropagation(); deletePraticaChatMsgDirect('${p.id}', ${chatHist.indexOf(pinnedMsg)})" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 2px 6px; margin-left:8px; opacity:0.8;">✕</button>
               </div>
             `;
           }
-          if (!lastMsg.pinned) {
+
+          // Mostra gli ultimi 3 messaggi non fissati della chat con tasto X diretto
+          const unpinned = chatHist.filter(m => !m.pinned);
+          const lastThree = unpinned.slice(-3);
+          lastThree.forEach(msg => {
+            const realIdx = chatHist.indexOf(msg);
             bannersHTML += `
               <div class="alert-banner alert-lastmsg" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
                 <span style="flex: 1; min-width: 0;">
-                  💬 <strong>Ultimo messaggio</strong> (${esc(lastMsg.dept)} · ${esc(lastMsg.date)}): <span class="lastmsg-text">"${linkify(clip(lastMsg.text, 140))}"</span>
+                  💬 <strong>Chat</strong> (${esc(msg.dept)} · ${esc(msg.date)}): <span class="lastmsg-text">"${linkify(clip(msg.text, 140))}"</span>
                 </span>
+                <button type="button" aria-label="Elimina messaggio" title="Elimina messaggio" onclick="event.stopPropagation(); deletePraticaChatMsgDirect('${p.id}', ${realIdx})" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 2px 6px; margin-left:8px; opacity:0.8;">✕</button>
               </div>
             `;
-          }
+          });
         }
 
         let phaseDisplayLabel = currentDeptLabel;
@@ -1482,10 +1498,11 @@
 
       pratiche.filter(p => !p.isArchived).forEach(p => {
         const stepIdx = p.currentStepIdx || 0;
-        const currentDept = ROUTE_STEPS[stepIdx].label;
+        const currentDept = ROUTE_STEPS[stepIdx] ? ROUTE_STEPS[stepIdx].label : 'Prospect';
         if (!p.todoNotes) p.todoNotes = [];
         if (!p.approvedSteps) p.approvedSteps = [];
-        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
+        const base = { praticaId: p.id, title: `${p.client || 'Committente'} - ${p.title || 'Spettacolo'}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
+        
         if (stepIdx < 5) {
           (p.earlyStart || []).forEach(d => {
             autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: d, situation: `🚀 ${d} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
@@ -1534,15 +1551,9 @@
       const manualsAll = sortTasksByDeadline([...formattedManuals, ...resolvedManuals]);
       sortTasksByDeadline(autoTasks);
 
-      const lastChattedId = lsGet('gt_last_chatted_todo_id');
-      const bump = (list) => {
-        if (!lastChattedId) return list;
-        const i = list.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
-        if (i > 0) { const [it] = list.splice(i, 1); list.unshift(it); }
-        return list;
-      };
       const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
-      let allTasks = [...bump(pinnedAll), ...bump(manualsAll.filter(t => !t.pinnedTask)), ...bump(autoTasks.filter(t => !t.pinnedTask))];
+      const unpinnedAll = [...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
+      let allTasks = [...pinnedAll, ...unpinnedAll];
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
@@ -1589,42 +1600,75 @@
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
-        const isHighlighted = (lastChattedId && (t.id === lastChattedId || t.praticaId === lastChattedId)) && !t.isResolved;
-
         const item = document.createElement('div');
-        item.className = isHighlighted ? 'todo-card highlighted-task' : 'todo-card';
+        item.className = 'todo-card';
         if (t.pinnedTask) item.className += ' pinned-task';
-        if (t.isResolved) item.style.opacity = '0.75';
+        const safeId = String(t.id || '').replace(/['"\\]/g, '');
+        const isExp = !!t.isExpanded;
 
-        const safeId = t.id ? String(t.id).replace(/['"\\]/g, '') : '';
-
-        const originalActionText = t.actionOriginal || t.action || '';
-        let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
-        let collapsedHTML = '';
-        const isExp = !t.isManual || !!t.isExpanded;
-        if (t.isManual && t.checklist && t.checklist.length > 0) {
-          collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Passaggi: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completati</div>`;
+        let actionContentHTML = '';
+        if (t.isManual) {
+          const chk = t.checklist || [];
+          if (chk.length > 0) {
+            let chkHtml = '<div style="margin: 10px 0; display:flex; flex-direction:column; gap:6px;">';
+            chk.forEach((c) => {
+              const cid = String(c.id || '');
+              chkHtml += `
+                <div class="cl-view ${c.done ? 'done-view' : ''}">
+                  <input type="checkbox" ${c.done ? 'checked' : ''} onclick="toggleChecklistItem('${safeId}', '${cid}')" aria-label="Spunta elemento">
+                  <span class="todo-text-block">${linkify(c.text)}</span>
+                </div>
+              `;
+            });
+            chkHtml += '</div>';
+            actionContentHTML += chkHtml;
+          }
+          if (t.actionOriginal || t.action) {
+            actionContentHTML += `<div class="todo-text-block" style="font-size: 14px; color: #fff; margin-top: 6px;">📝 <strong>Azione:</strong> ${linkify(t.actionOriginal || t.action)}</div>`;
+          }
+        } else {
+          actionContentHTML += `<div class="todo-text-block" style="font-size: 14px; color: #fff; margin-top: 6px;">📝 <strong>Dettagli:</strong> ${linkify(t.action)}</div>`;
         }
 
-        if (t.isManual && t.checklist && t.checklist.length > 0) {
-          const doneCount = t.checklist.filter(c => c.done).length;
-          const rows = t.checklist.map((c, i) => {
-            const cid = String(c.id).replace(/['"\\]/g, '');
-            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${safeId}', '${cid}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
-          }).join('');
-          displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Passaggi (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
-        }
+        let displayContentHTML = actionContentHTML;
+        let collapsedHTML = actionContentHTML;
 
-        const lastOf = (arr) => arr[arr.length - 1];
-        const commentBox = (m) => `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">💬 <strong>Ultimo commento [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>`;
+        const commentBox = (m, realIdx, isManual, parentId) => {
+          const deleteCall = isManual ? `deleteManualTodoChatMsgDirect('${parentId}', ${realIdx})` : `deletePraticaTodoChatMsgDirect('${parentId}', ${realIdx})`;
+          return `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">
+              <div class="todo-text-block" style="flex: 1; min-width: 0;">💬 <strong>Commento [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
+              <button type="button" aria-label="Elimina messaggio" title="Elimina messaggio" onclick="event.stopPropagation(); ${deleteCall}" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:16px; padding: 0 4px; flex-shrink: 0; opacity:0.8;">✕</button>
+            </div>
+          `;
+        };
 
-        const pinBox = (m) => `<div class="todo-text-block" style="font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;">📌 <strong style="color: var(--gold-light);">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>`;
+        const pinBox = (m, realIdx, isManual, parentId) => {
+          const deleteCall = isManual ? `deleteManualTodoChatMsgDirect('${parentId}', ${realIdx})` : `deletePraticaTodoChatMsgDirect('${parentId}', ${realIdx})`;
+          return `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;">
+              <div class="todo-text-block" style="flex: 1; min-width: 0;">📌 <strong style="color: var(--gold-light);">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
+              <button type="button" aria-label="Elimina messaggio fissato" title="Elimina messaggio" onclick="event.stopPropagation(); ${deleteCall}" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 0 4px; flex-shrink: 0; opacity:0.8;">✕</button>
+            </div>
+          `;
+        };
+
         const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
         if (chatArr.length > 0) {
           const pinnedMsg = chatArr.find(m => m.pinned);
-          const lastMsg = lastOf(chatArr);
-          if (pinnedMsg) { displayContentHTML += pinBox(pinnedMsg); collapsedHTML += pinBox(pinnedMsg); }
-          if (!lastMsg.pinned) displayContentHTML += commentBox(lastMsg);
+          const unpinned = chatArr.filter(m => !m.pinned);
+          const lastThree = unpinned.slice(-3);
+
+          if (pinnedMsg) { 
+            const realIdx = chatArr.indexOf(pinnedMsg);
+            const pbox = pinBox(pinnedMsg, realIdx, t.isManual, t.isManual ? safeId : t.praticaId);
+            displayContentHTML += pbox; 
+            collapsedHTML += pbox; 
+          }
+          lastThree.forEach(m => {
+            const realIdx = chatArr.indexOf(m);
+            displayContentHTML += commentBox(m, realIdx, t.isManual, t.isManual ? safeId : t.praticaId);
+          });
         }
 
         const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
@@ -1641,15 +1685,12 @@
           `;
         }
 
-        const highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
-
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
             <div style="width: 10px; flex-shrink: 0;"></div>
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
-                  ${highlightBadgeHTML}
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : esc(t.situation)}</span>
                   ${assigneeBadgeHTML}
                   ${deadlineBadgeHTML}
@@ -1997,6 +2038,36 @@
           p.todoNotes.splice(msgIndex, 1);
           await saveData();
           renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
+        }
+      }
+    }
+
+    async function deletePraticaChatMsgDirect(praticaId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.notesHistory && p.notesHistory[msgIndex]) {
+          p.notesHistory.splice(msgIndex, 1);
+          await saveData();
+        }
+      }
+    }
+
+    async function deleteManualTodoChatMsgDirect(taskId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
+        const task = manualTodos.find(t => t.id === taskId);
+        if (task && task.chatHistory && task.chatHistory[msgIndex]) {
+          task.chatHistory.splice(msgIndex, 1);
+          await saveData();
+        }
+      }
+    }
+
+    async function deletePraticaTodoChatMsgDirect(praticaId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes && p.todoNotes[msgIndex]) {
+          p.todoNotes.splice(msgIndex, 1);
+          await saveData();
         }
       }
     }
