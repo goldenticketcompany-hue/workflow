@@ -40,8 +40,8 @@
     .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
     .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
     .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
-    .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
-    .alert-pinned { background: rgba(246, 224, 94, 0.18); color: var(--gold-light); border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
+    .alert-lastmsg { background: rgba(28, 5, 7, 0.6); color: var(--text-main); border: 1.5px solid var(--border-color); cursor: pointer; }
+    .alert-pinned { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 2.5px solid #ff1a1a; box-shadow: 0 0 14px rgba(255, 26, 26, 0.4); cursor: pointer; }
     .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -1636,7 +1636,7 @@
 
         const item = document.createElement('div');
         item.className = 'todo-card';
-        if (t.pinnedTask) item.style.border = '2.5px solid var(--gold-light)';
+        if (t.pinnedTask) item.style.border = '2.5px solid #ff1a1a';
         if (t.isResolved) item.style.opacity = '0.75';
 
         item.innerHTML = `
@@ -1764,20 +1764,6 @@
         if (!item.chatHistory) item.chatHistory = [];
         item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
         await saveData();
-      }
-    }
-
-    async function archiveManualTodoWithPrompt(id) {
-      if (confirm('Vuoi archiviare questo task?')) {
-        const itemIdx = manualTodos.findIndex(t => t.id === id);
-        if (itemIdx !== -1) {
-          const removed = manualTodos.splice(itemIdx, 1)[0];
-          removed.archivedAt = getNow();
-          delete removed.pinnedTask;
-          if (!archivedTodos) archivedTodos = [];
-          archivedTodos.unshift(removed);
-          await saveData();
-        }
       }
     }
 
@@ -2546,7 +2532,7 @@
 
     function chatMsgCard(o) {
       const boxStyle = o.pinned
-        ? 'border: 2px solid var(--gold-light); background: #2e1a05; position: sticky; top: 0; z-index: 2;'
+        ? 'border: 2.5px solid #ff1a1a; background: #2a0505; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 12px rgba(255, 26, 26, 0.4);'
         : 'border: 1.5px solid var(--border-color); background: #1c0507;';
       return `
         <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
