@@ -13,7 +13,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
-aa
+
     header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 14px; }
     .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
@@ -42,7 +42,6 @@ aa
     .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
     .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
     .alert-pinned { background: rgba(246, 224, 94, 0.18); color: var(--gold-light); border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
-    .alert-pinned .lastmsg-text { color: #fff; }
     .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -61,10 +60,14 @@ aa
     .cl-view input { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
     .cl-view-num { min-width: 22px; color: var(--gold-light); font-weight: bold; }
     .cl-view.done-view .todo-text-block { text-decoration: line-through; opacity: 0.6; }
-    .todo-card.pinned-task { border: 3px solid #ff1a1a; box-shadow: 0 0 16px rgba(255, 26, 26, 0.55); }
     a.auto-link { color: var(--gold-light) !important; text-decoration: underline; font-weight: bold; word-break: break-all; cursor: pointer; }
     a.auto-link:hover { color: #fff !important; }
     #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
+    
+    /* Pulsante Torna Su */
+    #scrollTopBtn { position: fixed; right: 20px; bottom: 24px; background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; width: 46px; height: 46px; border-radius: 50%; font-size: 22px; font-weight: bold; cursor: pointer; z-index: 1500; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: 0.2s; }
+    #scrollTopBtn:hover { transform: scale(1.08); }
+
     .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
     .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
 
@@ -82,8 +85,6 @@ aa
     }
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
-    .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
-
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
@@ -115,37 +116,6 @@ aa
 
     body.logged-out .link-item-card button { display: none; }
     #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
-
-    /* PULSANTE FLUTTUANTE TORNA SU */
-    #scrollTopBtn {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 900;
-      background: linear-gradient(135deg, var(--gold-main), #b7791f);
-      color: #000;
-      border: 2px solid var(--gold-light);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      font-size: 22px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.2s ease;
-    }
-    #scrollTopBtn.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-    #scrollTopBtn:hover {
-      transform: translateY(-4px);
-    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -154,7 +124,7 @@ aa
 
   <div id="dataBanner" role="alert"></div>
   <div id="toast" role="status"></div>
-  <button id="scrollTopBtn" title="Torna all'inizio" aria-label="Torna su" onclick="scrollToTop()">↑</button>
+  <button id="scrollTopBtn" aria-label="Torna su" onclick="scrollToTop()">↑</button>
 
   <header>
     <div class="brand">
@@ -213,8 +183,8 @@ aa
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
-        <div style="display: flex; gap: 8px;">
-          <button type="button" id="btnToggleAllFlussi" class="btn-secondary-outline btn-sm" onclick="toggleAllFlussiCards()">📂 Espandi Tutto</button>
+        <div>
+          <button type="button" id="btnToggleAllFlussi" class="btn-secondary-outline btn-sm" onclick="toggleAllCardsState()">📂 Espandi Tutto</button>
         </div>
         <div>
           <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
@@ -246,9 +216,7 @@ aa
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; gap: 8px;">
-          <button type="button" id="btnToggleAllTodos" class="btn-secondary-outline btn-sm" onclick="toggleAllTodoCards()">📂 Espandi Tutto</button>
-        </div>
+        <div><button type="button" id="btnToggleAllTodos" class="btn-secondary-outline btn-sm" onclick="toggleAllTodosState()">📂 Espandi Tutto</button></div>
         <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
       </div>
 
@@ -390,7 +358,7 @@ aa
     </div>
   </div>
 
-  <!-- MODAL NUOVA PRATICA (Con campo Descrizione) -->
+  <!-- MODAL NUOVA PRATICA -->
   <div class="modal-overlay hidden" id="newModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -408,7 +376,7 @@ aa
         </div>
         <div class="form-group">
           <label for="formDescription">Descrizione (Opzionale)</label>
-          <textarea id="formDescription" class="form-control" rows="3" placeholder="Note o dettagli descrittivi del flusso/pratica..."></textarea>
+          <textarea id="formDescription" class="form-control" rows="3" placeholder="Note o dettagli sulla pratica..."></textarea>
         </div>
         <div class="form-group">
           <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
@@ -427,7 +395,7 @@ aa
     </div>
   </div>
 
-  <!-- MODAL MODIFICA PRATICA (Con campo Descrizione) -->
+  <!-- MODAL MODIFICA PRATICA -->
   <div class="modal-overlay hidden" id="editModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -446,7 +414,7 @@ aa
         </div>
         <div class="form-group">
           <label for="editDescription">Descrizione (Opzionale)</label>
-          <textarea id="editDescription" class="form-control" rows="3" placeholder="Note o dettagli descrittivi del flusso/pratica..."></textarea>
+          <textarea id="editDescription" class="form-control" rows="3"></textarea>
         </div>
         <div class="form-group">
           <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
@@ -636,11 +604,9 @@ aa
   </div>
 
   <script>
-    // ============ UTILITÀ ============
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    // localStorage sicuro (Safari privato può lanciare eccezioni)
     const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
     const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
     const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
@@ -652,7 +618,6 @@ aa
       b.style.display = 'block';
     }
 
-    // ============ SUPABASE ============
     const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
 
@@ -678,11 +643,6 @@ aa
     let isArchivedSectionOpen = false;
     let selectedStepIdx = null;
 
-    // Gestione stato espansione globale
-    let isAllFlussiExpanded = false;
-    let isAllTodosExpanded = false;
-
-    // Protezioni dati
     let dataLoaded = false;
     let linksLoaded = false;
     let legacyLinks = [];
@@ -734,12 +694,10 @@ aa
       return t.length > cut ? t.substring(0, cut) + '…' : t;
     }
 
-    // ============ CARICAMENTO / SALVATAGGIO ============
     function applyData(d) {
       pratiche = d.pratiche || [];
-      // Ripristino e normalizzazione sicura dei task manuali e archiviati
-      manualTodos = Array.isArray(d.manualTodos) ? d.manualTodos : [];
-      archivedTodos = Array.isArray(d.archivedTodos) ? d.archivedTodos : [];
+      manualTodos = d.manualTodos || [];
+      archivedTodos = d.archivedTodos || [];
       legacyLinks = d.utileLinks || [];
 
       pratiche.forEach(p => {
@@ -763,8 +721,6 @@ aa
         delete t.subtasks;
         if (t.isExpanded === undefined) t.isExpanded = false;
       });
-
-      initDropdownOptions();
     }
 
     async function loadData(canRetry = true) {
@@ -780,22 +736,21 @@ aa
             client.auth.signOut();
             return;
           }
-          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati. Ricarica la pagina.');
+          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati: il salvataggio è disattivato per non sovrascrivere i dati esistenti. Ricarica la pagina.');
           return;
         }
 
         if (data && data.data) {
           applyData(data.data);
-        } else if (!dataLoaded) {
-          // Se non esiste ancora la riga o i dati sono vuoti sul DB, inizializziamo conservando eventuali dati locali o demo
-          if (pratiche.length === 0) pratiche = getDemoData();
+        } else {
+          pratiche = getDemoData();
+          manualTodos = []; archivedTodos = []; legacyLinks = [];
         }
         dataLoaded = true;
         showBanner('');
-        renderApp();
       } catch (e) {
         console.error('Eccezione di caricamento:', e);
-        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati.');
+        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati. Ricarica la pagina.');
       }
     }
 
@@ -847,24 +802,19 @@ aa
     const saveLinks = () => enqueue(doSaveLinks);
 
     async function doSave() {
-      if (!client || !session) {
-        alert('Salvataggio bloccato: accesso scaduto o non autenticato. Effettua nuovamente l\'accesso.');
+      if (!client || !dataLoaded || !session) {
+        alert('Salvataggio bloccato: accesso scaduto o dati non caricati. Ricarica la pagina e rifai l\'accesso.');
         return;
       }
       try {
         await client.auth.getSession();
-        const payload = { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks };
-        let { error } = await client.from('workflow').update({ data: payload }).eq('id', 'main');
-        if (error) {
-          // Se la riga non esiste ancora, proviamo l'inserimento
-          const { error: insErr } = await client.from('workflow').insert({ id: 'main', data: payload });
-          if (insErr) throw insErr;
-        }
+        const error = await writeRow('main', { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks });
+        if (error) throw error;
         showBanner('');
         renderApp();
       } catch (err) {
         console.error('Errore di salvataggio:', err);
-        showBanner('⚠️ Salvataggio NON riuscito. Riprovo in corso...');
+        showBanner('⚠️ Salvataggio NON riuscito. Ricarico i dati dal server: ripeti l\'ultima modifica.');
         setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
       }
     }
@@ -899,12 +849,8 @@ aa
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
-    // ============ REALTIME ============
     function stopRealtime() {
-      if (client && rtChannel) { 
-        try { client.removeChannel(rtChannel); } catch (e) {}
-        rtChannel = null; 
-      }
+      if (client && rtChannel) { client.removeChannel(rtChannel); rtChannel = null; }
     }
 
     function startRealtime() {
@@ -928,13 +874,9 @@ aa
               renderLinksList();
             }
           })
-          .subscribe((status, err) => {
-            if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-              console.warn('Realtime non disponibile in questo ambiente (WebSocket bloccati). Modalità polling/richiesta attiva.');
-            }
-          });
+          .subscribe();
       } catch (e) {
-        console.warn('Connessione Realtime WebSocket non permessa dall\'ambiente di esecuzione.');
+        console.log('Realtime disabilitato in ambiente sandbox');
       }
     }
 
@@ -944,7 +886,6 @@ aa
       else loadLinks().then(renderApp);
     });
 
-    // ============ LOGIN ============
     function updateAuthUI() {
       document.body.classList.toggle('logged-out', !session);
       $('btnBackup').style.display = session ? '' : 'none';
@@ -1068,29 +1009,45 @@ aa
       renderArchivedTodoList();
       renderLinksList();
       updateArchiveCount();
+      updateToggleAllFlussiBtn();
+      updateToggleAllTodosBtn();
     }
 
-    function toggleAllFlussiCards() {
-      isAllFlussiExpanded = !isAllFlussiExpanded;
-      pratiche.forEach(p => p.isExpanded = isAllFlussiExpanded);
-      updateFlussiToggleBtn();
+    // --- PULSANTE UNICO ESPANDI / COMPATTA FLUSSI ---
+    function toggleAllCardsState() {
+      const activePratiche = pratiche.filter(p => !p.isArchived);
+      const allExpanded = activePratiche.length > 0 && activePratiche.every(p => p.isExpanded);
+      const newState = !allExpanded;
+      activePratiche.forEach(p => p.isExpanded = newState);
       renderFeed();
     }
 
-    function updateFlussiToggleBtn() {
+    function updateToggleAllFlussiBtn() {
       const btn = $('btnToggleAllFlussi');
       if (!btn) return;
-      btn.innerText = isAllFlussiExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
+      const activePratiche = pratiche.filter(p => !p.isArchived);
+      const allExpanded = activePratiche.length > 0 && activePratiche.every(p => p.isExpanded);
+      btn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
+    }
+
+    // --- PULSANTE UNICO ESPANDI / COMPATTA TODOS ---
+    function toggleAllTodosState() {
+      const allExpanded = manualTodos.length > 0 && manualTodos.every(t => t.isExpanded);
+      const newState = !allExpanded;
+      manualTodos.forEach(t => t.isExpanded = newState);
+      renderTodoList();
+    }
+
+    function updateToggleAllTodosBtn() {
+      const btn = $('btnToggleAllTodos');
+      if (!btn) return;
+      const allExpanded = manualTodos.length > 0 && manualTodos.every(t => t.isExpanded);
+      btn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
     }
 
     function toggleCardExpand(id) {
       const p = pratiche.find(item => item.id === id);
-      if (p) { 
-        p.isExpanded = !p.isExpanded; 
-        isAllFlussiExpanded = pratiche.filter(x => !x.isArchived).every(x => x.isExpanded);
-        updateFlussiToggleBtn();
-        renderFeed(); 
-      }
+      if (p) { p.isExpanded = !p.isExpanded; renderFeed(); }
     }
 
     function updateArchiveCount() {
@@ -1124,7 +1081,6 @@ aa
       initAssigneeDropdownOptions();
     }
 
-    // Popolamento tendina Responsabili Interni filtrato solo su ownerInt (pratiche) e assignee (task)
     function initAssigneeDropdownOptions() {
       const select = $('filterTodoAssignee');
       if (!select) return;
@@ -1154,6 +1110,7 @@ aa
 
     function renderFeed() {
       initDropdownOptions();
+      updateToggleAllFlussiBtn();
 
       const container = $('feedList');
       if (!container) return;
@@ -1299,29 +1256,29 @@ aa
           const clip = (t, n) => clipKeepUrls(String(t || '').replace(/\s+/g, ' ').trim(), n);
           const openKey = `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openChatModal('${p.id}')"`;
           const pinnedMsg = chatHist.find(m => m.pinned);
-          
+          const lastMsgs = chatHist.slice(-3).reverse();
+
           if (pinnedMsg) {
+            const pinIdx = chatHist.indexOf(pinnedMsg);
             bannersHTML += `
               <div class="alert-banner alert-pinned" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
                 <span style="flex: 1; min-width: 0;">
                   📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${linkify(clip(pinnedMsg.text, 220))}"</span>
                 </span>
-                <button type="button" aria-label="Elimina messaggio fissato" title="Elimina messaggio" onclick="event.stopPropagation(); deletePraticaChatMsgDirect('${p.id}', ${chatHist.indexOf(pinnedMsg)})" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 2px 6px; margin-left:8px; opacity:0.8;">✕</button>
+                <button type="button" aria-label="Elimina messaggio" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${pinIdx})">✕</button>
               </div>
             `;
           }
 
-          // Mostra gli ultimi 3 messaggi non fissati della chat con tasto X diretto
-          const unpinned = chatHist.filter(m => !m.pinned);
-          const lastThree = unpinned.slice(-3);
-          lastThree.forEach(msg => {
-            const realIdx = chatHist.indexOf(msg);
+          lastMsgs.forEach(m => {
+            const mIdx = chatHist.indexOf(m);
+            if (m.pinned) return;
             bannersHTML += `
               <div class="alert-banner alert-lastmsg" role="button" tabindex="0" aria-label="Apri la chat della pratica" ${openKey}>
                 <span style="flex: 1; min-width: 0;">
-                  💬 <strong>Chat</strong> (${esc(msg.dept)} · ${esc(msg.date)}): <span class="lastmsg-text">"${linkify(clip(msg.text, 140))}"</span>
+                  💬 (${esc(m.dept)} · ${esc(m.date)}): <span class="lastmsg-text">"${linkify(clip(m.text, 140))}"</span>
                 </span>
-                <button type="button" aria-label="Elimina messaggio" title="Elimina messaggio" onclick="event.stopPropagation(); deletePraticaChatMsgDirect('${p.id}', ${realIdx})" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 2px 6px; margin-left:8px; opacity:0.8;">✕</button>
+                <button type="button" aria-label="Elimina messaggio" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); removeChatMsgDirect('${p.id}', ${mIdx})">✕</button>
               </div>
             `;
           });
@@ -1399,6 +1356,36 @@ aa
       });
     }
 
+    async function removeChatMsgDirect(praticaId, index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.notesHistory && p.notesHistory[index]) {
+          p.notesHistory.splice(index, 1);
+          await saveData();
+        }
+      }
+    }
+
+    async function removeTodoChatMsgDirect(taskId, index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const t = manualTodos.find(item => item.id === taskId);
+        if (t && t.chatHistory && t.chatHistory[index]) {
+          t.chatHistory.splice(index, 1);
+          await saveData();
+        }
+      }
+    }
+
+    async function removePraticaTodoChatMsgDirect(praticaId, index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes && p.todoNotes[index]) {
+          p.todoNotes.splice(index, 1);
+          await saveData();
+        }
+      }
+    }
+
     async function archivePratica(id) {
       if (confirm('Vuoi archiviare questa pratica?')) {
         const p = pratiche.find(item => item.id === id);
@@ -1452,29 +1439,20 @@ aa
     async function removeStatusMessage(praticaId, statusId) {
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.statusMessages) return;
-      const removed = item.statusMessages.find(st => st.id === statusId);
       item.statusMessages = item.statusMessages.filter(st => st.id !== statusId);
-      if (removed) {
-        if (!item.notesHistory) item.notesHistory = [];
-        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto stallo su ${removed.dept}: "${removed.text}"` });
-      }
       await saveData();
     }
 
     async function removeSingleAlert(praticaId, alertId) {
       const item = pratiche.find(p => p.id === praticaId);
       if (!item || !item.alertsList) return;
-      const removed = item.alertsList.find(a => a.id === alertId);
       item.alertsList = item.alertsList.filter(a => a.id !== alertId);
-      if (removed) {
-        if (!item.notesHistory) item.notesHistory = [];
-        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` });
-      }
       await saveData();
     }
 
     function renderTodoList() {
       initAssigneeDropdownOptions();
+      updateToggleAllTodosBtn();
 
       const container = $('todoList');
       if (!container) return;
@@ -1488,9 +1466,10 @@ aa
 
       manualTodos.forEach(m => {
         const item = { ...m, isManual: true };
-        if (!item.id) item.id = 'mt_fallback_' + Math.random().toString(36).substr(2, 6);
+        if (!item.id) item.id = 'mt_fixed_' + Math.random().toString(36).substr(2, 6);
         if (!item.actionOriginal && item.action) item.actionOriginal = item.action;
         if (!item.chatHistory) item.chatHistory = item.actionOriginal ? [{ date: 'Storico', text: item.actionOriginal }] : [];
+        if (!item.checklist) item.checklist = [];
         if (item.isResolved) resolvedManuals.push(item); else formattedManuals.push(item);
       });
 
@@ -1498,14 +1477,13 @@ aa
 
       pratiche.filter(p => !p.isArchived).forEach(p => {
         const stepIdx = p.currentStepIdx || 0;
-        const currentDept = ROUTE_STEPS[stepIdx] ? ROUTE_STEPS[stepIdx].label : 'Prospect';
+        const currentDept = ROUTE_STEPS[stepIdx].label;
         if (!p.todoNotes) p.todoNotes = [];
         if (!p.approvedSteps) p.approvedSteps = [];
-        const base = { praticaId: p.id, title: `${p.client || 'Committente'} - ${p.title || 'Spettacolo'}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
-        
+        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
         if (stepIdx < 5) {
           (p.earlyStart || []).forEach(d => {
-            autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: d, situation: `🚀 ${d} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
+            autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: d, situation: `🚀 ${d} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo.` });
           });
         }
 
@@ -1552,8 +1530,7 @@ aa
       sortTasksByDeadline(autoTasks);
 
       const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
-      const unpinnedAll = [...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
-      let allTasks = [...pinnedAll, ...unpinnedAll];
+      let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
@@ -1600,78 +1577,45 @@ aa
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
-        const item = document.createElement('div');
-        item.className = 'todo-card';
-        if (t.pinnedTask) item.className += ' pinned-task';
-        const safeId = String(t.id || '').replace(/['"\\]/g, '');
-        const isExp = !!t.isExpanded;
-
-        let actionContentHTML = '';
-        if (t.isManual) {
-          const chk = t.checklist || [];
-          if (chk.length > 0) {
-            let chkHtml = '<div style="margin: 10px 0; display:flex; flex-direction:column; gap:6px;">';
-            chk.forEach((c) => {
-              const cid = String(c.id || '');
-              chkHtml += `
-                <div class="cl-view ${c.done ? 'done-view' : ''}">
-                  <input type="checkbox" ${c.done ? 'checked' : ''} onclick="toggleChecklistItem('${safeId}', '${cid}')" aria-label="Spunta elemento">
-                  <span class="todo-text-block">${linkify(c.text)}</span>
-                </div>
-              `;
-            });
-            chkHtml += '</div>';
-            actionContentHTML += chkHtml;
-          }
-          if (t.actionOriginal || t.action) {
-            actionContentHTML += `<div class="todo-text-block" style="font-size: 14px; color: #fff; margin-top: 6px;">📝 <strong>Azione:</strong> ${linkify(t.actionOriginal || t.action)}</div>`;
-          }
-        } else {
-          actionContentHTML += `<div class="todo-text-block" style="font-size: 14px; color: #fff; margin-top: 6px;">📝 <strong>Dettagli:</strong> ${linkify(t.action)}</div>`;
+        const isExp = !t.isManual || !!t.isExpanded;
+        const originalActionText = t.actionOriginal || t.action || '';
+        let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
+        let collapsedHTML = '';
+        if (t.isManual && t.checklist && t.checklist.length > 0) {
+          collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Passaggi: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completati</div>`;
         }
 
-        let displayContentHTML = actionContentHTML;
-        let collapsedHTML = actionContentHTML;
+        if (t.isManual && t.checklist && t.checklist.length > 0) {
+          const doneCount = t.checklist.filter(c => c.done).length;
+          const rows = t.checklist.map((c, i) => {
+            const cid = String(c.id).replace(/['"\\]/g, '');
+            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${t.id}', '${cid}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
+          }).join('');
+          displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Passaggi (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
+        }
 
-        const commentBox = (m, realIdx, isManual, parentId) => {
-          const deleteCall = isManual ? `deleteManualTodoChatMsgDirect('${parentId}', ${realIdx})` : `deletePraticaTodoChatMsgDirect('${parentId}', ${realIdx})`;
-          return `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">
-              <div class="todo-text-block" style="flex: 1; min-width: 0;">💬 <strong>Commento [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
-              <button type="button" aria-label="Elimina messaggio" title="Elimina messaggio" onclick="event.stopPropagation(); ${deleteCall}" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:16px; padding: 0 4px; flex-shrink: 0; opacity:0.8;">✕</button>
-            </div>
-          `;
-        };
-
-        const pinBox = (m, realIdx, isManual, parentId) => {
-          const deleteCall = isManual ? `deleteManualTodoChatMsgDirect('${parentId}', ${realIdx})` : `deletePraticaTodoChatMsgDirect('${parentId}', ${realIdx})`;
-          return `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;">
-              <div class="todo-text-block" style="flex: 1; min-width: 0;">📌 <strong style="color: var(--gold-light);">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
-              <button type="button" aria-label="Elimina messaggio fissato" title="Elimina messaggio" onclick="event.stopPropagation(); ${deleteCall}" style="background:transparent; border:none; color:var(--gold-light); cursor:pointer; font-size:18px; padding: 0 4px; flex-shrink: 0; opacity:0.8;">✕</button>
-            </div>
-          `;
-        };
-
+        const clip = (text, n) => clipKeepUrls(String(text || '').replace(/\s+/g, ' ').trim(), n);
         const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
         if (chatArr.length > 0) {
           const pinnedMsg = chatArr.find(m => m.pinned);
-          const unpinned = chatArr.filter(m => !m.pinned);
-          const lastThree = unpinned.slice(-3);
+          const lastMsgs = chatArr.slice(-3).reverse();
 
-          if (pinnedMsg) { 
-            const realIdx = chatArr.indexOf(pinnedMsg);
-            const pbox = pinBox(pinnedMsg, realIdx, t.isManual, t.isManual ? safeId : t.praticaId);
-            displayContentHTML += pbox; 
-            collapsedHTML += pbox; 
+          if (pinnedMsg) {
+            const pinIdx = chatArr.indexOf(pinnedMsg);
+            const pinBox = `<div class="todo-text-block" style="font-size: 14px; color: #fff; background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); margin-top: 6px; display:flex; justify-content:space-between; align-items:center;"><span>📌 <strong style="color: var(--gold-light);">Fissato [${esc(pinnedMsg.date)}]:</strong> ${linkify(clip(pinnedMsg.text, 180))}</span><button type="button" class="btn-solve-sm" style="background:var(--danger-red);" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${pinIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${pinIdx})`}">✕</button></div>`;
+            displayContentHTML += pinBox;
+            collapsedHTML += pinBox;
           }
-          lastThree.forEach(m => {
-            const realIdx = chatArr.indexOf(m);
-            displayContentHTML += commentBox(m, realIdx, t.isManual, t.isManual ? safeId : t.praticaId);
+
+          lastMsgs.forEach(m => {
+            const mIdx = chatArr.indexOf(m);
+            if (m.pinned) return;
+            const commentBox = `<div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px; display:flex; justify-content:space-between; align-items:center;"><span>💬 [${esc(m.date)}]: ${linkify(clip(m.text, 120))}</span><button type="button" class="btn-solve-sm" style="background:var(--danger-red); padding:4px 8px; font-size:10px;" onclick="event.stopPropagation(); ${t.isManual ? `removeTodoChatMsgDirect('${t.id}', ${mIdx})` : `removePraticaTodoChatMsgDirect('${t.praticaId}', ${mIdx})`}">✕</button></div>`;
+            displayContentHTML += commentBox;
           });
         }
 
-        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
+        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
 
         let actionTabsHTML = '';
         if (t.isManual) {
@@ -1679,11 +1623,16 @@ aa
           const resolveBtnText = t.isResolved ? '↩️ Riapri' : '✅ Risolto';
           actionTabsHTML = `
             <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${safeId}')">${resolveBtnText}</button>
-              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${safeId}')">📦 Archivia</button>
+              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${t.id}')">${resolveBtnText}</button>
+              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${t.id}')">📦 Archivia</button>
             </div>
           `;
         }
+
+        const item = document.createElement('div');
+        item.className = 'todo-card';
+        if (t.pinnedTask) item.style.border = '2.5px solid var(--gold-light)';
+        if (t.isResolved) item.style.opacity = '0.75';
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
@@ -1697,15 +1646,15 @@ aa
                 </div>
                 ${isExp ? actionTabsHTML : ''}
               </div>
-              <div ${t.isManual ? `onclick="toggleTodoExpand('${safeId}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
+              <div ${t.isManual ? `onclick="toggleTodoExpand('${t.id}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
               ${isExp ? displayContentHTML : collapsedHTML}
             </div>
             <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex-wrap: wrap; max-width: 150px; flex-shrink: 0;">
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
-              <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" title="${t.pinnedTask ? 'Stacca dall\'alto' : 'Fissa in alto'}" onclick="${t.isManual ? `toggleTaskPin('${safeId}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
+              <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="${t.isManual ? `toggleTaskPin('${t.id}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
               ${t.isManual && isExp ? `
-                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${safeId}')">✏️</button>
-                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${t.id}')">✏️</button>
+                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               ` : ''}
             </div>
           </div>
@@ -1822,7 +1771,6 @@ aa
           delete removed.pinnedTask;
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
-          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
           await saveData();
         }
       }
@@ -1830,12 +1778,8 @@ aa
 
     async function confirmDeleteManualTodo(id) {
       if (confirm('Vuoi eliminare definitivamente questo task?')) {
-        const itemIdx = manualTodos.findIndex(t => t.id === id);
-        if (itemIdx !== -1) {
-          manualTodos.splice(itemIdx, 1);
-          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
-          await saveData();
-        }
+        manualTodos = manualTodos.filter(t => t.id !== id);
+        await saveData();
       }
     }
 
@@ -2042,36 +1986,6 @@ aa
       }
     }
 
-    async function deletePraticaChatMsgDirect(praticaId, msgIndex) {
-      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
-        const p = pratiche.find(item => item.id === praticaId);
-        if (p && p.notesHistory && p.notesHistory[msgIndex]) {
-          p.notesHistory.splice(msgIndex, 1);
-          await saveData();
-        }
-      }
-    }
-
-    async function deleteManualTodoChatMsgDirect(taskId, msgIndex) {
-      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
-        const task = manualTodos.find(t => t.id === taskId);
-        if (task && task.chatHistory && task.chatHistory[msgIndex]) {
-          task.chatHistory.splice(msgIndex, 1);
-          await saveData();
-        }
-      }
-    }
-
-    async function deletePraticaTodoChatMsgDirect(praticaId, msgIndex) {
-      if (confirm('Vuoi eliminare questo messaggio direttamente?')) {
-        const p = pratiche.find(item => item.id === praticaId);
-        if (p && p.todoNotes && p.todoNotes[msgIndex]) {
-          p.todoNotes.splice(msgIndex, 1);
-          await saveData();
-        }
-      }
-    }
-
     async function addTodoChatMessage() {
       const manualId = $('todoChatId').value;
       const praticaId = $('todoChatPraticaId').value;
@@ -2083,14 +1997,12 @@ aa
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
-          lsSet('gt_last_chatted_todo_id', manualObj.id);
         }
       } else if (praticaId) {
         const praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
           if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
           praticaObj.todoNotes.push({ date: getNow(), text: text });
-          lsSet('gt_last_chatted_todo_id', praticaObj.id);
         }
       }
 
@@ -2138,6 +2050,17 @@ aa
       if (!item) row.querySelector('.cl-text').focus();
     }
 
+    function fillChecklist(containerId, list) {
+      $(containerId).innerHTML = '';
+      (list || []).forEach(it => addChecklistRow(containerId, it));
+    }
+
+    function readChecklist(containerId) {
+      return [...$(containerId).querySelectorAll('.cl-row')]
+        .map(r => ({ id: r.dataset.id, text: r.querySelector('.cl-text').value.trim(), done: r.querySelector('.cl-done').checked }))
+        .filter(x => x.text);
+    }
+
     async function toggleTaskPin(id) {
       const it = manualTodos.find(t => t.id === id);
       if (!it) return;
@@ -2151,27 +2074,9 @@ aa
       await saveData();
     }
 
-    function toggleAllTodoCards() {
-      isAllTodosExpanded = !isAllTodosExpanded;
-      manualTodos.forEach(t => t.isExpanded = isAllTodosExpanded);
-      updateTodosToggleBtn();
-      renderTodoList();
-    }
-
-    function updateTodosToggleBtn() {
-      const btn = $('btnToggleAllTodos');
-      if (!btn) return;
-      btn.innerText = isAllTodosExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
-    }
-
     function toggleTodoExpand(id) {
       const t = manualTodos.find(x => x.id === id);
-      if (t) { 
-        t.isExpanded = !t.isExpanded; 
-        isAllTodosExpanded = manualTodos.every(x => x.isExpanded);
-        updateTodosToggleBtn();
-        renderTodoList(); 
-      }
+      if (t) { t.isExpanded = !t.isExpanded; renderTodoList(); }
     }
 
     async function toggleChecklistItem(taskId, itemId) {
@@ -2214,7 +2119,6 @@ aa
         checklist: readChecklist('todoChecklistEditor')
       });
 
-      lsSet('gt_last_chatted_todo_id', newId);
       closeTodoModal();
       await saveData();
     }
@@ -2373,8 +2277,6 @@ aa
       activeItem.statusMessages = (activeItem.statusMessages || []).filter(st => st.dept !== label);
       activeItem.alertsList = (activeItem.alertsList || []).filter(al => al.target !== label);
       activeItem.mailDepts = (activeItem.mailDepts || []).filter(d => d !== label);
-      if (!activeItem.notesHistory) activeItem.notesHistory = [];
-      activeItem.notesHistory.push({ date: getNow(), dept: label, text: `✅ Risolti stalli/avvisi su ${label}.` });
       closeStepClickModal();
       await saveData();
     }
@@ -2402,8 +2304,6 @@ aa
       if (!p.earlyRequests.includes(dept)) p.earlyRequests.push(dept);
       if (!p.mailDepts) p.mailDepts = [];
       if (!p.mailDepts.includes('Legal')) p.mailDepts.push('Legal');
-      p.notesHistory.push({ date: getNow(), dept, text: `🙋 ${dept} chiede a Legal la partenza anticipata (contratto non ancora firmato: resterà fucsia finché Legal non approva).` });
-      lsSet('gt_last_chatted_todo_id', p.id);
       closeStepClickModal();
       await saveData();
     }
@@ -2416,7 +2316,6 @@ aa
       p.earlyRequests = (p.earlyRequests || []).filter(d => d !== dept);
       if (!p.mailDepts) p.mailDepts = [];
       if (!p.mailDepts.includes(dept)) p.mailDepts.push(dept);
-      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `🚀 Legal consente la partenza anticipata a ${dept}: può lavorare ma resta fucsia finché Legal non approva (contratto da firmare).` });
       closeStepClickModal();
       await saveData();
     }
@@ -2425,7 +2324,6 @@ aa
       const p = pratiche.find(x => x.id === pid);
       if (!p || (p.currentStepIdx || 0) !== 4) return;
       p.earlyStart = (p.earlyStart || []).filter(d => d !== dept);
-      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `⏹ Legal revoca la partenza anticipata a ${dept}.` });
       closeStepClickModal();
       await saveData();
     }
@@ -2451,7 +2349,6 @@ aa
 
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
       activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
-      lsSet('gt_last_chatted_todo_id', activeItem.id);
 
       closeQuickChatModal();
       await saveData();
@@ -2509,8 +2406,6 @@ aa
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
       if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
 
-      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `↩️ [Rimandato a ${targetDept}]: ${note}` });
-
       closeSendBackModal();
       await saveData();
     }
@@ -2560,8 +2455,6 @@ aa
         if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
       }
 
-      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
-
       closeStatusModal();
       await saveData();
     }
@@ -2581,15 +2474,9 @@ aa
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
 
         if (activeItem.currentStepIdx === 5) {
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
           activeItem.earlyStart = [];
           activeItem.earlyRequests = [];
-        } else {
-          const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
-          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
         }
-      } else {
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
       }
 
       closeStepClickModal();
@@ -2605,10 +2492,8 @@ aa
 
       if (isAlreadyDone) {
         activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
       } else {
         activeItem.approvedSteps.push(selectedStepIdx);
-        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
       }
 
       closeStepClickModal();
@@ -2642,8 +2527,6 @@ aa
       if (!activeItem.mailDepts) activeItem.mailDepts = [];
       if (!activeItem.mailDepts.includes(senderDept)) activeItem.mailDepts.push(senderDept);
 
-      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `[REPARTO BLOCCATO ❌]: ${note}` });
-
       closeInterveneModal();
       await saveData();
     }
@@ -2658,7 +2541,7 @@ aa
 
     function chatMsgCard(o) {
       const boxStyle = o.pinned
-        ? (o.red ? 'border: 3px solid #ff1a1a; background: #2a0505; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 14px rgba(255,26,26,0.55);' : 'border: 2px solid var(--gold-light); background: #2e1a05; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 12px rgba(246,224,94,0.35);')
+        ? 'border: 2px solid var(--gold-light); background: #2e1a05; position: sticky; top: 0; z-index: 2;'
         : 'border: 1.5px solid var(--border-color); background: #1c0507;';
       return `
         <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
@@ -2777,7 +2660,6 @@ aa
 
     function closeChatModal() { $('chatModal').classList.add('hidden'); }
 
-    // ============ PRATICHE (Gestione campo Descrizione) ============
     function openNewModal() {
       $('formClient').value = '';
       $('formTitle').value = '';
@@ -2815,8 +2697,6 @@ aa
         item.showDate = $('editShowDate').value.trim();
         item.ownerExt = $('editOwnerExt').value.trim();
         item.ownerInt = $('editOwnerInt').value.trim();
-        if (!item.notesHistory) item.notesHistory = [];
-        item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
         closeEditModal();
         await saveData();
       }
@@ -2840,7 +2720,7 @@ aa
         isArchived: false,
         isExpanded: false,
         todoNotes: [],
-        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
+        notesHistory: []
       });
 
       closeNewModal();
@@ -2858,20 +2738,20 @@ aa
       return new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
     }
 
-    // ============ GESTIONE PULSANTE TORNA SU ============
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
+    // --- GESTIONE PULSANTE TORNA SU ---
     window.addEventListener('scroll', () => {
       const btn = $('scrollTopBtn');
       if (!btn) return;
       if (window.scrollY > 300) {
-        btn.classList.add('visible');
+        btn.style.display = 'flex';
       } else {
-        btn.classList.remove('visible');
+        btn.style.display = 'none';
       }
     });
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     document.querySelectorAll('.modal-overlay').forEach(m => { m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); });
     document.addEventListener('keydown', e => {
