@@ -41,7 +41,7 @@
     .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
     .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
     .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
-    .alert-pinned { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 3px solid #ff1a1a; box-shadow: 0 0 14px rgba(255, 26, 26, 0.35); cursor: pointer; }
+    .alert-pinned { background: rgba(246, 224, 94, 0.18); color: var(--gold-light); border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
     .alert-pinned .lastmsg-text { color: #fff; }
     .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
@@ -56,8 +56,6 @@
     .cl-num { min-width: 24px; color: var(--gold-light); font-weight: bold; }
     .cl-row input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
     .cl-row .cl-text { flex: 1; min-width: 0; width: auto; }
-    .cl-move-btn { background: transparent; border: 1px solid var(--border-color); color: var(--gold-light); cursor: pointer; border-radius: 4px; padding: 2px 6px; font-size: 12px; }
-    .cl-move-btn:hover { background: rgba(214, 158, 46, 0.2); }
     .cl-del { background: transparent; border: none; color: #fc8181; cursor: pointer; font-size: 20px; padding: 4px 6px; }
     .cl-view { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; font-size: 14px; color: #fff; }
     .cl-view input { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
@@ -66,6 +64,10 @@
     .todo-card.pinned-task { border: 3px solid #ff1a1a; box-shadow: 0 0 16px rgba(255, 26, 26, 0.55); }
     a.auto-link { color: var(--gold-light) !important; text-decoration: underline; font-weight: bold; word-break: break-all; cursor: pointer; }
     a.auto-link:hover { color: #fff !important; }
+    .card-description-block { white-space: pre-line; word-break: normal; overflow-wrap: anywhere; }
+    .cl-move-btn { background: transparent; border: 1px solid var(--border-color); color: var(--gold-light); cursor: pointer; border-radius: 4px; padding: 2px 6px; font-size: 12px; }
+    .cl-move-btn:hover { background: rgba(214, 158, 46, 0.2); }
+    #scrollTopBtn { position: fixed; bottom: 25px; right: 25px; background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 900; }
     #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
     .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
     .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
@@ -83,9 +85,10 @@
       100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
     }
 
-    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; width: 100%; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
+    .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
 
-    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 8px; margin-right: 6px; }
+    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
     .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
     .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
@@ -93,21 +96,20 @@
     .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
-    .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; white-space: pre-line; }
+    .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
     .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
-    .card-description-block { white-space: pre-line; word-break: normal; overflow-wrap: anywhere; }
 
-    .btn-sm { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
     .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
     .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
     .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
     .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
     .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(3px); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.hidden { display: none; }
-    .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
     .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
     .form-group { margin-bottom: 16px; }
@@ -117,10 +119,6 @@
 
     body.logged-out .link-item-card button { display: none; }
     #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
-
-    /* Pulsante Torna Su */
-    #scrollTopBtn { position: fixed; bottom: 25px; right: 25px; background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 900; transition: transform 0.2s; }
-    #scrollTopBtn:hover { transform: scale(1.1); }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -129,9 +127,7 @@
 
   <div id="dataBanner" role="alert"></div>
   <div id="toast" role="status"></div>
-
-  <!-- Pulsante Torna Su -->
-  <button id="scrollTopBtn" onclick="scrollToTop()" title="Torna all'inizio">↑</button>
+  <button id="scrollTopBtn" onclick="scrollToTop()" title="Torna all'inizio" aria-label="Torna all'inizio">↑</button>
 
   <header>
     <div class="brand">
@@ -179,12 +175,12 @@
           <option value="ALL">🏢 Tutti i Reparti</option>
           <option value="Prospect">Prospect</option>
           <option value="Tech Serv">Tech Serv</option>
+          <option value="Logistics">Logistics</option>
           <option value="Admin">Admin</option>
           <option value="Deal">Deal</option>
           <option value="Legal">Legal</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
-          <option value="Logistics">Logistics</option>
         </select>
         <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
       </div>
@@ -209,12 +205,13 @@
           <option value="ALL">Tutti i Reparti</option>
           <option value="Prospect">Prospect</option>
           <option value="Tech Serv">Tech Serv</option>
+          <option value="Logistics">Logistics</option>
           <option value="Admin">Admin</option>
           <option value="Deal">Deal</option>
           <option value="Legal">Legal</option>
           <option value="Promo">Promo</option>
           <option value="PR">PR</option>
-          <option value="Logistics">Logistics</option>
+          <option value="Art Director">Art Director</option>
         </select>
         <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile" onchange="renderTodoList()">
           <option value="ALL">👤 Tutti i Responsabili Interni</option>
@@ -261,8 +258,8 @@
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
-        <button class="btn-gold stepact" id="btnUndoAdvance" style="display:none; background: var(--warning-amber); color:#fff;" onclick="undoAdvanceStep()">↩️ Annulla "Passa Avanti" e Richiama Pratica</button>
         <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+        <button class="btn-gold stepact" id="btnUndoAdvance" style="display:none; background: var(--warning-amber); color:#fff;" onclick="undoAdvanceStep()">↩️ Annulla "Passa Avanti" e richiama la pratica</button>
         <button class="btn-gold stepact" id="btnGoCurrent" style="display:none; color:#000;" onclick="goToCurrentStep()">👉 Vai al reparto attuale</button>
         <button class="btn-sm stepact" id="btnResolveDept" style="display:none; background: var(--success-green);" onclick="resolveDeptMarkers()">✅ Risolvi stalli / avvisi di questo reparto</button>
         <button class="btn-gold stepact" id="btnRequestEarly" style="display:none; background: var(--status-fuchsia); color:#fff;" onclick="requestEarlyStart()">🙋 Chiedi a Legal la partenza anticipata</button>
@@ -457,11 +454,11 @@
         <div class="form-group">
           <label for="todoSit">Reparto di Riferimento *</label>
           <select id="todoSit" class="form-control" required>
-            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Logistics">Logistics</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="todoAssignee">Responsabile Interno (Opzionale)</label>
+          <label for="todoAssignee">Chi deve farlo (Assegnato a - Referente Interno)</label>
           <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
         </div>
         <div class="form-group">
@@ -498,11 +495,11 @@
         <div class="form-group">
           <label for="editTodoSit">Reparto di Riferimento *</label>
           <select id="editTodoSit" class="form-control" required>
-            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Logistics">Logistics</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="editTodoAssignee">Responsabile Interno (Opzionale)</label>
+          <label for="editTodoAssignee">Chi deve farlo (Assegnato a - Referente Interno)</label>
           <input type="text" id="editTodoAssignee" class="form-control">
         </div>
         <div class="form-group">
@@ -537,7 +534,7 @@
       <form onsubmit="saveLinkItem(event)">
         <input type="hidden" id="editLinkId">
         <div class="form-group">
-          <label for="linkFolderSelect">Seleziona Folder / Cartella *</label>
+          <label for="linkFolderSelect">Folder / Cartella *</label>
           <select id="linkFolderSelect" class="form-control" required></select>
         </div>
         <div class="form-group">
@@ -549,8 +546,8 @@
           <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
         </div>
         <div class="form-group">
-          <label for="linkAnchorTextInput">Testo del Link (Opzionale - parola/frase cliccabile)</label>
-          <input type="text" id="linkAnchorTextInput" class="form-control" placeholder="Es. Apri Modello Contratto">
+          <label for="linkAnchorTextInput">Testo del link (opzionale: parola cliccabile al posto dell'indirizzo)</label>
+          <input type="text" id="linkAnchorTextInput" class="form-control" placeholder="Es. Apri il modello di contratto">
         </div>
         <div class="form-group">
           <label for="linkUrlInput">Link (URL) *</label>
@@ -643,6 +640,7 @@
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+    // localStorage sicuro (Safari privato può lanciare eccezioni)
     const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
     const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
     const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
@@ -652,19 +650,6 @@
       if (!msg) { b.style.display = 'none'; return; }
       b.textContent = msg;
       b.style.display = 'block';
-    }
-
-    // Scroll back to top logic
-    window.onscroll = function() {
-      const btn = $('scrollTopBtn');
-      if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        btn.style.display = "flex";
-      } else {
-        btn.style.display = "none";
-      }
-    };
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ============ SUPABASE ============
@@ -678,32 +663,36 @@
     const ROUTE_STEPS = [
       { id: 'Prospect', label: 'Prospect' },
       { id: 'TechServ', label: 'Tech Serv' },
-      { id: 'Logistics', label: 'Logistics' },
+      { id: 'Logistics', label: 'Logistics' }, // <-- Nuovo pallino intermedio
       { id: 'Admin', label: 'Admin' },
       { id: 'Deal', label: 'Deal' },
       { id: 'Legal', label: 'Legal' },
       { id: 'Promo', label: 'Promo' },
-      { id: 'PR', label: 'PR' }
+      { id: 'PR', label: 'PR' },
+      { id: 'LogisticsFinal', label: 'Logistics' } // <-- Reparto finale nella fase parallela
     ];
 
     let pratiche = [];
     let manualTodos = [];
     let archivedTodos = [];
     let utileLinks = [];
-    let definedFolders = ['Generale'];
-    let openFoldersMap = {}; // Tracks open state of Link Folders
     let isArchivedSectionOpen = false;
     let selectedStepIdx = null;
 
-    let dataLoaded = false;
-    let linksLoaded = false;
-    let legacyLinks = [];
-    let session = null;
-    let currentTab = 'links'; // Default tab set to 'links' so logged-out users see Useful Links first
+    // Protezioni dati
+    let dataLoaded = false;   // finché è false NON si salva mai (evita di sovrascrivere i dati veri)
+    let linksLoaded = false;  // idem per i link utili
+    let legacyLinks = [];     // copia dei link ancora presenti nella riga 'main' (vecchio formato)
+    let session = null;       // sessione di login (null = visitatore senza accesso)
+    let currentTab = 'links';   // chi non ha fatto l'accesso parte dai Link Utili
     let rtChannel = null;
-    let linksError = '';
-    let pendingSaves = 0;
+    let definedFolders = ['Generale'];
+    let openFoldersMap = {};
+    let userPickedTab = false;
+    let linksError = '';      // motivo per cui i link non si caricano (per mostrarlo a schermo)
+    let pendingSaves = 0;     // salvataggi in corso/in coda
 
+    // "activeItem" ora punta sempre all'oggetto aggiornato (cerca per id ad ogni lettura)
     let activeItemId = null;
     Object.defineProperty(window, 'activeItem', {
       get() { return pratiche.find(p => p.id === activeItemId) || null; },
@@ -718,19 +707,53 @@
       return dateStr;
     }
 
+    // linkify ora fa l'escape del testo PRIMA di creare i link
     function linkify(inputText) {
       if (!inputText) return '';
       const text = esc(inputText);
-      const re = /((?:https?|ftp):\/\/[^\s<]+)|(^|[^@\w.\/-])(www\.[^\s<]+|(?:[a-z0-9-]+\.)+(?:com|it|org|net|eu|io|app|dev|co|me|ly|be|tv|fm|info|biz)(?![a-z0-9-])(?:\/[^\s<]*)?)/gi;
-      const tailRe = /(&quot;|&#39;|&gt;|&lt;|&[.,;:!?)\]}])$/;
-      return text.replace(re, (m, full, pre, bare) => {
+      const re = /\[([^\]\n]+)\]\(([^\s)]+)\)|((?:https?|ftp):\/\/[^\s<]+)|(^|[^@\w.\/-])(www\.[^\s<]+|(?:[a-z0-9-]+\.)+(?:com|it|org|net|eu|io|app|dev|co|me|ly|be|tv|fm|info|biz)(?![a-z0-9-])(?:\/[^\s<]*)?)/gi;
+      const tailRe = /(&quot;|&#39;|&gt;|&lt;|&[#a-z0-9]+;|[.,;:!?)\]}])$/;
+      const a = (href, label) => `<a class="auto-link" href="${href}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${label}</a>`;
+      return text.replace(re, (m, label, mdUrl, full, pre, bare) => {
+        if (label !== undefined) {
+          const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(mdUrl);
+          if (hasScheme && !/^(https?|ftp):\/\//i.test(mdUrl)) return m;
+          return a(hasScheme ? mdUrl : 'https://' + mdUrl, label);
+        }
         let url = full || bare;
         let tail = '';
         let t;
         while ((t = url.match(tailRe)) !== null) { tail = t[1] + tail; url = url.slice(0, -t[1].length); }
         if (!url) return m;
-        const href = full ? url : 'https://' + url;
-        return (full ? '' : pre) + `<a class="auto-link" href="${href}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${url}</a>` + tail;
+        return (full ? '' : pre) + a(full ? url : 'https://' + url, url) + tail;
+      });
+    }
+
+    function insertLabeledLink(id) {
+      const el = $(id);
+      if (!el) return;
+      const start = el.selectionStart, end = el.selectionEnd;
+      const selected = (start != null && end > start) ? el.value.substring(start, end) : '';
+      const label = prompt('Parola (o frase) da mostrare come link:', selected);
+      if (!label) return;
+      const url = prompt('Indirizzo del link (es. https://drive.google.com/...):', '');
+      if (!url) return;
+      const md = '[' + label.replace(/[\[\]]/g, '').trim() + '](' + url.trim().replace(/\s+/g, '') + ')';
+      const pos = start != null ? start : el.value.length;
+      const to = end != null ? end : pos;
+      el.value = el.value.substring(0, pos) + md + el.value.substring(to);
+      el.focus();
+    }
+
+    function attachLinkHelpers() {
+      ['formDescription', 'editDescription', 'todoAction', 'editTodoAction', 'todoChatNewText', 'quickChatTextInput', 'sendBackNoteInput', 'statusNoteInput', 'interveneNote', 'editChatText', 'linkDescInput'].forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'margin-top: 6px; font-size: 12px; color: var(--text-muted);';
+        wrap.innerHTML = '<button type="button" class="btn-secondary-outline btn-sm" style="padding: 4px 10px; font-size: 12px;">🔗 Inserisci link con parola cliccabile</button> <span>oppure scrivi: [parola](https://indirizzo)</span>';
+        wrap.querySelector('button').onclick = () => insertLabeledLink(id);
+        el.insertAdjacentElement('afterend', wrap);
       });
     }
 
@@ -738,7 +761,7 @@
       const t = String(text || '');
       if (t.length <= n) return t;
       let cut = n;
-      const re = /(?:https?|ftp):\/\/\S+|www\.\S+/gi;
+      const re = /\[[^\]\n]+\]\([^\s)]+\)|(?:https?|ftp):\/\/\S+|www\.\S+/gi;
       let m;
       while ((m = re.exec(t)) !== null) {
         if (m.index < cut && m.index + m[0].length > cut) { cut = m.index + m[0].length; break; }
@@ -746,13 +769,6 @@
       return t.length > cut ? t.substring(0, cut) + '…' : t;
     }
 
-    // Filter chat list to get top maxItems
-    function getRecentUserChatMessages(historyList, maxItems = 3) {
-      if (!historyList || !Array.isArray(historyList)) return [];
-      return historyList.slice(-maxItems);
-    }
-
-    // ============ CARICAMENTO / SALVATAGGIO ============
     function applyData(d) {
       pratiche = d.pratiche || [];
       manualTodos = d.manualTodos || [];
@@ -762,11 +778,6 @@
       pratiche.forEach(p => {
         if (p.owner && !p.ownerExt && !p.ownerInt) p.ownerExt = p.owner;
         if (!p.notesHistory) p.notesHistory = [];
-        const nine = p.currentStepIdx === 8 || (p.approvedSteps || []).includes(8);
-        if (nine) {
-          p.approvedSteps = (p.approvedSteps || []).filter(i => i !== 5).map(i => i > 5 ? i - 1 : i);
-          if (p.currentStepIdx >= 5) p.currentStepIdx = 5;
-        }
       });
 
       manualTodos.forEach((t, i) => {
@@ -826,7 +837,6 @@
           linksLoaded = true;
         } else if (session && dataLoaded) {
           utileLinks = legacyLinks.slice();
-          definedFolders = ['Generale'];
           linksLoaded = true;
           const err = await writeRow('links', { utileLinks, definedFolders });
           if (err) {
@@ -900,33 +910,45 @@
       }
     }
 
+    function exportBackup() {
+      if (!session) return;
+      const blob = new Blob([JSON.stringify({ pratiche, manualTodos, archivedTodos, utileLinks, definedFolders }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'golden-ticket-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function stopRealtime() {
+      if (client && rtChannel) { client.removeChannel(rtChannel); rtChannel = null; }
+    }
+
     function startRealtime() {
       if (!client) return;
-      try {
-        if (rtChannel) client.removeChannel(rtChannel);
-        rtChannel = client.channel('public:workflow')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'workflow' }, payload => {
-            if (pendingSaves > 0) return;
-            const row = payload.new;
-            if (!row || !row.data) return;
-            if (row.id === 'main' && session) {
-              applyData(row.data);
-              renderApp();
-            }
-            if (row.id === 'links') {
-              utileLinks = row.data.utileLinks || [];
-              definedFolders = row.data.definedFolders || ['Generale'];
-              if (!definedFolders.includes('Generale')) definedFolders.unshift('Generale');
-              linksLoaded = true;
-              renderLinksList();
-            }
-          })
-          .subscribe((status, err) => {
-            if (err) console.warn('Realtime status warning:', status, err);
-          });
-      } catch (e) {
-        console.warn('Realtime initialization warning (safe fallback enabled):', e);
-      }
+      stopRealtime();
+      rtChannel = client
+        .channel('workflow-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workflow' }, payload => {
+          const row = payload.new;
+          if (!row || !row.id || !row.data) return;
+          if (pendingSaves > 0) return;
+          if (row.id === 'main' && session) {
+            applyData(row.data);
+            dataLoaded = true;
+            initDropdownOptions();
+            renderApp();
+          } else if (row.id === 'links') {
+            utileLinks = row.data.utileLinks || [];
+            definedFolders = row.data.definedFolders || ['Generale'];
+            if (!definedFolders.includes('Generale')) definedFolders.unshift('Generale');
+            linksLoaded = true;
+            renderLinksList();
+          }
+        })
+        .subscribe();
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -935,7 +957,6 @@
       else loadLinks().then(renderApp);
     });
 
-    // ============ LOGIN ============
     function updateAuthUI() {
       document.body.classList.toggle('logged-out', !session);
       $('btnBackup').style.display = session ? '' : 'none';
@@ -955,22 +976,7 @@
       $('btnTabLinks').className = currentTab === 'links' ? 'tab-btn active' : 'tab-btn';
     }
 
-    function switchTab(tab) { currentTab = tab; updateView(); }
-
-    function goToPraticaFromTodo(praticaId) {
-      if (!praticaId) return;
-      const p = pratiche.find(x => x.id === praticaId);
-      if (p) {
-        p.isArchived = false;
-        p.isExpanded = true;
-      }
-      switchTab('flussi');
-      renderFeed();
-      setTimeout(() => {
-        const el = Array.from(document.querySelectorAll('.card')).find(c => c.innerHTML.includes(`openChatModal('${praticaId}')`));
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
+    function switchTab(tab) { userPickedTab = true; currentTab = tab; updateView(); }
 
     async function doLogin(e) {
       e.preventDefault();
@@ -1002,6 +1008,7 @@
 
     async function handleSignedIn(sess) {
       session = sess;
+      if (!userPickedTab) currentTab = 'todo';
       updateAuthUI();
       updateView();
       await loadAll();
@@ -1014,7 +1021,8 @@
       pratiche = []; manualTodos = []; archivedTodos = []; legacyLinks = [];
       selectedStepIdx = null;
       document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-      currentTab = 'links'; // Ensure switching back to links tab upon logout
+      currentTab = 'links';
+      userPickedTab = false;
       updateAuthUI();
       updateView();
       renderApp();
@@ -1054,7 +1062,6 @@
         id: 'p_1',
         title: 'Caravaggio - Rebel Rock Musical',
         client: 'Teatro Manzoni Cassino',
-        description: 'Tour invernale 2027',
         showDate: '2027-03-09',
         ownerExt: 'Mario Rossi',
         ownerInt: 'Fabrizio R.',
@@ -1078,21 +1085,18 @@
       updateArchiveCount();
     }
 
-    // Toggle unico per i Flussi
     function toggleAllFlussi() {
-      const btn = $('btnToggleAllFlussi');
-      const shouldExpand = btn.innerText.includes('Espandi');
-      pratiche.forEach(p => p.isExpanded = shouldExpand);
+      const active = pratiche.filter(p => !p.isArchived);
+      const shouldExpand = !active.every(p => p.isExpanded);
+      active.forEach(p => p.isExpanded = shouldExpand);
       renderFeed();
     }
 
-    // Toggle unico per i Todo
-    function toggleAllTodos() {
-      const btn = $('btnToggleAllTodos');
-      const shouldExpand = btn.innerText.includes('Espandi');
-      manualTodos.forEach(t => t.isExpanded = shouldExpand);
-      renderTodoList();
-    }
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    window.addEventListener('scroll', () => {
+      const btn = $('scrollTopBtn');
+      if (btn) btn.style.display = (window.scrollY > 300) ? 'flex' : 'none';
+    });
 
     function toggleCardExpand(id) {
       const p = pratiche.find(item => item.id === id);
@@ -1145,7 +1149,7 @@
       };
 
       manualTodos.forEach(t => addName(t.assignee));
-      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerInt); });
+      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerExt); addName(p.ownerInt); });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili Interni</option>';
       Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(name => {
@@ -1157,40 +1161,11 @@
       });
     }
 
-    // Direct deletion helper for chat previews
-    async function deleteSingleFlussiChatMessageDirect(praticaId, index) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (!p || !p.notesHistory) return;
-      p.notesHistory.splice(index, 1);
-      await saveData();
-      renderFeed();
-    }
-
-    async function deleteSingleTodoChatMessageDirect(taskId, index) {
-      const item = manualTodos.find(t => t.id === taskId);
-      if (!item || !item.chatHistory) return;
-      item.chatHistory.splice(index, 1);
-      await saveData();
-      renderTodoList();
-    }
-
-    async function deleteSinglePraticaTodoMessageDirect(praticaId, index) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (!p || !p.todoNotes) return;
-      p.todoNotes.splice(index, 1);
-      await saveData();
-      renderTodoList();
-    }
-
     function renderFeed() {
       initDropdownOptions();
-
-      // Update Flussi toggle button text state
       const flussiBtn = $('btnToggleAllFlussi');
-      if (flussiBtn && pratiche.filter(p => !p.isArchived).length > 0) {
-        const allExpanded = pratiche.filter(p => !p.isArchived).every(p => p.isExpanded);
-        flussiBtn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
-      }
+      const activeNow = pratiche.filter(p => !p.isArchived);
+      if (flussiBtn && activeNow.length > 0) flussiBtn.innerText = activeNow.every(p => p.isExpanded) ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
 
       const container = $('feedList');
       if (!container) return;
@@ -1202,7 +1177,7 @@
       const activePratiche = pratiche.filter(p => !p.isArchived);
 
       const filteredPratiche = activePratiche.filter(p => {
-        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search) || (p.ownerExt || '').toLowerCase().includes(search) || (p.ownerInt || '').toLowerCase().includes(search);
+        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search) || (p.ownerExt || '').toLowerCase().includes(search) || (p.ownerInt || '').toLowerCase().includes(search);
         if (!matchSearch) return false;
 
         if (filterShow !== 'ALL') {
@@ -1248,7 +1223,7 @@
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
 
-        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6) && p.approvedSteps.includes(7);
+        const isFullyDone = p.approvedSteps.includes(6) && p.approvedSteps.includes(7) && p.approvedSteps.includes(8);
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -1259,9 +1234,9 @@
           else if (warnedTargets.includes(s.label)) { cls += ' warning-alert'; symbol = '⚠️'; }
           else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
           else if (isFullyDone) { cls += ' done'; symbol = '✓'; }
-          else if (idx >= 5) {
+          else if (idx >= 6) {
             if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
-            else if (stepIdx >= 5 || (p.earlyStart || []).includes(s.label)) { cls += ' current-fuchsia'; symbol = '●'; }
+            else if (stepIdx >= 6 || (p.earlyStart || []).includes(s.label)) { cls += ' current-fuchsia'; symbol = '●'; }
           }
           else if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
           else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
@@ -1318,15 +1293,15 @@
           bannersHTML += `
             <div class="alert-banner alert-status">
               <span style="flex: 1;">🙋 <strong>${esc(d)}</strong> chiede la partenza anticipata (contratto non ancora firmato)</span>
-              ${stepIdx === 4 ? `<button type="button" class="btn-solve-sm" onclick="enableEarlyStart('${p.id}', '${esc(d)}')">🚀 Consenti</button>` : ''}
+              ${stepIdx === 5 ? `<button type="button" class="btn-solve-sm" onclick="enableEarlyStart('${p.id}', '${esc(d)}')">🚀 Consenti</button>` : ''}
             </div>`;
         });
-        if (stepIdx < 5) {
+        if (stepIdx < 6) {
           (p.earlyStart || []).forEach(d => {
             bannersHTML += `
               <div class="alert-banner alert-status">
                 <span style="flex: 1;">🚀 <strong>${esc(d)}</strong> in partenza anticipata: resta fucsia finché Legal non approva</span>
-                ${stepIdx === 4 ? `<button type="button" class="btn-solve-sm" style="background:#6b21a8;" onclick="revokeEarlyStart('${p.id}', '${esc(d)}')">⏹ Revoca</button>` : ''}
+                ${stepIdx === 5 ? `<button type="button" class="btn-solve-sm" style="background:#6b21a8;" onclick="revokeEarlyStart('${p.id}', '${esc(d)}')">⏹ Revoca</button>` : ''}
               </div>`;
           });
         }
@@ -1334,33 +1309,26 @@
         const chatHist = p.notesHistory || [];
         if (chatHist.length > 0) {
           const clip = (t, n) => clipKeepUrls(String(t || '').replace(/\s+/g, ' ').trim(), n);
+          const delBtn = (idx) => `<button type="button" onclick="event.stopPropagation(); deleteFlussiMsgDirect('${p.id}', ${idx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px; margin-left:8px;" title="Elimina messaggio" aria-label="Elimina messaggio">✕</button>`;
           const pinnedMsg = chatHist.find(m => m.pinned);
-          const recentChat = getRecentUserChatMessages(chatHist, 3);
-          
           if (pinnedMsg) {
-            const pIdx = chatHist.indexOf(pinnedMsg);
             bannersHTML += `
-              <div class="alert-banner alert-pinned" style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div class="alert-banner alert-pinned" style="align-items: flex-start;">
                 <span style="flex: 1; min-width: 0; cursor: pointer;" onclick="openChatModal('${p.id}')">
                   📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${linkify(clip(pinnedMsg.text, 220))}"</span>
-                </span>
-                <button type="button" onclick="event.stopPropagation(); deleteSingleFlussiChatMessageDirect('${p.id}', ${pIdx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
+                </span>${delBtn(chatHist.indexOf(pinnedMsg))}
               </div>
             `;
           }
-
-          recentChat.forEach(msg => {
-            if (!msg.pinned) {
-              const mIdx = chatHist.indexOf(msg);
-              bannersHTML += `
-                <div class="alert-banner alert-lastmsg" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                  <span style="flex: 1; min-width: 0; cursor: pointer;" onclick="openChatModal('${p.id}')">
-                    💬 <strong>Messaggio (${esc(msg.dept)} · ${esc(msg.date)}):</strong> <span class="lastmsg-text">"${linkify(clip(msg.text, 140))}"</span>
-                  </span>
-                  <button type="button" onclick="event.stopPropagation(); deleteSingleFlussiChatMessageDirect('${p.id}', ${mIdx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
-                </div>
-              `;
-            }
+          chatHist.slice(-3).forEach(msg => {
+            if (msg.pinned) return;
+            bannersHTML += `
+              <div class="alert-banner alert-lastmsg" style="align-items: flex-start;">
+                <span style="flex: 1; min-width: 0; cursor: pointer;" onclick="openChatModal('${p.id}')">
+                  💬 <strong>Messaggio (${esc(msg.dept)} · ${esc(msg.date)}):</strong> <span class="lastmsg-text">"${linkify(clip(msg.text, 140))}"</span>
+                </span>${delBtn(chatHist.indexOf(msg))}
+              </div>
+            `;
           });
         }
 
@@ -1369,7 +1337,8 @@
           let pList = [];
           if (!p.approvedSteps.includes(6)) pList.push('Promo');
           if (!p.approvedSteps.includes(7)) pList.push('PR');
-          phaseDisplayLabel = pList.length > 0 ? `In corso su: ${pList.join(', ')}` : `✅ Completato (Promo & PR)`;
+          if (!p.approvedSteps.includes(8)) pList.push('Logistics');
+          phaseDisplayLabel = pList.length > 0 ? `In corso su: ${pList.join(', ')}` : `✅ Completato (Promo, PR & Logistics)`;
         }
 
         const isExpanded = !!p.isExpanded;
@@ -1379,11 +1348,11 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
             <div>
               ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:4px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
-              ${p.description ? `<div style="font-size:14px; color:#fff; margin-bottom:6px; line-height:1.4;" class="card-description-block">📝 <strong>Descrizione:</strong>\n${linkify(p.description)}</div>` : ''}
+              ${p.description ? `<div class="card-description-block" style="font-size:14px; color:#fff; margin-bottom:6px; line-height:1.4;">📝 <strong>Descrizione:</strong>\n${linkify(p.description)}</div>` : ''}
               ${(p.ownerExt || p.ownerInt) ? `
-                <div style="font-size:13px; color:var(--text-muted); display: flex; flex-direction: column; gap: 4px;" class="card-description-block">
-                  ${p.ownerExt ? `<div>👤 <strong>Referente Esterno:</strong>\n${linkify(p.ownerExt)}</div>` : ''}
-                  ${p.ownerInt ? `<div>🏢 <strong>Referente Interno:</strong>\n${linkify(p.ownerInt)}</div>` : ''}
+                <div style="font-size:13px; color:var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                  ${p.ownerExt ? `<div>👤 <strong>Referente Esterno:</strong> ${linkify(p.ownerExt)}</div>` : ''}
+                  ${p.ownerInt ? `<div>🏢 <strong>Referente Interno:</strong> ${linkify(p.ownerInt)}</div>` : ''}
                 </div>
               ` : ''}
             </div>
@@ -1396,12 +1365,12 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
+          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
             <div>
               <div class="client-title-main">${linkify(p.client)}</div>
               <div class="card-show-title">${linkify(p.title)} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
             </div>
-            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;" onclick="event.stopPropagation()">
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;" onclick="event.stopPropagation()">
               <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
               <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="archivePratica('${p.id}')">📦 Archivia</button>
               <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
@@ -1419,9 +1388,10 @@
                 <div class="stepper">${stepperHTML}</div>
               </div>
 
-              <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                <div></div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  ${stepIdx < 5 ? `<button type="button" class="btn-gold" style="background: var(--success-green); color:#fff;" onclick="approveCurrent('${p.id}')">▶️ Approva "${esc(currentDeptLabel)}" e manda avanti</button>` : ''}
+                  ${stepIdx < 6 ? `<button type="button" class="btn-gold" style="background: var(--success-green); color:#fff;" onclick="approveCurrent('${p.id}')">▶️ Approva "${esc(currentDeptLabel)}" e manda avanti</button>` : ''}
                   <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
                 </div>
               </div>
@@ -1510,13 +1480,8 @@
 
     function renderTodoList() {
       initAssigneeDropdownOptions();
-
-      // Update To-Do toggle button text state
       const todoBtn = $('btnToggleAllTodos');
-      if (todoBtn && manualTodos.length > 0) {
-        const allExpanded = manualTodos.every(t => t.isExpanded);
-        todoBtn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
-      }
+      if (todoBtn && manualTodos.length > 0) todoBtn.innerText = manualTodos.every(t => t.isExpanded) ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
 
       const container = $('todoList');
       if (!container) return;
@@ -1543,8 +1508,8 @@
         const currentDept = ROUTE_STEPS[stepIdx].label;
         if (!p.todoNotes) p.todoNotes = [];
         if (!p.approvedSteps) p.approvedSteps = [];
-        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
-        if (stepIdx < 5) {
+        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || p.ownerExt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
+        if (stepIdx < 6) {
           (p.earlyStart || []).forEach(d => {
             autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: d, situation: `🚀 ${d} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
           });
@@ -1573,6 +1538,7 @@
           if (stepIdx >= 6) {
             if (!p.approvedSteps.includes(6)) autoTasks.push({ ...base, id: 'wait_auto_promo_' + p.id, dept: 'Promo', situation: `⏳ Promo - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Promo.` });
             if (!p.approvedSteps.includes(7)) autoTasks.push({ ...base, id: 'wait_auto_pr_' + p.id, dept: 'PR', situation: `⏳ PR - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da PR.` });
+            if (!p.approvedSteps.includes(8)) autoTasks.push({ ...base, id: 'wait_auto_log_' + p.id, dept: 'Logistics', situation: `⏳ Logistics - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Logistics.` });
           } else {
             autoTasks.push({ ...base, id: 'wait_auto_' + p.id, dept: currentDept, situation: `⏳ ${currentDept} - IN ATTESA`, action: `Pratica ferma in attesa di approvazione o avanzamento.` });
           }
@@ -1591,8 +1557,15 @@
       const manualsAll = sortTasksByDeadline([...formattedManuals, ...resolvedManuals]);
       sortTasksByDeadline(autoTasks);
 
+      const lastChattedId = lsGet('gt_last_chatted_todo_id');
+      const bump = (list) => {
+        if (!lastChattedId) return list;
+        const i = list.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
+        if (i > 0) { const [it] = list.splice(i, 1); list.unshift(it); }
+        return list;
+      };
       const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
-      let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
+      let allTasks = [...bump(pinnedAll), ...bump(manualsAll.filter(t => !t.pinnedTask)), ...bump(autoTasks.filter(t => !t.pinnedTask))];
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
@@ -1639,6 +1612,15 @@
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
+        const isHighlighted = (lastChattedId && (t.id === lastChattedId || t.praticaId === lastChattedId)) && !t.isResolved;
+
+        const item = document.createElement('div');
+        item.className = isHighlighted ? 'todo-card highlighted-task' : 'todo-card';
+        if (t.pinnedTask) item.className += ' pinned-task';
+        if (t.isResolved) item.style.opacity = '0.75';
+
+        const safeId = t.id ? String(t.id).replace(/['"\\]/g, '') : '';
+
         const originalActionText = t.actionOriginal || t.action || '';
         let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
         let collapsedHTML = '';
@@ -1650,52 +1632,35 @@
         if (t.isManual && t.checklist && t.checklist.length > 0) {
           const doneCount = t.checklist.filter(c => c.done).length;
           const rows = t.checklist.map((c, i) => {
-            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${t.id}', '${c.id}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
+            const cid = String(c.id).replace(/['"\\]/g, '');
+            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${safeId}', '${cid}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
           }).join('');
           displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Passaggi (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
         }
 
-        const commentBox = (m, delFn) => `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">
-            <div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); flex: 1; cursor: pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}">
-              💬 <strong>Messaggio [${esc(m.date)}]:</strong> ${linkify(m.text)}
-            </div>
-            <button type="button" onclick="event.stopPropagation(); ${delFn}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
-          </div>
-        `;
-
-        const pinBox = (m, delFn) => `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; background: rgba(229, 62, 62, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid #ff1a1a; box-shadow: 0 0 12px rgba(255, 26, 26, 0.3); margin-top: 6px;">
-            <div class="todo-text-block" style="font-size: 14px; color: #fff; flex: 1; cursor: pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}">
-              📌 <strong style="color: #fc8181;">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}
-            </div>
-            <button type="button" onclick="event.stopPropagation(); ${delFn}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
-          </div>
-        `;
+        const delFnFor = (idx) => t.isManual ? `deleteTodoMsgDirect('${safeId}', ${idx})` : `deletePraticaTodoMsgDirect('${t.praticaId}', ${idx})`;
+        const openChatCall = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
+        const msgBox = (m, idx, isPin) => `<div style="display: flex; justify-content: space-between; align-items: flex-start; ${isPin ? 'background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;' : 'background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;'}">
+            <div class="todo-text-block" style="font-size: ${isPin ? 14 : 13}px; color: ${isPin ? '#fff' : 'var(--gold-light)'}; flex: 1; cursor: pointer;" onclick="${openChatCall}">${isPin ? '📌 <strong style="color: var(--gold-light);">Fissato' : '💬 <strong>Messaggio'} [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
+            <button type="button" onclick="event.stopPropagation(); ${delFnFor(idx)}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio" aria-label="Elimina messaggio">✕</button>
+          </div>`;
 
         const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
         if (chatArr.length > 0) {
           const pinnedMsg = chatArr.find(m => m.pinned);
-          const recentUserMsgs = getRecentUserChatMessages(chatArr, 3);
-          
           if (pinnedMsg) {
-            const pIdx = chatArr.indexOf(pinnedMsg);
-            const delFn = t.isManual ? `deleteSingleTodoChatMessageDirect('${t.id}', ${pIdx})` : `deleteSinglePraticaTodoMessageDirect('${t.praticaId}', ${pIdx})`;
-            displayContentHTML += pinBox(pinnedMsg, delFn);
-            collapsedHTML += pinBox(pinnedMsg, delFn);
+            const pb = msgBox(pinnedMsg, chatArr.indexOf(pinnedMsg), true);
+            displayContentHTML += pb;
+            collapsedHTML += pb;
           }
-
-          recentUserMsgs.forEach(msg => {
-            if (!msg.pinned) {
-              const mIdx = chatArr.indexOf(msg);
-              const delFn = t.isManual ? `deleteSingleTodoChatMessageDirect('${t.id}', ${mIdx})` : `deleteSinglePraticaTodoMessageDirect('${t.praticaId}', ${mIdx})`;
-              displayContentHTML += commentBox(msg, delFn);
-            }
+          chatArr.slice(-3).forEach(m => {
+            if (!m.pinned) displayContentHTML += msgBox(m, chatArr.indexOf(m), false);
           });
         }
 
-        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
         const gotoFlussoBtnHTML = (!t.isManual && t.praticaId) ? `<button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="goToPraticaFromTodo('${t.praticaId}')" title="Vai al flusso di provenienza">🔗 Flusso</button>` : '';
+
+        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
 
         let actionTabsHTML = '';
         if (t.isManual) {
@@ -1703,16 +1668,13 @@
           const resolveBtnText = t.isResolved ? '↩️ Riapri' : '✅ Risolto';
           actionTabsHTML = `
             <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${t.id}')">${resolveBtnText}</button>
-              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${t.id}')">📦 Archivia</button>
+              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${safeId}')">${resolveBtnText}</button>
+              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${safeId}')">📦 Archivia</button>
             </div>
           `;
         }
 
-        const item = document.createElement('div');
-        item.className = 'todo-card';
-        if (t.pinnedTask) item.style.border = '2.5px solid #ff1a1a';
-        if (t.isResolved) item.style.opacity = '0.75';
+        const highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
@@ -1720,28 +1682,37 @@
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
+                  ${highlightBadgeHTML}
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : esc(t.situation)}</span>
                   ${assigneeBadgeHTML}
                   ${deadlineBadgeHTML}
                 </div>
                 ${isExp ? actionTabsHTML : ''}
               </div>
-              <div ${t.isManual ? `onclick="toggleTodoExpand('${t.id}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
+              <div ${t.isManual ? `onclick="toggleTodoExpand('${safeId}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
               ${isExp ? displayContentHTML : collapsedHTML}
             </div>
             <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex-wrap: wrap; max-width: 150px; flex-shrink: 0;">
               ${gotoFlussoBtnHTML}
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
-              <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="${t.isManual ? `toggleTaskPin('${t.id}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
+              <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" title="${t.pinnedTask ? 'Stacca dall\'alto' : 'Fissa in alto'}" onclick="${t.isManual ? `toggleTaskPin('${safeId}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
               ${t.isManual && isExp ? `
-                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${t.id}')">✏️</button>
-                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${safeId}')">✏️</button>
+                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
               ` : ''}
             </div>
           </div>
         `;
         container.appendChild(item);
       });
+    }
+
+    const folderKey = s => encodeURIComponent(s).replace(/'/g, '%27');
+
+    function toggleFolderExpand(enc) {
+      const f = decodeURIComponent(enc);
+      openFoldersMap[f] = !(openFoldersMap[f] !== false);
+      renderLinksList();
     }
 
     function renderLinksList() {
@@ -1751,45 +1722,159 @@
       const search = (($('searchLinkInput') || {}).value || '').toLowerCase();
       container.innerHTML = '';
       if (!utileLinks) utileLinks = [];
+      if (!definedFolders) definedFolders = ['Generale'];
+      if (!definedFolders.includes('Generale')) definedFolders.unshift('Generale');
 
-      const filteredLinks = utileLinks.filter(l => (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search) || (l.anchorText || '').toLowerCase().includes(search));
-
-      if (filteredLinks.length === 0) {
-        let emptyMsg = 'Nessun link utile inserito.';
-        if (linksError === 'NOROW') emptyMsg = 'I link non sono ancora stati pubblicati. Chiedi a chi ha l\'accesso di aprire l\'app almeno una volta.';
-        else if (linksError) emptyMsg = 'Impossibile caricare i link (' + linksError + ').';
+      if (linksError && utileLinks.length === 0) {
+        const emptyMsg = linksError === 'NOROW'
+          ? 'I link non sono ancora stati pubblicati. Chiedi a chi ha l\'accesso di aprire l\'app almeno una volta.'
+          : 'Impossibile caricare i link (' + linksError + ').';
         container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">${esc(emptyMsg)}</div>`;
         return;
       }
 
-      filteredLinks.forEach((linkItem) => {
-        const card = document.createElement('div');
-        card.className = 'card link-item-card';
-        const displayText = linkItem.anchorText && linkItem.anchorText.trim() !== '' ? esc(linkItem.anchorText) : esc(linkItem.url);
-        const targetUrl = linkItem.url.startsWith('http://') || linkItem.url.startsWith('https://') ? linkItem.url : 'https://' + linkItem.url;
-        const linkHTML = `<a class="auto-link" href="${esc(targetUrl)}" target="_blank" rel="noopener noreferrer">${displayText}</a>`;
+      const filteredLinks = utileLinks.filter(l => (l.folder || '').toLowerCase().includes(search) || (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search) || (l.anchorText || '').toLowerCase().includes(search));
 
+      const groups = {};
+      definedFolders.forEach(f => { groups[f] = []; });
+      filteredLinks.forEach(item => {
+        const f = (item.folder && item.folder.trim() !== '') ? item.folder.trim() : 'Generale';
+        if (!groups[f]) groups[f] = [];
+        groups[f].push(item);
+      });
+
+      const names = Object.keys(groups).sort((a, b) => {
+        if (a === 'Generale') return -1;
+        if (b === 'Generale') return 1;
+        return a.localeCompare(b, 'it', { sensitivity: 'base' });
+      });
+
+      names.forEach(folderName => {
+        const items = groups[folderName];
+        if (search && items.length === 0) return;
+        const isExp = search.length > 0 || openFoldersMap[folderName] !== false;
+        const fk = folderKey(folderName);
+
+        let inner = '';
+        if (isExp) {
+          if (items.length === 0) {
+            inner = `<div style="margin-top: 14px; border-top: 1.5px solid var(--border-color); padding-top: 14px; color: var(--text-muted); font-size: 14px;">Folder vuoto. Aggiungi dei link per popolarlo.</div>`;
+          } else {
+            inner = `<div style="margin-top: 14px; border-top: 1.5px solid var(--border-color); padding-top: 14px; display: flex; flex-direction: column; gap: 12px;">`;
+            items.forEach(linkItem => {
+              const shown = (linkItem.anchorText && linkItem.anchorText.trim() !== '') ? esc(linkItem.anchorText) : esc(linkItem.url);
+              const target = /^https?:\/\//i.test(linkItem.url || '') ? linkItem.url : 'https://' + (linkItem.url || '');
+              const linkHTML = `<a class="auto-link" href="${esc(target)}" target="_blank" rel="noopener noreferrer">${shown}</a>`;
+              inner += `
+                <div class="link-item-card" style="background: rgba(42,8,12,0.6); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 0; overflow: hidden;">
+                      <div style="font-size: 16px; font-weight: bold; color: var(--gold-light); margin-bottom: 4px; word-break: break-word;">${linkify(linkItem.title)}</div>
+                      <div style="font-size: 14px; color: #fff; margin-bottom: 8px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
+                      <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">🔗 ${linkHTML}</div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                      <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
+                      <button type="button" aria-label="Elimina link" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
+                    </div>
+                  </div>
+                </div>`;
+            });
+            inner += `</div>`;
+          }
+        }
+
+        const actions = (session && folderName !== 'Generale') ? `
+          <div style="display: flex; gap: 6px; align-items: center;" onclick="event.stopPropagation()">
+            <button type="button" class="btn-secondary-outline btn-sm" onclick="openRenameFolderModal('${fk}')">✏️ Rinomina</button>
+            <button type="button" aria-label="Elimina folder" onclick="confirmDeleteFolder('${fk}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina folder">✕</button>
+          </div>` : '';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.cssText = 'margin-bottom: 16px; padding: 16px 20px;';
         card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 0; overflow: hidden;">
-              <div style="font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 6px; word-break: break-word;">${linkify(linkItem.title)}</div>
-              <div style="font-size: 14px; color: #fff; margin-bottom: 10px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
-              <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                🔗 ${linkHTML}
+          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer;" onclick="toggleFolderExpand('${fk}')">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+              <span style="font-size: 24px;">📁</span>
+              <div style="min-width: 0;">
+                <span style="font-size: 18px; font-weight: 900; color: var(--gold-light); word-break: break-word;">${esc(folderName)}</span>
+                <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">(${items.length} link)</span>
               </div>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
-              <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
-              <button type="button" aria-label="Elimina link" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              ${actions}
+              <div style="font-size: 14px; color: var(--gold-light); font-weight: bold; white-space: nowrap;">${isExp ? '[ Chiudi ▴ ]' : '[ Apri ▾ ]'}</div>
             </div>
           </div>
-        `;
+          ${inner}`;
         container.appendChild(card);
       });
     }
 
+    function populateFolderSelect(selected) {
+      const select = $('linkFolderSelect');
+      if (!select) return;
+      select.innerHTML = '';
+      if (!definedFolders.includes('Generale')) definedFolders.unshift('Generale');
+      definedFolders.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f;
+        opt.innerText = '📁 ' + f;
+        if (f === (selected || 'Generale')) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function openCreateFolderModal() {
+      $('folderOldName').value = '';
+      $('folderNameInput').value = '';
+      $('folderModalTitle').innerText = 'Nuovo Folder';
+      $('folderModal').classList.remove('hidden');
+    }
+    function openRenameFolderModal(enc) {
+      const oldName = decodeURIComponent(enc);
+      $('folderOldName').value = oldName;
+      $('folderNameInput').value = oldName;
+      $('folderModalTitle').innerText = 'Rinomina Folder';
+      $('folderModal').classList.remove('hidden');
+    }
+    function closeFolderModal() { $('folderModal').classList.add('hidden'); }
+
+    async function saveFolderModalAction(e) {
+      e.preventDefault();
+      const oldName = $('folderOldName').value;
+      const newName = $('folderNameInput').value.trim();
+      if (!newName) return;
+      if (newName.toLowerCase() !== oldName.toLowerCase() && definedFolders.some(f => f.toLowerCase() === newName.toLowerCase())) {
+        alert('Esiste già un folder con questo nome.');
+        return;
+      }
+      if (oldName) {
+        const i = definedFolders.indexOf(oldName);
+        if (i !== -1) definedFolders[i] = newName;
+        utileLinks.forEach(l => { if (l.folder === oldName) l.folder = newName; });
+        if (openFoldersMap[oldName] !== undefined) { openFoldersMap[newName] = openFoldersMap[oldName]; delete openFoldersMap[oldName]; }
+      } else {
+        definedFolders.push(newName);
+      }
+      closeFolderModal();
+      await saveLinks();
+    }
+
+    async function confirmDeleteFolder(enc) {
+      const name = decodeURIComponent(enc);
+      if (name === 'Generale') return;
+      if (confirm(`Vuoi eliminare il folder "${name}"? I link contenuti verranno spostati in "Generale".`)) {
+        definedFolders = definedFolders.filter(f => f !== name);
+        utileLinks.forEach(l => { if (l.folder === name) l.folder = 'Generale'; });
+        await saveLinks();
+      }
+    }
+
     function openLinkModal() {
       $('editLinkId').value = '';
+      populateFolderSelect('Generale');
       $('linkTitleInput').value = '';
       $('linkDescInput').value = '';
       $('linkAnchorTextInput').value = '';
@@ -1803,18 +1888,18 @@
     async function saveLinkItem(e) {
       e.preventDefault();
       const id = $('editLinkId').value;
+      const folder = $('linkFolderSelect').value || 'Generale';
       const title = $('linkTitleInput').value.trim();
       const description = $('linkDescInput').value.trim();
       const anchorText = $('linkAnchorTextInput').value.trim();
       let url = $('linkUrlInput').value.trim();
-
-      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
       if (id) {
         const item = utileLinks.find(l => l.id === id);
-        if (item) { item.title = title; item.description = description; item.anchorText = anchorText; item.url = url; }
+        if (item) { item.folder = folder; item.title = title; item.description = description; item.anchorText = anchorText; item.url = url; }
       } else {
-        utileLinks.unshift({ id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), title, description, anchorText, url });
+        utileLinks.unshift({ id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), folder, title, description, anchorText, url });
       }
 
       closeLinkModal();
@@ -1825,6 +1910,7 @@
       const item = utileLinks.find(l => l.id === id);
       if (!item) return;
       $('editLinkId').value = item.id;
+      populateFolderSelect(item.folder || 'Generale');
       $('linkTitleInput').value = item.title || '';
       $('linkDescInput').value = item.description || '';
       $('linkAnchorTextInput').value = item.anchorText || '';
@@ -1859,6 +1945,7 @@
           delete removed.pinnedTask;
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
+          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
           await saveData();
         }
       }
@@ -1869,6 +1956,7 @@
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
           manualTodos.splice(itemIdx, 1);
+          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
           await saveData();
         }
       }
@@ -1912,6 +2000,7 @@
 
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
+        const safeId = String(t.id || '').replace(/['"\\]/g, '');
 
         item.innerHTML = `
           <div style="flex: 1; min-width: 0; overflow: hidden;">
@@ -1924,8 +2013,8 @@
             <div class="todo-text-block" style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
-            <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeleteArchivedTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
+            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${safeId}')">↩️ Ripristina</button>
+            <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeleteArchivedTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
           </div>
         `;
         container.appendChild(item);
@@ -1956,683 +2045,619 @@
       $('todoChatPraticaId').value = '';
       $('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
       $('todoChatNewText').value = '';
-      $('btnTodoResolveToggle').style.display = 'inline-block';
-      $('btnTodoResolveToggle').innerText = item.isResolved ? '↩️ Riapri' : '✅ Segna Risolto';
+      $('btnTodoResolveToggle').style.display = 'block';
+
+      const btn = $('btnTodoResolveToggle');
+      if (item.isResolved) {
+        btn.innerText = '↩️ Riapri Task';
+        btn.style.background = '#d69e2e';
+        btn.style.color = '#000';
+      } else {
+        btn.innerText = '✅ Segna Risolto';
+        btn.style.background = 'var(--success-green)';
+        btn.style.color = '#fff';
+      }
+
       $('todoChatModal').classList.remove('hidden');
       renderTodoChatMessages(item, null);
     }
 
     function openPraticaTodoChatModal(praticaId) {
-      const p = pratiche.find(x => x.id === praticaId);
+      const p = pratiche.find(item => item.id === praticaId);
       if (!p) return;
       $('todoChatId').value = '';
       $('todoChatPraticaId').value = p.id;
-      $('todoChatModalTitle').innerText = `Chat Pratica: ${p.client} - ${p.title}`;
+      $('todoChatModalTitle').innerText = `Chat Operativa: ${p.client} - ${p.title}`;
       $('todoChatNewText').value = '';
       $('btnTodoResolveToggle').style.display = 'none';
+      if (!p.todoNotes) p.todoNotes = [];
       $('todoChatModal').classList.remove('hidden');
       renderTodoChatMessages(null, p);
     }
 
     function closeTodoChatModal() { $('todoChatModal').classList.add('hidden'); }
 
-    function toggleFolderExpand(folderName) {
-      openFoldersMap[folderName] = !openFoldersMap[folderName];
-      renderLinksList();
+    async function togglePinTodoChat(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory) return;
+      pinToggle(item.chatHistory, index);
+      await saveData();
+      renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
     }
 
-    function renderLinksList() {
-      const container = $('linksListContainer');
-      if (!container) return;
-
-      const search = (($('searchLinkInput') || {}).value || '').toLowerCase();
-      container.innerHTML = '';
-      if (!utileLinks) utileLinks = [];
-      if (!definedFolders) definedFolders = ['Generale'];
-
-      const filteredLinks = utileLinks.filter(l => (l.folder || '').toLowerCase().includes(search) || (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search) || (l.anchorText || '').toLowerCase().includes(search));
-
-      const folderGroups = {};
-      definedFolders.forEach(f => { folderGroups[f] = []; });
-      if (!folderGroups['Generale']) folderGroups['Generale'] = [];
-
-      filteredLinks.forEach(item => {
-        const f = (item.folder && item.folder.trim() !== '') ? item.folder.trim() : 'Generale';
-        if (!folderGroups[f]) folderGroups[f] = [];
-        folderGroups[f].push(item);
-      });
-
-      const folderNames = Object.keys(folderGroups).sort((a, b) => {
-        if (a === 'Generale') return -1;
-        if (b === 'Generale') return 1;
-        return a.localeCompare(b, 'it', { sensitivity: 'base' });
-      });
-
-      if (folderNames.length === 0) {
-        let emptyMsg = 'Nessun folder o link utile inserito.';
-        if (linksError === 'NOROW') emptyMsg = 'I link non sono ancora stati pubblicati. Chiedi a chi ha l\'accesso di aprire l\'app almeno una volta.';
-        else if (linksError) emptyMsg = 'Impossibile caricare i link (' + linksError + ').';
-        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">${esc(emptyMsg)}</div>`;
-        return;
-      }
-
-      folderNames.forEach(folderName => {
-        const linksInFolder = folderGroups[folderName];
-        const isExp = search.length > 0 || openFoldersMap[folderName] !== false; // default open
-        
-        const folderCard = document.createElement('div');
-        folderCard.className = 'card';
-        folderCard.style.marginBottom = '16px';
-        folderCard.style.padding = '16px 20px';
-
-        let innerLinksHTML = '';
-        if (isExp) {
-          if (linksInFolder.length === 0) {
-            innerLinksHTML = `<div style="margin-top: 14px; border-top: 1.5px solid var(--border-color); padding-top: 14px; color: var(--text-muted); font-size: 14px;">Folder vuoto. Aggiungi dei link per popolarlo.</div>`;
-          } else {
-            innerLinksHTML = `<div style="margin-top: 14px; border-top: 1.5px solid var(--border-color); padding-top: 14px; display: flex; flex-direction: column; gap: 12px;">`;
-            linksInFolder.forEach(linkItem => {
-              const displayText = linkItem.anchorText && linkItem.anchorText.trim() !== '' ? esc(linkItem.anchorText) : esc(linkItem.url);
-              const targetUrl = linkItem.url.startsWith('http://') || linkItem.url.startsWith('https://') ? linkItem.url : 'https://' + linkItem.url;
-              const linkHTML = `<a class="auto-link" href="${esc(targetUrl)}" target="_blank" rel="noopener noreferrer">${displayText}</a>`;
-
-              innerLinksHTML += `
-                <div class="link-item-card" style="background: rgba(42,8,12,0.6); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 14px;">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 0; overflow: hidden;">
-                      <div style="font-size: 16px; font-weight: bold; color: var(--gold-light); margin-bottom: 4px; word-break: break-word;">${linkify(linkItem.title)}</div>
-                      <div style="font-size: 14px; color: #fff; margin-bottom: 8px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
-                      <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        🔗 ${linkHTML}
-                      </div>
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                      <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
-                      <button type="button" aria-label="Elimina link" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
-                    </div>
-                  </div>
-                </div>
-              `;
-            });
-            innerLinksHTML += `</div>`;
-          }
-        }
-
-        const actionsHTML = (folderName !== 'Generale') ? `
-          <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;" onclick="event.stopPropagation()">
-            <button type="button" class="btn-secondary-outline btn-sm" onclick="openRenameFolderModal('${esc(folderName)}')">✏️ Rinomina</button>
-            <button type="button" aria-label="Elimina folder" onclick="confirmDeleteFolder('${esc(folderName)}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina folder">✕</button>
-          </div>
-        ` : '';
-
-        folderCard.innerHTML = `
-          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleFolderExpand('${esc(folderName)}')">
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-              <span style="font-size: 24px;">📁</span>
-              <div>
-                <span style="font-size: 18px; font-weight: 900; color: var(--gold-light);">${esc(folderName)}</span>
-                <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">(${linksInFolder.length} link)</span>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              ${actionsHTML}
-              <div style="font-size: 14px; color: var(--gold-light); font-weight: bold;">
-                ${isExp ? '[ Chiudi ▴ ]' : '[ Apri Folder ▾ ]'}
-              </div>
-            </div>
-          </div>
-          ${innerLinksHTML}
-        `;
-        container.appendChild(folderCard);
-      });
-    }
-
-    function populateFolderSelect(selectedFolder = 'Generale') {
-      const select = $('linkFolderSelect');
-      if (!select) return;
-      select.innerHTML = '';
-      if (!definedFolders.includes('Generale')) definedFolders.unshift('Generale');
-      definedFolders.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f;
-        opt.innerText = '📁 ' + f;
-        if (f === selectedFolder) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function openCreateFolderModal() {
-      $('folderOldName').value = '';
-      $('folderNameInput').value = '';
-      $('folderModalTitle').innerText = 'Crea Nuovo Folder';
-      $('folderModal').classList.remove('hidden');
-    }
-
-    function openRenameFolderModal(oldName) {
-      $('folderOldName').value = oldName;
-      $('folderNameInput').value = oldName;
-      $('folderModalTitle').innerText = `Rinomina Folder: ${oldName}`;
-      $('folderModal').classList.remove('hidden');
-    }
-
-    function closeFolderModal() { $('folderModal').classList.add('hidden'); }
-
-    async function saveFolderModalAction(e) {
-      e.preventDefault();
-      const oldName = $('folderOldName').value.trim();
-      const newName = $('folderNameInput').value.trim();
-      if (!newName) return;
-
-      if (!definedFolders) definedFolders = ['Generale'];
-
-      if (oldName) {
-        if (oldName !== newName) {
-          const idx = definedFolders.indexOf(oldName);
-          if (idx !== -1) definedFolders[idx] = newName;
-          utileLinks.forEach(l => {
-            if (l.folder === oldName) l.folder = newName;
-          });
-        }
-      } else {
-        if (!definedFolders.includes(newName)) definedFolders.push(newName);
-      }
-      closeFolderModal();
-      await saveLinks();
-    }
-
-    async function confirmDeleteFolder(folderName) {
-      if (folderName === 'Generale') return;
-      if (confirm(`Vuoi eliminare il folder "${folderName}"? I link contenuti verranno spostati nel folder "Generale".`)) {
-        definedFolders = definedFolders.filter(f => f !== folderName);
-        utileLinks.forEach(l => {
-          if (l.folder === folderName) l.folder = 'Generale';
-        });
-        await saveLinks();
-      }
-    }
-
-    function openLinkModal() {
-      $('editLinkId').value = '';
-      populateFolderSelect('Generale');
-      $('linkTitleInput').value = '';
-      $('linkDescInput').value = '';
-      $('linkAnchorTextInput').value = '';
-      $('linkUrlInput').value = '';
-      $('linkModalTitle').innerText = 'Aggiungi Link Utile';
-      $('linkModal').classList.remove('hidden');
-    }
-
-    function closeLinkModal() { $('linkModal').classList.add('hidden'); }
-
-    async function saveLinkItem(e) {
-      e.preventDefault();
-      const id = $('editLinkId').value;
-      const folder = $('linkFolderSelect').value || 'Generale';
-      const title = $('linkTitleInput').value.trim();
-      const description = $('linkDescInput').value.trim();
-      const anchorText = $('linkAnchorTextInput').value.trim();
-      let url = $('linkUrlInput').value.trim();
-
-      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
-
-      if (id) {
-        const item = utileLinks.find(l => l.id === id);
-        if (item) { item.folder = folder; item.title = title; item.description = description; item.anchorText = anchorText; item.url = url; }
-      } else {
-        utileLinks.unshift({ id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), folder, title, description, anchorText, url });
-      }
-
-      closeLinkModal();
-      await saveLinks();
-    }
-
-    function openEditLinkModal(id) {
-      const item = utileLinks.find(l => l.id === id);
-      if (!item) return;
-      $('editLinkId').value = item.id;
-      populateFolderSelect(item.folder || 'Generale');
-      $('linkTitleInput').value = item.title || '';
-      $('linkDescInput').value = item.description || '';
-      $('linkAnchorTextInput').value = item.anchorText || '';
-      $('linkUrlInput').value = item.url || '';
-      $('linkModalTitle').innerText = 'Modifica Link Utile';
-      $('linkModal').classList.remove('hidden');
-    }
-
-    function renumberChecklist(containerId) {
-      const rows = document.querySelectorAll(`#${containerId} .cl-row`);
-      rows.forEach((row, i) => {
-        const numSpan = row.querySelector('.cl-num');
-        if (numSpan) numSpan.textContent = `${i + 1}.`;
-      });
-    }
-
-    function addChecklistRow(containerId, value = '', done = false) {
-      const container = $(containerId);
-      if (!container) return;
-      const count = container.querySelectorAll('.cl-row').length + 1;
-      const div = document.createElement('div');
-      div.className = 'cl-row';
-      div.innerHTML = `
-        <span class="cl-num">${count}.</span>
-        <input type="checkbox" ${done ? 'checked' : ''} class="cl-done-check">
-        <input type="text" class="form-control cl-text" value="${esc(value)}" placeholder="Descrizione passaggio...">
-        <button type="button" class="cl-move-btn" onclick="moveChecklistRow(this, -1)">⬆</button>
-        <button type="button" class="cl-move-btn" onclick="moveChecklistRow(this, 1)">⬇</button>
-        <button type="button" class="cl-del" onclick="this.closest('.cl-row').remove(); renumberChecklist('${containerId}');">✕</button>
-      `;
-      container.appendChild(div);
-    }
-
-    function moveChecklistRow(btn, direction) {
-      const row = btn.closest('.cl-row');
-      const container = row.parentElement;
-      if (direction === -1 && row.previousElementSibling) {
-        container.insertBefore(row, row.previousElementSibling);
-      } else if (direction === 1 && row.nextElementSibling) {
-        container.insertBefore(row.nextElementSibling, row);
-      }
-      renumberChecklist(container.id);
+    async function togglePinPraticaTodo(praticaId, index) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.todoNotes) return;
+      pinToggle(p.todoNotes, index);
+      await saveData();
+      renderTodoChatMessages(null, pratiche.find(x => x.id === praticaId) || p);
     }
 
     function renderTodoChatMessages(manualItem, praticaItem) {
-      const container = $('todoChatMessages');
-      container.innerHTML = '';
-      const list = manualItem ? (manualItem.chatHistory || []) : (praticaItem ? (praticaItem.todoNotes || []) : []);
-      if (list.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 16px;">Nessun messaggio presente.</div>`;
+      const box = $('todoChatMessages');
+      box.innerHTML = '';
+
+      let messagesArray = [];
+      if (manualItem) messagesArray = manualItem.chatHistory || [];
+      if (praticaItem) messagesArray = praticaItem.todoNotes || [];
+
+      if (messagesArray.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 13px;">Nessun messaggio in questa chat operativa.</div>`;
         return;
       }
-      list.forEach((msg, idx) => {
-        const div = document.createElement('div');
-        div.style.cssText = "background: rgba(214,158,46,0.1); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;";
-        div.innerHTML = `
-          <div style="flex: 1; min-width: 0;">
-            <div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">💬 ${esc(msg.date || '')}</div>
-            <div class="chat-msg-text" style="font-size: 14px; color: #fff;">${linkify(msg.text)}</div>
-          </div>
-          <button type="button" aria-label="Elimina messaggio" onclick="${manualItem ? `deleteSingleTodoChatMessageDirect('${manualItem.id}', ${idx})` : `deleteSinglePraticaTodoMessageDirect('${praticaItem.id}', ${idx})`}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px;" title="Elimina messaggio">✕</button>
-        `;
-        container.appendChild(div);
+
+      const mid = manualItem ? String(manualItem.id).replace(/['"\\]/g, '') : '';
+      let html = '';
+      pinnedFirstOrder(messagesArray).forEach(index => {
+        const msg = messagesArray[index];
+        html += chatMsgCard({
+          dept: '', date: msg.date, text: msg.text, pinned: !!msg.pinned,
+          pinCall: manualItem ? `togglePinTodoChat('${mid}', ${index})` : `togglePinPraticaTodo('${praticaItem.id}', ${index})`,
+          editCall: manualItem ? `openEditTodoChatMessageModal('${mid}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`,
+          delCall: manualItem ? `confirmDeleteTodoChatMessage('${mid}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`
+        });
       });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function openEditTodoChatMessageModal(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory || !item.chatHistory[index]) return;
+      $('editChatType').value = 'manualTodo';
+      $('editChatManualId').value = itemId;
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = item.chatHistory[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function openEditPraticaTodoMessageModal(praticaId, index) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (!p || !p.todoNotes || !p.todoNotes[index]) return;
+      $('editChatType').value = 'praticaTodo';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = praticaId;
+      $('editChatIndex').value = index;
+      $('editChatText').value = p.todoNotes[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    async function confirmDeleteTodoChatMessage(itemId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const item = manualTodos.find(t => t.id === itemId);
+        if (item && item.chatHistory) {
+          item.chatHistory.splice(msgIndex, 1);
+          await saveData();
+          renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
+        }
+      }
+    }
+
+    async function confirmDeletePraticaTodoMessage(praticaId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes) {
+          p.todoNotes.splice(msgIndex, 1);
+          await saveData();
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
+        }
+      }
     }
 
     async function addTodoChatMessage() {
-      const text = $('todoChatNewText').value.trim();
-      if (!text) return;
       const manualId = $('todoChatId').value;
       const praticaId = $('todoChatPraticaId').value;
+      const text = $('todoChatNewText').value.trim();
+      if (!text) return;
 
       if (manualId) {
-        const item = manualTodos.find(t => t.id === manualId);
-        if (item) {
-          if (!item.chatHistory) item.chatHistory = [];
-          item.chatHistory.push({ date: getNow(), text });
+        const manualObj = manualTodos.find(t => t.id === manualId);
+        if (manualObj) {
+          if (!manualObj.chatHistory) manualObj.chatHistory = [];
+          manualObj.chatHistory.push({ date: getNow(), text: text });
+          lsSet('gt_last_chatted_todo_id', manualObj.id);
         }
       } else if (praticaId) {
-        const p = pratiche.find(x => x.id === praticaId);
-        if (p) {
-          if (!p.todoNotes) p.todoNotes = [];
-          p.todoNotes.push({ date: getNow(), text });
+        const praticaObj = pratiche.find(item => item.id === praticaId);
+        if (praticaObj) {
+          if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
+          praticaObj.todoNotes.push({ date: getNow(), text: text });
+          lsSet('gt_last_chatted_todo_id', praticaObj.id);
         }
       }
 
       $('todoChatNewText').value = '';
       await saveData();
-      const manualItem = manualId ? manualTodos.find(t => t.id === manualId) : null;
-      const praticaItem = praticaId ? pratiche.find(x => x.id === praticaId) : null;
-      renderTodoChatMessages(manualItem, praticaItem);
-      renderTodoList();
+
+      if (manualId) openTodoChatModal(manualId);
+      if (praticaId) openPraticaTodoChatModal(praticaId);
     }
 
     async function toggleResolveFromChat() {
-      const manualId = $('todoChatId').value;
-      if (manualId) {
-        await toggleManualTodoResolved(manualId);
-        const item = manualTodos.find(t => t.id === manualId);
-        if (item) {
-          $('btnTodoResolveToggle').innerText = item.isResolved ? '↩️ Riapri' : '✅ Segna Risolto';
-          renderTodoChatMessages(item, null);
-        }
+      const id = $('todoChatId').value;
+      if (!id) return;
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.isResolved = !item.isResolved;
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        await saveData();
+        closeTodoChatModal();
       }
     }
 
-    function toggleTodoExpand(id) {
-      const item = manualTodos.find(t => t.id === id);
-      if (item) { item.isExpanded = !item.isExpanded; renderTodoList(); }
+    function renumberChecklist(containerId) {
+      [...$(containerId).children].forEach((r, i) => { r.querySelector('.cl-num').textContent = (i + 1) + '.'; });
+    }
+
+    function addChecklistRow(containerId, item) {
+      const c = $(containerId);
+      const row = document.createElement('div');
+      row.className = 'cl-row';
+      row.dataset.id = (item && item.id) || ('cl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+      row.innerHTML = `<span class="cl-num"></span>
+        <input type="checkbox" class="cl-done" aria-label="Fatto">
+        <input type="text" class="form-control cl-text" aria-label="Testo del punto" placeholder="Es. Telefonare per l'approvazione...">
+        <button type="button" class="cl-move-btn cl-up" aria-label="Sposta su">⬆</button>
+        <button type="button" class="cl-move-btn cl-down" aria-label="Sposta giù">⬇</button>
+        <button type="button" class="cl-del" aria-label="Elimina punto">✕</button>`;
+      row.querySelector('.cl-done').checked = !!(item && item.done);
+      row.querySelector('.cl-text').value = item ? (item.text || '') : '';
+      row.querySelector('.cl-del').onclick = () => { row.remove(); renumberChecklist(containerId); };
+      row.querySelector('.cl-up').onclick = () => { if (row.previousElementSibling) { c.insertBefore(row, row.previousElementSibling); renumberChecklist(containerId); } };
+      row.querySelector('.cl-down').onclick = () => { if (row.nextElementSibling) { c.insertBefore(row.nextElementSibling, row); renumberChecklist(containerId); } };
+      row.querySelector('.cl-text').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addChecklistRow(containerId); }
+      });
+      c.appendChild(row);
+      renumberChecklist(containerId);
+      if (!item) row.querySelector('.cl-text').focus();
+    }
+
+    function fillChecklist(containerId, list) {
+      $(containerId).innerHTML = '';
+      (list || []).forEach(it => addChecklistRow(containerId, it));
+    }
+
+    function readChecklist(containerId) {
+      return [...$(containerId).querySelectorAll('.cl-row')]
+        .map(r => ({ id: r.dataset.id, text: r.querySelector('.cl-text').value.trim(), done: r.querySelector('.cl-done').checked }))
+        .filter(x => x.text);
     }
 
     async function toggleTaskPin(id) {
-      const item = manualTodos.find(t => t.id === id);
-      if (item) { item.pinnedTask = !item.pinnedTask; await saveData(); renderTodoList(); }
+      const it = manualTodos.find(t => t.id === id);
+      if (!it) return;
+      it.pinnedTask = !it.pinnedTask;
+      await saveData();
     }
-
     async function toggleAutoTaskPin(praticaId) {
       const p = pratiche.find(x => x.id === praticaId);
-      if (p) { p.todoPinned = !p.todoPinned; await saveData(); renderTodoList(); }
-    }
-
-    function openNewModal() {
-      $('formClient').value = ''; $('formTitle').value = ''; $('formDescription').value = '';
-      $('formShowDate').value = ''; $('formOwnerExt').value = ''; $('formOwnerInt').value = '';
-      $('newModal').classList.remove('hidden');
-    }
-    function closeNewModal() { $('newModal').classList.add('hidden'); }
-
-    async function savePratica(e) {
-      e.preventDefault();
-      const clientName = $('formClient').value.trim();
-      const title = $('formTitle').value.trim();
-      const description = $('formDescription').value.trim();
-      const showDate = $('formShowDate').value;
-      const ownerExt = $('formOwnerExt').value.trim();
-      const ownerInt = $('formOwnerInt').value.trim();
-
-      const newP = {
-        id: 'p_' + Date.now(),
-        client: clientName, title, description, showDate, ownerExt, ownerInt,
-        currentStepIdx: 0, approvedSteps: [], statusMessages: [], alertsList: [], mailDepts: [],
-        isArchived: false, isExpanded: true, todoNotes: [],
-        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
-      };
-
-      pratiche.unshift(newP);
-      closeNewModal();
+      if (!p) return;
+      p.todoPinned = !p.todoPinned;
       await saveData();
     }
 
-    function openEditModal(id) {
-      const p = pratiche.find(x => x.id === id);
+    async function deleteFlussiMsgDirect(praticaId, index) {
+      if (!confirm('Vuoi eliminare questo messaggio?')) return;
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.notesHistory) return;
+      p.notesHistory.splice(index, 1);
+      await saveData();
+    }
+    async function deleteTodoMsgDirect(taskId, index) {
+      if (!confirm('Vuoi eliminare questo messaggio?')) return;
+      const t = manualTodos.find(x => x.id === taskId);
+      if (!t || !t.chatHistory) return;
+      t.chatHistory.splice(index, 1);
+      await saveData();
+    }
+    async function deletePraticaTodoMsgDirect(praticaId, index) {
+      if (!confirm('Vuoi eliminare questo messaggio?')) return;
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.todoNotes) return;
+      p.todoNotes.splice(index, 1);
+      await saveData();
+    }
+    function goToPraticaFromTodo(praticaId) {
+      const p = pratiche.find(x => x.id === praticaId);
       if (!p) return;
-      $('editId').value = p.id;
-      $('editClient').value = p.client || '';
-      $('editTitle').value = p.title || '';
-      $('editDescription').value = p.description || '';
-      $('editShowDate').value = p.showDate || '';
-      $('editOwnerExt').value = p.ownerExt || '';
-      $('editOwnerInt').value = p.ownerInt || '';
-      $('editModal').classList.remove('hidden');
-    }
-    function closeEditModal() { $('editModal').classList.add('hidden'); }
-
-    async function updatePratica(e) {
-      e.preventDefault();
-      const id = $('editId').value;
-      const p = pratiche.find(x => x.id === id);
-      if (p) {
-        p.client = $('editClient').value.trim();
-        p.title = $('editTitle').value.trim();
-        p.description = $('editDescription').value.trim();
-        p.showDate = $('editShowDate').value;
-        p.ownerExt = $('editOwnerExt').value.trim();
-        p.ownerInt = $('editOwnerInt').value.trim();
-        closeEditModal();
-        await saveData();
-      }
+      p.isExpanded = true;
+      switchTab('flussi');
+      renderFeed();
+      setTimeout(() => {
+        const el = Array.from(document.querySelectorAll('#feedList .card')).find(c => c.innerHTML.includes(`toggleCardExpand('${praticaId}')`));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
 
-    async function deletePratica(id) {
-      if (confirm('Vuoi eliminare questa pratica?')) {
-        pratiche = pratiche.filter(p => p.id !== id);
-        await saveData();
-      }
+    function toggleTodoExpand(id) {
+      const t = manualTodos.find(x => x.id === id);
+      if (t) { t.isExpanded = !t.isExpanded; renderTodoList(); }
+    }
+    function toggleAllTodos() {
+      const shouldExpand = !manualTodos.every(t => t.isExpanded);
+      manualTodos.forEach(t => t.isExpanded = shouldExpand);
+      renderTodoList();
+    }
+
+    async function toggleChecklistItem(taskId, itemId) {
+      const task = manualTodos.find(t => t.id === taskId);
+      if (!task || !task.checklist) return;
+      const it = task.checklist.find(c => c.id === itemId);
+      if (!it) return;
+      it.done = !it.done;
+      await saveData();
     }
 
     function openTodoModal() {
-      $('todoTitle').value = ''; $('todoAssignee').value = ''; $('todoDeadline').value = ''; $('todoAction').value = '';
-      $('todoChecklistEditor').innerHTML = '';
+      fillChecklist('todoChecklistEditor', []);
+      $('todoTitle').value = '';
+      $('todoAssignee').value = '';
+      $('todoDeadline').value = '';
+      $('todoAction').value = '';
       $('todoModal').classList.remove('hidden');
     }
     function closeTodoModal() { $('todoModal').classList.add('hidden'); }
 
     async function saveManualTodo(e) {
       e.preventDefault();
-      const title = $('todoTitle').value.trim();
-      const sit = $('todoSit').value;
-      const assignee = $('todoAssignee').value.trim();
-      const deadline = $('todoDeadline').value;
-      const action = $('todoAction').value.trim();
-
-      const clRows = document.querySelectorAll('#todoChecklistEditor .cl-row');
-      const checklist = Array.from(clRows).map((row, i) => ({
-        id: 'cl_' + i + '_' + Date.now(),
-        text: row.querySelector('.cl-text').value.trim(),
-        done: row.querySelector('.cl-done-check').checked
-      })).filter(x => x.text);
+      const sitVal = $('todoSit').value;
+      const initialAction = $('todoAction').value;
+      const newId = 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
 
       manualTodos.unshift({
-        id: 'mt_' + Date.now(),
-        title, situation: sit, dept: sit, assignee, deadline, action, actionOriginal: action,
-        checklist, isManual: true, isResolved: false, isExpanded: true,
-        chatHistory: [{ date: getNow(), text: action }]
+        id: newId,
+        title: $('todoTitle').value,
+        dept: sitVal,
+        assignee: $('todoAssignee').value.trim(),
+        deadline: $('todoDeadline').value.trim(),
+        situation: `📌 ${sitVal}`,
+        actionOriginal: initialAction,
+        action: initialAction,
+        chatHistory: [{ date: getNow(), text: initialAction }],
+        isManual: true,
+        isResolved: false,
+        checklist: readChecklist('todoChecklistEditor')
       });
 
+      lsSet('gt_last_chatted_todo_id', newId);
       closeTodoModal();
       await saveData();
     }
 
     function openEditTodoModal(id) {
-      const t = manualTodos.find(x => x.id === id);
-      if (!t) return;
-      $('editTodoId').value = t.id;
-      $('editTodoTitle').value = t.title || '';
-      $('editTodoSit').value = t.dept || t.situation || 'Prospect';
-      $('editTodoAssignee').value = t.assignee || '';
-      $('editTodoDeadline').value = t.deadline || '';
-      $('editTodoAction').value = t.actionOriginal || t.action || '';
-      $('editTodoIsResolved').checked = !!t.isResolved;
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      $('editTodoId').value = item.id;
+      $('editTodoTitle').value = item.title || '';
 
-      const editor = $('editTodoChecklistEditor');
-      editor.innerHTML = '';
-      (t.checklist || []).forEach(c => addChecklistRow('editTodoChecklistEditor', c.text, c.done));
+      const selectSit = $('editTodoSit');
+      if (item.dept && [...selectSit.options].some(o => o.value === item.dept)) selectSit.value = item.dept;
 
+      $('editTodoAssignee').value = item.assignee || '';
+      $('editTodoDeadline').value = item.deadline || '';
+      $('editTodoAction').value = item.actionOriginal || item.action || '';
+      $('editTodoIsResolved').checked = !!item.isResolved;
+      fillChecklist('editTodoChecklistEditor', item.checklist);
       $('editTodoModal').classList.remove('hidden');
     }
+
     function closeEditTodoModal() { $('editTodoModal').classList.add('hidden'); }
 
     async function saveEditedManualTodo(e) {
       e.preventDefault();
       const id = $('editTodoId').value;
-      const t = manualTodos.find(x => x.id === id);
-      if (t) {
-        t.title = $('editTodoTitle').value.trim();
-        t.dept = $('editTodoSit').value;
-        t.situation = t.dept;
-        t.assignee = $('editTodoAssignee').value.trim();
-        t.deadline = $('editTodoDeadline').value;
-        t.actionOriginal = $('editTodoAction').value.trim();
-        t.action = t.actionOriginal;
-        t.isResolved = $('editTodoIsResolved').checked;
-
-        const clRows = document.querySelectorAll('#editTodoChecklistEditor .cl-row');
-        t.checklist = Array.from(clRows).map((row, i) => ({
-          id: 'cl_' + i + '_' + Date.now(),
-          text: row.querySelector('.cl-text').value.trim(),
-          done: row.querySelector('.cl-done-check').checked
-        })).filter(x => x.text);
-
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.title = $('editTodoTitle').value;
+        const sitVal = $('editTodoSit').value;
+        item.dept = sitVal;
+        item.assignee = $('editTodoAssignee').value.trim();
+        item.deadline = $('editTodoDeadline').value.trim();
+        item.isResolved = $('editTodoIsResolved').checked;
+        if (!item.isResolved) item.situation = `📌 ${sitVal}`;
+        item.actionOriginal = $('editTodoAction').value;
+        item.action = item.actionOriginal;
+        item.checklist = readChecklist('editTodoChecklistEditor');
         closeEditTodoModal();
         await saveData();
       }
     }
 
-    async function toggleChecklistItem(todoId, itemId) {
-      const t = manualTodos.find(x => x.id === todoId);
-      if (t && t.checklist) {
-        const item = t.checklist.find(c => c.id === itemId);
-        if (item) { item.done = !item.done; await saveData(); renderTodoList(); }
-      }
-    }
-
+    // ============ GESTIONE REPARTI (STEPPER) ============
     function isStepLocked(p, idx) {
-      if (idx === 0) return false;
-      if (idx >= 5) return !p.approvedSteps.includes(4) && !(p.earlyStart || []).includes(ROUTE_STEPS[idx].label);
-      return !p.approvedSteps.includes(idx - 1);
+      const cur = p.currentStepIdx || 0;
+      if (idx >= 6) return cur < 6 && !isEarlyStarted(p, idx);
+      return idx > cur;
+    }
+    function reachMax(p) {
+      const cur = p.currentStepIdx || 0;
+      return cur >= 6 ? ROUTE_STEPS.length - 1 : cur;
+    }
+    function stepHasMarker(p, label) {
+      return (p.mailDepts || []).includes(label)
+        || (p.statusMessages || []).some(st => st.dept === label)
+        || (p.alertsList || []).some(al => al.target === label);
+    }
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
     }
 
-    function stepHasMarker(p, deptLabel) {
-      const hasStatus = (p.statusMessages || []).some(st => st.dept === deptLabel);
-      const hasAlert = (p.alertsList || []).some(al => al.target === deptLabel);
-      const hasMail = (p.mailDepts || []).includes(deptLabel);
-      return hasStatus || hasAlert || hasMail;
-    }
+    function openStepClickModal(id, idx) {
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      const deptLabel = ROUTE_STEPS[idx].label;
 
-    function openStepClickModal(praticaId, stepIdx) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (!p) return;
-      activeItemId = p.id;
-      selectedStepIdx = stepIdx;
-      const deptLabel = ROUTE_STEPS[stepIdx].label;
+      const chatOnly = isStepLocked(activeItem, idx) && !stepHasMarker(activeItem, deptLabel);
+      selectedStepIdx = idx;
+      ['btnStall', 'btnSendBack', 'btnBlock'].forEach(b => { $(b).style.display = chatOnly ? 'none' : 'block'; });
 
-      $('stepClickTitle').innerText = `Gestione Reparto: ${deptLabel}`;
-      $('stepClickSub').innerText = `Pratica: ${p.client} - ${p.title}`;
+      if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
+        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
+        saveData();
+      }
 
-      const isCurrent = (p.currentStepIdx === stepIdx);
-      const canApprove = (isCurrent && stepIdx < 5) || (stepIdx >= 5 && (p.approvedSteps.includes(4) || (p.earlyStart || []).includes(deptLabel)) && !p.approvedSteps.includes(stepIdx));
-      const canUndo = p.approvedSteps.includes(stepIdx) || (stepIdx > 0 && p.currentStepIdx > stepIdx);
+      $('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
+      $('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
 
-      $('btnApproveNext').style.display = canApprove ? 'block' : 'none';
-      $('btnExecuteFinal').style.display = (stepIdx >= 5 && canApprove) ? 'block' : 'none';
-      if (stepIdx >= 5 && canApprove) $('btnApproveNext').style.display = 'none';
-      $('btnUndoAdvance').style.display = canUndo ? 'block' : 'none';
-      $('btnGoCurrent').style.display = (!isCurrent && stepIdx < 5) ? 'block' : 'none';
-      $('btnResolveDept').style.display = stepHasMarker(p, deptLabel) ? 'block' : 'none';
-      $('btnRequestEarly').style.display = (stepIdx >= 5 && !p.approvedSteps.includes(4) && !(p.earlyRequests || []).includes(deptLabel) && !(p.earlyStart || []).includes(deptLabel)) ? 'block' : 'none';
+      const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
+      const btnApprove = $('btnApproveNext');
+      const btnExecuteFinal = $('btnExecuteFinal');
 
+      btnApprove.style.display = 'none';
+      btnExecuteFinal.style.display = 'none';
+
+      const curIdx = activeItem.currentStepIdx || 0;
+      const curLabel = ROUTE_STEPS[curIdx].label;
+      const inParallel = curIdx >= 6 && idx >= 6;
+      $('btnGoCurrent').style.display = 'none';
+      $('btnResolveDept').style.display = stepHasMarker(activeItem, deptLabel) ? 'block' : 'none';
+      $('btnUndoAdvance').style.display = (idx < 6 && (activeItem.approvedSteps || []).includes(idx) && curIdx > idx) ? 'block' : 'none';
+      if (!isCurrentStep && !inParallel) {
+        if (curIdx < 6) {
+          $('stepClickSub').innerText = `⚠️ La pratica è attualmente su "${curLabel}". Il pulsante per mandarla avanti è nel reparto attuale.`;
+          $('btnGoCurrent').innerText = `👉 Vai a "${curLabel}" (per mandare avanti)`;
+          $('btnGoCurrent').style.display = 'block';
+        } else {
+          $('stepClickSub').innerText = `La pratica è nella fase parallela (Promo, PR, Logistics): conferma ESEGUITO dai rispettivi pallini.`;
+        }
+      }
+
+      if (activeItem.currentStepIdx >= 6 && (idx >= 6)) {
+        const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
+        btnExecuteFinal.style.display = 'block';
+        btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
+      } else if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        btnApprove.style.display = 'block';
+        btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
+      }
+
+      if (chatOnly) {
+        const cur = ROUTE_STEPS[activeItem.currentStepIdx || 0].label;
+        ['btnApproveNext', 'btnExecuteFinal', 'btnGoCurrent', 'btnResolveDept', 'btnUndoAdvance'].forEach(b => { $(b).style.display = 'none'; });
+        $('stepClickSub').innerText = `🔒 "${deptLabel}" non è ancora attivo (la pratica è su "${cur}"). Per ora puoi solo scrivere in chat.`;
+      }
+
+      $('btnRequestEarly').style.display = 'none';
+      $('earlyStartBox').innerHTML = '';
+      // Legal è all'indice 5
+      if (idx >= 6 && curIdx === 5) {
+        const already = (activeItem.earlyStart || []).includes(deptLabel);
+        const asked = (activeItem.earlyRequests || []).includes(deptLabel);
+        if (!already && !asked) {
+          $('btnRequestEarly').style.display = 'block';
+          $('btnRequestEarly').innerText = `🙋 Chiedi a Legal la partenza anticipata di ${deptLabel}`;
+        } else if (asked && !already) {
+          $('stepClickSub').innerText = `🙋 Hai già chiesto a Legal la partenza anticipata. Attendi la sua risposta (nel frattempo puoi scrivere in chat).`;
+        }
+      }
+      if (idx >= 6 && curIdx < 6 && isEarlyStarted(activeItem, idx)) {
+        $('stepClickSub').innerText = `🚀 Partenza anticipata consentita da Legal: puoi lavorare, ma il reparto resta fucsia finché Legal non approva (contratto da firmare).`;
+      }
+      if (idx === 5 && curIdx === 5) {
+        $('earlyStartBox').innerHTML = ['Promo', 'PR', 'Logistics'].map(d => {
+          const on = (activeItem.earlyStart || []).includes(d);
+          const req = (activeItem.earlyRequests || []).includes(d) ? ' 🙋 (richiesta in corso)' : '';
+          return `<button type="button" class="btn-sm stepact" style="background: ${on ? '#6b21a8' : 'var(--status-fuchsia)'};" onclick="${on ? 'revokeEarlyStart' : 'enableEarlyStart'}('${activeItem.id}', '${d}')">${on ? '⏹ Revoca partenza anticipata' : '🚀 Consenti partenza anticipata'}: ${d}${req}</button>`;
+        }).join('');
+      }
       $('stepClickModal').classList.remove('hidden');
-    }
-    function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
-
-    async function approveAndNext() {
-      const p = activeItem;
-      if (!p) return;
-      const stepIdx = selectedStepIdx;
-      if (!p.approvedSteps.includes(stepIdx)) p.approvedSteps.push(stepIdx);
-      if (stepIdx < 5 && p.currentStepIdx <= stepIdx) p.currentStepIdx = stepIdx + 1;
-      closeStepClickModal();
-      await saveData();
-    }
-
-    async function executeFinalDepartment() {
-      await approveAndNext();
     }
 
     async function undoAdvanceStep() {
       const p = activeItem;
-      if (!p) return;
-      const stepIdx = selectedStepIdx;
-      p.approvedSteps = (p.approvedSteps || []).filter(i => i !== stepIdx);
-      if (stepIdx < 5) p.currentStepIdx = stepIdx;
+      if (!p || selectedStepIdx === null || selectedStepIdx >= 6) return;
+      const label = ROUTE_STEPS[selectedStepIdx].label;
+      if (!confirm(`Richiamare la pratica su "${label}" e annullare gli avanzamenti successivi?`)) return;
+      p.currentStepIdx = selectedStepIdx;
+      p.approvedSteps = (p.approvedSteps || []).filter(i => i < selectedStepIdx);
+      p.earlyStart = []; p.earlyRequests = [];
+      if (!p.notesHistory) p.notesHistory = [];
+      p.notesHistory.push({ date: getNow(), dept: label, text: `↩️ Avanzamento annullato: la pratica è tornata su ${label}.` });
       closeStepClickModal();
       await saveData();
     }
 
-    async function goToCurrentStep() {
+    function goToCurrentStep() {
+      const p = activeItem;
+      if (!p) return;
+      const id = p.id, cur = p.currentStepIdx || 0;
       closeStepClickModal();
-      renderFeed();
+      openStepClickModal(id, cur);
     }
 
     async function resolveDeptMarkers() {
-      const p = activeItem;
-      if (!p) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      p.statusMessages = (p.statusMessages || []).filter(st => st.dept !== deptLabel);
-      p.alertsList = (p.alertsList || []).filter(al => al.target !== deptLabel);
-      p.mailDepts = (p.mailDepts || []).filter(d => d !== deptLabel);
+      if (!activeItem || selectedStepIdx === null) return;
+      const label = ROUTE_STEPS[selectedStepIdx].label;
+      activeItem.statusMessages = (activeItem.statusMessages || []).filter(st => st.dept !== label);
+      activeItem.alertsList = (activeItem.alertsList || []).filter(al => al.target !== label);
+      activeItem.mailDepts = (activeItem.mailDepts || []).filter(d => d !== label);
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({ date: getNow(), dept: label, text: `✅ Risolti stalli/avvisi su ${label}.` });
       closeStepClickModal();
       await saveData();
+    }
+
+    async function approveCurrent(id) {
+      const p = pratiche.find(x => x.id === id);
+      if (!p) return;
+      const cur = p.currentStepIdx || 0;
+      if (cur >= 6) return;
+      if (!confirm(`Approvare "${ROUTE_STEPS[cur].label}" e mandare avanti la pratica?`)) return;
+      activeItem = p;
+      selectedStepIdx = cur;
+      await approveAndNext();
+    }
+
+    function isEarlyStarted(p, idx) {
+      return (p.earlyStart || []).includes(ROUTE_STEPS[idx].label);
     }
 
     async function requestEarlyStart() {
       const p = activeItem;
-      if (!p) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      // Legal è all'indice 5
+      if (!p || selectedStepIdx === null || (p.currentStepIdx || 0) !== 5) return;
+      const dept = ROUTE_STEPS[selectedStepIdx].label;
       if (!p.earlyRequests) p.earlyRequests = [];
-      if (!p.earlyRequests.includes(deptLabel)) p.earlyRequests.push(deptLabel);
+      if (!p.earlyRequests.includes(dept)) p.earlyRequests.push(dept);
+      if (!p.mailDepts) p.mailDepts = [];
+      if (!p.mailDepts.includes('Legal')) p.mailDepts.push('Legal');
+      p.notesHistory.push({ date: getNow(), dept, text: `🙋 ${dept} chiede a Legal la partenza anticipata (contratto non ancora firmato: resterà fucsia finché Legal non approva).` });
+      lsSet('gt_last_chatted_todo_id', p.id);
       closeStepClickModal();
       await saveData();
     }
 
-    async function enableEarlyStart(praticaId, deptLabel) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (p) {
-        p.earlyRequests = (p.earlyRequests || []).filter(d => d !== deptLabel);
-        if (!p.earlyStart) p.earlyStart = [];
-        if (!p.earlyStart.includes(deptLabel)) p.earlyStart.push(deptLabel);
-        await saveData();
-      }
+    async function enableEarlyStart(pid, dept) {
+      const p = pratiche.find(x => x.id === pid);
+      if (!p || (p.currentStepIdx || 0) !== 5) return;
+      if (!p.earlyStart) p.earlyStart = [];
+      if (!p.earlyStart.includes(dept)) p.earlyStart.push(dept);
+      p.earlyRequests = (p.earlyRequests || []).filter(d => d !== dept);
+      if (!p.mailDepts) p.mailDepts = [];
+      if (!p.mailDepts.includes(dept)) p.mailDepts.push(dept);
+      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `🚀 Legal consente la partenza anticipata a ${dept}: può lavorare ma resta fucsia finché Legal non approva (contratto da firmare).` });
+      closeStepClickModal();
+      await saveData();
     }
 
-    async function revokeEarlyStart(praticaId, deptLabel) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (p) {
-        p.earlyStart = (p.earlyStart || []).filter(d => d !== deptLabel);
-        await saveData();
-      }
+    async function revokeEarlyStart(pid, dept) {
+      const p = pratiche.find(x => x.id === pid);
+      if (!p || (p.currentStepIdx || 0) !== 5) return;
+      p.earlyStart = (p.earlyStart || []).filter(d => d !== dept);
+      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `⏹ Legal revoca la partenza anticipata a ${dept}.` });
+      closeStepClickModal();
+      await saveData();
     }
 
-    async function approveCurrent(praticaId) {
-      const p = pratiche.find(x => x.id === praticaId);
-      if (p && p.currentStepIdx < 5) {
-        if (!p.approvedSteps.includes(p.currentStepIdx)) p.approvedSteps.push(p.currentStepIdx);
-        p.currentStepIdx++;
-        await saveData();
-      }
-    }
+    function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
 
     function openQuickChatFromStep() {
       closeStepClickModal();
-      const p = activeItem;
-      if (!p) return;
-      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
-      $('quickChatSenderLabel').innerText = deptLabel;
+      if (!activeItem || selectedStepIdx === null) return;
+      $('quickChatSenderLabel').innerText = ROUTE_STEPS[selectedStepIdx].label;
       $('quickChatTextInput').value = '';
       $('quickChatModal').classList.remove('hidden');
     }
+
     function closeQuickChatModal() { $('quickChatModal').classList.add('hidden'); }
 
     async function saveQuickChatFromStep(e) {
       e.preventDefault();
-      const p = activeItem;
-      if (!p) return;
+      if (!activeItem || selectedStepIdx === null) return;
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
       const text = $('quickChatTextInput').value.trim();
       if (!text) return;
-      if (!p.notesHistory) p.notesHistory = [];
-      p.notesHistory.push({ date: getNow(), dept: deptLabel, text });
+
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
+      lsSet('gt_last_chatted_todo_id', activeItem.id);
+
       closeQuickChatModal();
       await saveData();
     }
 
     function openSendBackModal() {
       closeStepClickModal();
-      const p = activeItem;
-      if (!p) return;
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      $('sendBackModalTitle').innerText = `Rimanda da "${currentDeptLabel}" ad altro reparto`;
+
       const select = $('sendBackTargetSelect');
       select.innerHTML = '';
+
+      const maxIdxBack = reachMax(activeItem);
       ROUTE_STEPS.forEach((s, idx) => {
-        if (idx !== selectedStepIdx) {
-          const opt = document.createElement('option');
-          opt.value = s.label;
-          opt.innerText = s.label;
-          select.appendChild(opt);
-        }
+        if (idx > maxIdxBack) return;
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.innerText = s.label + (idx < selectedStepIdx ? ' (Indietro)' : idx === selectedStepIdx ? ' (Stesso reparto)' : ' (Avanti)');
+        if (idx === Math.max(0, selectedStepIdx - 1)) opt.selected = true;
+        select.appendChild(opt);
       });
+
       $('sendBackNoteInput').value = '';
       $('sendBackModal').classList.remove('hidden');
     }
+
     function closeSendBackModal() { $('sendBackModal').classList.add('hidden'); }
 
     async function saveSendBackAction(e) {
       e.preventDefault();
-      const p = activeItem;
-      if (!p) return;
-      const target = $('sendBackTargetSelect').value;
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetStepIdx = parseInt($('sendBackTargetSelect').value);
+      const targetDept = ROUTE_STEPS[targetStepIdx].label;
       const note = $('sendBackNoteInput').value.trim();
-      const sender = ROUTE_STEPS[selectedStepIdx].label;
 
-      if (!p.alertsList) p.alertsList = [];
-      p.alertsList.push({ id: 'al_' + Date.now(), type: 'WARN', sender, target, text: note });
+      activeItem.currentStepIdx = targetStepIdx;
+      // Legal è all'indice 5
+      if (targetStepIdx < 5) { activeItem.earlyStart = []; activeItem.earlyRequests = []; }
+
+      if (targetStepIdx <= selectedStepIdx) {
+        const bothParallel = targetStepIdx >= 6 && selectedStepIdx >= 6;
+        activeItem.approvedSteps = (activeItem.approvedSteps || []).filter(i => bothParallel ? i !== targetStepIdx : i < targetStepIdx);
+      }
+
+      if (!activeItem.alertsList) activeItem.alertsList = [];
+      activeItem.alertsList.push({
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'WARN',
+        sender: senderDept,
+        target: targetDept,
+        text: `Rimandato indietro: ${note}`
+      });
+
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `↩️ [Rimandato a ${targetDept}]: ${note}` });
 
       closeSendBackModal();
       await saveData();
@@ -2640,110 +2665,366 @@
 
     function openStatusModal() {
       closeStepClickModal();
-      const p = activeItem;
-      if (!p) return;
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      $('statusModalTitle').innerText = `Segnala Stallo / Metti in Attesa da "${currentDeptLabel}"`;
+
       const select = $('statusTargetSelect');
       select.innerHTML = '';
-      ROUTE_STEPS.forEach((s) => {
+
+      const maxIdxStatus = reachMax(activeItem);
+      ROUTE_STEPS.forEach((s, idx) => {
+        if (idx > maxIdxStatus) return;
         const opt = document.createElement('option');
         opt.value = s.label;
-        opt.innerText = s.label;
-        if (s.label === ROUTE_STEPS[selectedStepIdx].label) opt.selected = true;
+        opt.innerText = s.label + (s.label === currentDeptLabel ? ' (Questo reparto)' : ' (Rimanda a questo reparto)');
+        if (s.label === currentDeptLabel) opt.selected = true;
         select.appendChild(opt);
       });
+
       $('statusNoteInput').value = '';
       $('statusModal').classList.remove('hidden');
     }
+
     function closeStatusModal() { $('statusModal').classList.add('hidden'); }
 
-    async function saveDepartmentStatus(e) {
-      e.preventDefault();
-      const p = activeItem;
-      if (!p) return;
-      const target = $('statusTargetSelect').value;
-      const note = $('statusNoteInput').value.trim();
+    async function saveDepartmentStatus(event) {
+      event.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetDept = $('statusTargetSelect').value;
+      const text = $('statusNoteInput').value.trim();
 
-      if (!p.statusMessages) p.statusMessages = [];
-      p.statusMessages.push({ id: 'st_' + Date.now(), dept: target, text: note });
+      if (!activeItem.statusMessages) activeItem.statusMessages = [];
+      activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
+
+      activeItem.statusMessages.push({
+        id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        dept: targetDept,
+        text: text
+      });
+
+      if (senderDept !== targetDept) {
+        if (!activeItem.mailDepts) activeItem.mailDepts = [];
+        if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+      }
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
 
       closeStatusModal();
       await saveData();
     }
 
+    async function approveAndNext() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+      if (!activeItem.approvedSteps.includes(selectedStepIdx)) activeItem.approvedSteps.push(selectedStepIdx);
+
+      if (activeItem.statusMessages) activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
+      if (activeItem.mailDepts) activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
+      if (activeItem.alertsList) activeItem.alertsList = activeItem.alertsList.filter(al => al.target !== deptLabel);
+
+      if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
+
+        // Legal è all'indice 5, la fase parallela parte dall'indice 6
+        if (activeItem.currentStepIdx === 6) {
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
+          activeItem.earlyStart = [];
+          activeItem.earlyRequests = [];
+        } else {
+          const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
+        }
+      } else {
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
+      }
+
+      closeStepClickModal();
+      await saveData();
+    }
+
+    async function executeFinalDepartment() {
+      if (!activeItem || selectedStepIdx < 6) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+      const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
+
+      if (isAlreadyDone) {
+        activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
+      } else {
+        activeItem.approvedSteps.push(selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
+      }
+
+      closeStepClickModal();
+      await saveData();
+    }
+
     function openInterveneFromStepClick() {
       closeStepClickModal();
+      $('interveneModalTitle').innerText = `Blocca Reparto "${ROUTE_STEPS[selectedStepIdx].label}"`;
       $('interveneNote').value = '';
       $('interveneModal').classList.remove('hidden');
     }
+
     function closeInterveneModal() { $('interveneModal').classList.add('hidden'); }
 
     async function confirmInterveneAction(e) {
       e.preventDefault();
-      const p = activeItem;
-      if (!p) return;
-      const note = $('interveneNote').value.trim();
-      const target = ROUTE_STEPS[selectedStepIdx].label;
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const note = $('interveneNote').value.trim() || 'Bloccato';
 
-      if (!p.alertsList) p.alertsList = [];
-      p.alertsList.push({ id: 'al_' + Date.now(), type: 'REJECT', sender: 'Sistema', target, text: note });
+      if (!activeItem.alertsList) activeItem.alertsList = [];
+      activeItem.alertsList.push({
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'REJECT',
+        sender: senderDept,
+        target: senderDept,
+        text: note
+      });
+
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(senderDept)) activeItem.mailDepts.push(senderDept);
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `[REPARTO BLOCCATO ❌]: ${note}` });
 
       closeInterveneModal();
       await saveData();
     }
 
     function openChatModal(id) {
-      const p = pratiche.find(x => x.id === id);
-      if (!p) return;
-      $('chatModalTitle').innerText = `Chat Pratica: ${p.client} - ${p.title}`;
-      const container = $('chatMessages');
-      container.innerHTML = '';
-
-      const history = p.notesHistory || [];
-      if (history.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessun messaggio in chat.</div>`;
-      } else {
-        history.forEach((msg) => {
-          const div = document.createElement('div');
-          div.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;";
-          div.innerHTML = `
-            <div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">💬 ${esc(msg.dept || '')} (${esc(msg.date || '')})</div>
-            <div class="chat-msg-text" style="font-size: 14px; color: #fff;">${linkify(msg.text)}</div>
-          `;
-          container.appendChild(div);
-        });
-      }
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      $('chatModalTitle').innerText = `Consulta Chat: ${activeItem.client} - ${activeItem.title}`;
       $('chatModal').classList.remove('hidden');
+      renderChatMessages();
     }
+
+    function chatMsgCard(o) {
+      const boxStyle = o.pinned
+        ? (o.red ? 'border: 3px solid #ff1a1a; background: #2a0505; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 14px rgba(255,26,26,0.55);' : 'border: 2px solid var(--gold-light); background: #2e1a05; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 12px rgba(246,224,94,0.35);')
+        : 'border: 1.5px solid var(--border-color); background: #1c0507;';
+      return `
+        <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; color: var(--gold-light); font-weight: bold;">${o.pinned ? '📌 FISSATO · ' : ''}${o.dept ? esc(o.dept) + ' · ' : ''}${esc(o.date)}</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.pinCall}">${o.pinned ? '📌 Stacca' : '📌 Fissa'}</button>
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.editCall}">✏️ Modifica</button>
+              <button type="button" aria-label="Elimina messaggio" onclick="${o.delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+            </div>
+          </div>
+          <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(o.text)}</div>
+        </div>`;
+    }
+
+    function pinToggle(arr, index) {
+      const m = arr[index];
+      if (!m) return;
+      const was = !!m.pinned;
+      arr.forEach(x => { delete x.pinned; });
+      if (!was) m.pinned = true;
+    }
+
+    function pinnedFirstOrder(list) {
+      const order = list.map((_, i) => i);
+      const pi = list.findIndex(m => m.pinned);
+      if (pi >= 0) { order.splice(order.indexOf(pi), 1); order.unshift(pi); }
+      return order;
+    }
+
+    async function togglePinFlussi(index) {
+      const p = activeItem;
+      if (!p || !p.notesHistory) return;
+      pinToggle(p.notesHistory, index);
+      await saveData();
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const box = $('chatMessages');
+      box.innerHTML = '';
+      if (!activeItem) return;
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      const list = activeItem.notesHistory;
+
+      if (list.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessun messaggio in questa chat.</div>`;
+        return;
+      }
+
+      let html = '';
+      pinnedFirstOrder(list).forEach(index => {
+        const n = list[index];
+        html += chatMsgCard({ dept: n.dept, date: n.date, text: n.text, pinned: !!n.pinned,
+          pinCall: `togglePinFlussi(${index})`, editCall: `openEditFlussiChatMsgModal(${index})`, delCall: `confirmDeleteChatMsg(${index})` });
+      });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function confirmDeleteChatMsg(index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        if (activeItem && activeItem.notesHistory) {
+          activeItem.notesHistory.splice(index, 1);
+          await saveData();
+          renderChatMessages();
+        }
+      }
+    }
+
+    function openEditFlussiChatMsgModal(index) {
+      if (!activeItem) return;
+      const note = activeItem.notesHistory[index];
+      if (!note) return;
+      $('editChatType').value = 'flussi';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = note.text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function closeEditChatMsgModal() { $('editChatMsgModal').classList.add('hidden'); }
+
+    async function saveEditedChatMsg(e) {
+      e.preventDefault();
+      const type = $('editChatType').value;
+      const index = parseInt($('editChatIndex').value);
+      const newText = $('editChatText').value.trim();
+
+      if (type === 'flussi') {
+        if (activeItem && activeItem.notesHistory[index]) {
+          activeItem.notesHistory[index].text = newText;
+          await saveData();
+          renderChatMessages();
+        }
+      } else if (type === 'manualTodo') {
+        const manualId = $('editChatManualId').value;
+        const item = manualTodos.find(t => t.id === manualId);
+        if (item && item.chatHistory && item.chatHistory[index]) {
+          item.chatHistory[index].text = newText;
+          await saveData();
+          renderTodoChatMessages(manualTodos.find(t => t.id === manualId) || item, null);
+        }
+      } else if (type === 'praticaTodo') {
+        const praticaId = $('editChatPraticaId').value;
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes && p.todoNotes[index]) {
+          p.todoNotes[index].text = newText;
+          await saveData();
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
+        }
+      }
+      closeEditChatMsgModal();
+    }
+
     function closeChatModal() { $('chatModal').classList.add('hidden'); }
 
+    function openNewModal() {
+      $('formClient').value = '';
+      $('formTitle').value = '';
+      $('formDescription').value = '';
+      $('formShowDate').value = '';
+      $('formOwnerExt').value = '';
+      $('formOwnerInt').value = '';
+      $('newModal').classList.remove('hidden');
+    }
+    function closeNewModal() { $('newModal').classList.add('hidden'); }
+
+    function openEditModal(id) {
+      const item = pratiche.find(p => p.id === id);
+      if (!item) return;
+      $('editId').value = item.id;
+      $('editClient').value = item.client || '';
+      $('editTitle').value = item.title || '';
+      $('editDescription').value = item.description || '';
+      $('editShowDate').value = item.showDate || '';
+      $('editOwnerExt').value = item.ownerExt || '';
+      $('editOwnerInt').value = item.ownerInt || '';
+      $('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() { $('editModal').classList.add('hidden'); }
+
+    async function updatePratica(e) {
+      e.preventDefault();
+      const id = $('editId').value;
+      const item = pratiche.find(p => p.id === id);
+      if (item) {
+        item.client = $('editClient').value;
+        item.title = $('editTitle').value;
+        item.description = $('editDescription').value.trim();
+        item.showDate = $('editShowDate').value.trim();
+        item.ownerExt = $('editOwnerExt').value.trim();
+        item.ownerInt = $('editOwnerInt').value.trim();
+        if (!item.notesHistory) item.notesHistory = [];
+        item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
+        closeEditModal();
+        await saveData();
+      }
+    }
+
+    async function savePratica(e) {
+      e.preventDefault();
+      pratiche.unshift({
+        id: 'p_' + Date.now(),
+        title: $('formTitle').value,
+        description: $('formDescription').value.trim(),
+        client: $('formClient').value,
+        showDate: $('formShowDate').value.trim(),
+        ownerExt: $('formOwnerExt').value.trim(),
+        ownerInt: $('formOwnerInt').value.trim(),
+        currentStepIdx: 0,
+        approvedSteps: [],
+        statusMessages: [],
+        alertsList: [],
+        mailDepts: [],
+        isArchived: false,
+        isExpanded: true,
+        todoNotes: [],
+        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
+      });
+
+      closeNewModal();
+      await saveData();
+    }
+
+    async function deletePratica(id) {
+      if (confirm('Confermi l\'eliminazione della pratica?')) {
+        pratiche = pratiche.filter(p => p.id !== id);
+        await saveData();
+      }
+    }
+
     function getNow() {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
     }
 
-    function exportBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ pratiche, manualTodos, archivedTodos, utileLinks, definedFolders }, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `golden_ticket_backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
+    document.querySelectorAll('.modal-overlay').forEach(m => { m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const open = [...document.querySelectorAll('.modal-overlay:not(.hidden)')].pop();
+      if (open) { const b = open.querySelector('.close-x'); if (b) b.click(); }
+    });
 
-    // Modal background click handler for closing overlay safely
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-        }
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      let downOnOverlay = false;
+      m.addEventListener('mousedown', e => { downOnOverlay = (e.target === m); });
+      m.addEventListener('touchstart', e => { downOnOverlay = (e.target === m); }, { passive: true });
+      m.addEventListener('click', e => {
+        if (downOnOverlay && e.target === m) { const b = m.querySelector('.close-x'); if (b) b.click(); else m.classList.add('hidden'); }
+        downOnOverlay = false;
       });
     });
 
-    window.onload = function() {
-      initAuth();
-    };
+    attachLinkHelpers();
+    initAuth();
   </script>
 </body>
 </html>
