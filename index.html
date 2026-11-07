@@ -86,7 +86,6 @@
     }
 
     .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
-    .todo-card.highlighted-task { background: linear-gradient(135deg, #381a05, #1c0507); border: 3px solid var(--gold-light); box-shadow: 0 0 20px rgba(246, 224, 94, 0.4); }
 
     .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
     .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
@@ -97,6 +96,7 @@
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
     .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
+    .todo-text-block { white-space: pre-line; }
     .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
 
@@ -1229,15 +1229,18 @@
           let cls = 'step-circle';
           let symbol = idx + 1;
 
+          const isEarlyStartTarget = idx >= 6 && (p.earlyStart || []).includes(s.label);
+          const isEarlierLogisticsDuplicate = idx === 2 && (p.earlyStart || []).includes('Logistics');
           if (rejectedTargets.includes(s.label)) { cls += ' rejected'; symbol = '✕'; }
           else if (statusDepts.includes(s.label)) { cls += ' status-purple'; symbol = '🟣'; }
           else if (warnedTargets.includes(s.label)) { cls += ' warning-alert'; symbol = '⚠️'; }
-          else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
           else if (isFullyDone) { cls += ' done'; symbol = '✓'; }
           else if (idx >= 6) {
             if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
-            else if (stepIdx >= 6 || (p.earlyStart || []).includes(s.label)) { cls += ' current-fuchsia'; symbol = '●'; }
+            else if (stepIdx >= 6 || isEarlyStartTarget) { cls += ' current-fuchsia'; symbol = '●'; }
+            else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
           }
+          else if (p.mailDepts.includes(s.label) && !isEarlierLogisticsDuplicate) { cls += ' has-mail'; symbol = '✉️'; }
           else if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
           else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
 
@@ -1557,15 +1560,8 @@
       const manualsAll = sortTasksByDeadline([...formattedManuals, ...resolvedManuals]);
       sortTasksByDeadline(autoTasks);
 
-      const lastChattedId = lsGet('gt_last_chatted_todo_id');
-      const bump = (list) => {
-        if (!lastChattedId) return list;
-        const i = list.findIndex(t => t.id === lastChattedId || t.praticaId === lastChattedId);
-        if (i > 0) { const [it] = list.splice(i, 1); list.unshift(it); }
-        return list;
-      };
       const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
-      let allTasks = [...bump(pinnedAll), ...bump(manualsAll.filter(t => !t.pinnedTask)), ...bump(autoTasks.filter(t => !t.pinnedTask))];
+      let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
 
       const filteredTasks = allTasks.filter(t => {
         const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
@@ -1612,10 +1608,9 @@
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
-        const isHighlighted = (lastChattedId && (t.id === lastChattedId || t.praticaId === lastChattedId)) && !t.isResolved;
 
         const item = document.createElement('div');
-        item.className = isHighlighted ? 'todo-card highlighted-task' : 'todo-card';
+        item.className = 'todo-card';
         if (t.pinnedTask) item.className += ' pinned-task';
         if (t.isResolved) item.style.opacity = '0.75';
 
@@ -1674,7 +1669,6 @@
           `;
         }
 
-        const highlightBadgeHTML = isHighlighted ? `<span class="todo-badge" style="background: rgba(246, 224, 94, 0.35); color: var(--gold-light); border: 1.5px solid var(--gold-light); font-weight: 900; font-size: 12px; padding: 5px 10px;">⭐ ULTIMO AGGIORNATO IN CHAT</span>` : '';
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
@@ -1682,7 +1676,6 @@
             <div style="flex: 1; min-width: 0; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
-                  ${highlightBadgeHTML}
                   <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : esc(t.situation)}</span>
                   ${assigneeBadgeHTML}
                   ${deadlineBadgeHTML}
@@ -1945,7 +1938,7 @@
           delete removed.pinnedTask;
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
-          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
+
           await saveData();
         }
       }
@@ -1956,7 +1949,7 @@
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
           manualTodos.splice(itemIdx, 1);
-          if (lsGet('gt_last_chatted_todo_id') === id) lsDel('gt_last_chatted_todo_id');
+
           await saveData();
         }
       }
@@ -2176,14 +2169,14 @@
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
-          lsSet('gt_last_chatted_todo_id', manualObj.id);
+
         }
       } else if (praticaId) {
         const praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
           if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
           praticaObj.todoNotes.push({ date: getNow(), text: text });
-          lsSet('gt_last_chatted_todo_id', praticaObj.id);
+
         }
       }
 
@@ -2342,7 +2335,6 @@
         checklist: readChecklist('todoChecklistEditor')
       });
 
-      lsSet('gt_last_chatted_todo_id', newId);
       closeTodoModal();
       await saveData();
     }
@@ -2550,7 +2542,7 @@
       if (!p.mailDepts) p.mailDepts = [];
       if (!p.mailDepts.includes('Legal')) p.mailDepts.push('Legal');
       p.notesHistory.push({ date: getNow(), dept, text: `🙋 ${dept} chiede a Legal la partenza anticipata (contratto non ancora firmato: resterà fucsia finché Legal non approva).` });
-      lsSet('gt_last_chatted_todo_id', p.id);
+
       closeStepClickModal();
       await saveData();
     }
@@ -2561,8 +2553,9 @@
       if (!p.earlyStart) p.earlyStart = [];
       if (!p.earlyStart.includes(dept)) p.earlyStart.push(dept);
       p.earlyRequests = (p.earlyRequests || []).filter(d => d !== dept);
+      // La deroga attiva il reparto parallelo: non deve generare un indicatore di posta blu.
       if (!p.mailDepts) p.mailDepts = [];
-      if (!p.mailDepts.includes(dept)) p.mailDepts.push(dept);
+      p.mailDepts = p.mailDepts.filter(d => d !== dept);
       p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `🚀 Legal consente la partenza anticipata a ${dept}: può lavorare ma resta fucsia finché Legal non approva (contratto da firmare).` });
       closeStepClickModal();
       await saveData();
@@ -2598,7 +2591,6 @@
 
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
       activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
-      lsSet('gt_last_chatted_todo_id', activeItem.id);
 
       closeQuickChatModal();
       await saveData();
