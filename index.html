@@ -17,7 +17,2875 @@
     header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .brand { display: flex; align-items: center; gap: 14px; }
     .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
+    .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; lett<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golden Ticket Company - Workflow & To-Do Manager</title>
+
+  <style>
+    :root {
+      --bg-dark: #2a080c; --card-bg: #1c0507; --border-color: #5c1b22;
+      --gold-main: #d69e2e; --gold-light: #f6e05e; --text-main: #e2e8f0; --text-muted: #a0aec0;
+      --danger-red: #e53e3e; --warning-amber: #dd6b20; --success-green: #38a169; --status-fuchsia: #d946ef;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; font-size: 16px; scroll-behavior: smooth; overflow-x: hidden; }
+
+    header { background: #1c0507; border-bottom: 2px solid var(--border-color); padding: 16px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo-badge { background: linear-gradient(135deg, #f6e05e, #b7791f); color: #000; font-weight: 900; padding: 8px 14px; border-radius: 10px; font-size: 20px; }
     .brand-title { color: var(--gold-light); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+
+    .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+    .tab-btn.active { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; }
+
+    .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+
+    .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-input, .select-filter { background: var(--card-bg); border: 1.5px solid var(--border-color); color: #fff; padding: 14px; border-radius: 12px; font-size: 16px; outline: none; }
+    .search-input { flex: 1; min-width: 220px; }
+    .select-filter { min-width: 180px; }
+    .btn-gold { background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; padding: 14px 22px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+
+    .card { background: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px; position: relative; }
+    .client-title-main { font-size: 22px; font-weight: 900; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .card-show-title { font-size: 15px; color: var(--text-muted); font-weight: bold; }
+
+    .alert-banner { padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .alert-rejected { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1.5px solid var(--danger-red); }
+    .alert-warning { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1.5px solid var(--warning-amber); }
+    .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
+    .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
+    .alert-pinned { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 3px solid #ff1a1a; box-shadow: 0 0 14px rgba(255, 26, 26, 0.35); cursor: pointer; }
+    .alert-pinned .lastmsg-text { color: #fff; }
+    .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
+
+    .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+
+    .stepper-box { background: #2a080c; padding: 14px 10px; border-radius: 12px; border: 1.5px solid var(--border-color); margin: 16px 0; }
+    .stepper { display: flex; justify-content: space-between; align-items: center; overflow-x: auto; padding: 6px 2px; gap: 12px; -webkit-overflow-scrolling: touch; }
+    .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
+    .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
+    .step-item.step-locked { opacity: 0.5; }
+    .cl-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .cl-num { min-width: 24px; color: var(--gold-light); font-weight: bold; }
+    .cl-row input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
+    .cl-row .cl-text { flex: 1; min-width: 0; width: auto; }
+    .cl-del { background: transparent; border: none; color: #fc8181; cursor: pointer; font-size: 20px; padding: 4px 6px; }
+    .cl-view { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; font-size: 14px; color: #fff; }
+    .cl-view input { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
+    .cl-view-num { min-width: 22px; color: var(--gold-light); font-weight: bold; }
+    .cl-view.done-view .todo-text-block { text-decoration: line-through; opacity: 0.6; }
+    .todo-card.pinned-task { border: 3px solid #ff1a1a; box-shadow: 0 0 16px rgba(255, 26, 26, 0.55); }
+    a.auto-link { color: var(--gold-light) !important; text-decoration: underline; font-weight: bold; word-break: break-all; cursor: pointer; }
+    a.auto-link:hover { color: #fff !important; }
+    #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
+    .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
+    .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
+
+    .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
+    .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
+    .step-circle.status-purple { background: #a855f7 !important; color: #fff !important; border: 2.5px solid #d8b4fe !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+    .step-circle.warning-alert { background: var(--warning-amber) !important; color: #fff !important; border: 2.5px solid #fbd38d !important; font-size: 18px !important; }
+    .step-circle.rejected { background: var(--danger-red) !important; color: #fff !important; font-size: 18px !important; }
+    .step-circle.has-mail { background: #2563eb !important; color: #fff !important; border: 2.5px solid #93c5fd !important; animation: pulse-warn 1.8s infinite; font-size: 18px !important; }
+
+    @keyframes pulse-warn {
+      0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+    }
+
+    .todo-card { background: var(--card-bg); border: 1.5px solid var(--border-color); padding: 16px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; overflow: hidden; }
+
+    .todo-badge { background: rgba(214, 158, 46, 0.2); color: var(--gold-light); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 6px; margin-right: 4px; }
+    .todo-badge.red { background: rgba(229, 62, 62, 0.3); color: #fc8181; border: 1px solid var(--danger-red); }
+    .todo-badge.amber { background: rgba(221, 107, 32, 0.3); color: #fbd38d; border: 1px solid var(--warning-amber); }
+    .todo-badge.fuchsia { background: rgba(217, 70, 239, 0.3); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
+    .todo-badge.green { background: rgba(56, 161, 105, 0.3); color: #68d391; border: 1px solid var(--success-green); }
+    .todo-badge.assignee { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
+    .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
+
+    .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
+    .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
+    .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
+
+    .btn-sm { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-danger-outline { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1.5px solid rgba(229, 62, 62, 0.4); }
+    .btn-secondary-outline { background: rgba(214, 158, 46, 0.15); color: var(--gold-light); border: 1.5px solid rgba(214, 158, 46, 0.4); }
+    .btn-green-outline { background: rgba(56, 161, 105, 0.15); border-color: var(--success-green); color: #68d391; }
+    .close-x { background: transparent; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+    .stepact { text-align: left; padding: 14px; font-size: 15px; color: #fff; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-card { background: var(--card-bg); border: 2px solid var(--border-color); width: 100%; max-width: 560px; border-radius: 18px; padding: 24px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--gold-light); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+    .form-control { width: 100%; background: #2a080c; border: 1.5px solid var(--border-color); color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; }
+    .form-control-lg { font-size: 18px; font-weight: bold; padding: 14px; border: 2px solid var(--gold-main); color: var(--gold-light); }
+
+    body.logged-out .link-item-card button { display: none; }
+    #dataBanner { display: none; position: sticky; top: 0; z-index: 200; background: var(--danger-red); color: #fff; padding: 10px 16px; font-weight: bold; font-size: 14px; text-align: center; }
+
+    /* Pulsante Torna Su */
+    #scrollTopBtn { position: fixed; bottom: 25px; right: 25px; background: linear-gradient(135deg, #d69e2e, #b7791f); color: #000; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 900; transition: opacity 0.3s; }
+    #scrollTopBtn:hover { transform: scale(1.1); }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+  <div id="dataBanner" role="alert"></div>
+  <div id="toast" role="status"></div>
+
+  <!-- Pulsante Torna Su -->
+  <button id="scrollTopBtn" onclick="scrollToTop()" title="Torna all'inizio">↑</button>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">GT</div>
+      <div class="brand-title">GOLDEN TICKET CLOUD</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="btnTabTodo" onclick="switchTab('todo')">📋 To-Do List</button>
+      <button class="tab-btn" id="btnTabFlussi" onclick="switchTab('flussi')">📊 Flussi</button>
+      <button class="tab-btn" id="btnTabLinks" onclick="switchTab('links')">🔗 Link Utili</button>
+      <button class="tab-btn" id="btnBackup" style="display:none;" onclick="exportBackup()" title="Scarica una copia di tutti i dati">💾 Backup</button>
+      <button class="tab-btn" id="btnAuth" onclick="onAuthButton()">🔒 Accedi</button>
+    </div>
+  </header>
+
+  <div class="container" role="main">
+    <!-- SCHERMATA DI ACCESSO (Flussi e To-Do) -->
+    <div id="loginGate" style="display:none;">
+      <div class="card" style="max-width: 420px; margin: 40px auto;">
+        <div class="client-title-main" style="margin-bottom: 6px;">🔒 Accesso riservato</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;">Flussi e To-Do List sono visibili solo al team. I Link Utili restano consultabili da tutti.</p>
+        <form onsubmit="doLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-control" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
+          </div>
+          <div id="loginError" role="alert" style="display:none; color:#fc8181; font-size:14px; font-weight:bold; margin-bottom:12px;"></div>
+          <button type="submit" class="btn-gold" id="loginSubmit" style="width:100%;">Accedi</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SEZIONE FLUSSI -->
+    <div id="sectionFlussi">
+      <div class="toolbar">
+        <input type="text" id="searchInput" class="search-input" aria-label="Cerca spettacolo o teatro" oninput="renderApp()" placeholder="Cerca spettacolo o teatro...">
+        <select id="filterShowTitle" class="select-filter" aria-label="Filtra per spettacolo" onchange="renderApp()">
+          <option value="ALL">🎭 Tutti gli Spettacoli</option>
+        </select>
+        <select id="filterDept" class="select-filter" aria-label="Filtra per reparto" onchange="renderApp()">
+          <option value="ALL">🏢 Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <button class="btn-gold" onclick="openNewModal()">+ Nuova Pratica</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; background: rgba(28,5,7,0.7); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="btnToggleAllFlussi" class="btn-secondary-outline btn-sm" onclick="toggleAllFlussi()">📂 Espandi Tutto</button>
+        </div>
+        <div>
+          <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="openArchiveModal()">📦 Pratiche Archiviate (<span id="archiveCountBadge">0</span>)</button>
+        </div>
+      </div>
+
+      <div id="feedList"></div>
+    </div>
+
+    <!-- SEZIONE TO-DO LIST -->
+    <div id="sectionTodo" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchTodoInput" class="search-input" aria-label="Cerca task o attività" oninput="renderApp()" placeholder="Cerca task o attività...">
+        <select id="filterTodoDept" class="select-filter" aria-label="Filtra task per reparto" onchange="renderApp()">
+          <option value="ALL">Tutti i Reparti</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Tech Serv">Tech Serv</option>
+          <option value="Admin">Admin</option>
+          <option value="Deal">Deal</option>
+          <option value="Legal">Legal</option>
+          <option value="Promo">Promo</option>
+          <option value="PR">PR</option>
+          <option value="Logistics">Logistics</option>
+        </select>
+        <select id="filterTodoAssignee" class="select-filter" aria-label="Filtra per responsabile" onchange="renderTodoList()">
+          <option value="ALL">👤 Tutti i Responsabili Interni</option>
+        </select>
+        <button class="btn-gold" onclick="openTodoModal()">+ Task Manuale</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 8px;"><button type="button" id="btnToggleAllTodos" class="btn-secondary-outline btn-sm" onclick="toggleAllTodos()">📂 Espandi Tutto</button></div>
+        <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="jumpToArchivedTodos()">📦 Task Archiviati (<span id="archivedTodoCountBadge">0</span>)</button>
+      </div>
+
+      <div id="todoList"></div>
+
+      <div id="archivedTodosAnchorSection" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+        <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(28,5,7,0.8); padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border-color);" onclick="toggleArchivedTodosSection()">
+          <div style="font-size: 16px; font-weight: bold; color: var(--success-green);">
+            📦 Archivio Task (<span id="archivedTodoCountBadgeBottom">0</span>)
+          </div>
+          <div style="font-size: 14px; color: var(--text-muted);" id="archivedToggleLabel">[ Clicca per aprire ▾ ]</div>
+        </div>
+        <div id="archivedTodosContainer" style="display: none; margin-top: 14px;"></div>
+      </div>
+    </div>
+
+    <!-- SEZIONE LINK UTILI -->
+    <div id="sectionLinks" style="display: none;">
+      <div class="toolbar">
+        <input type="text" id="searchLinkInput" class="search-input" aria-label="Cerca link" oninput="renderLinksList()" placeholder="Cerca link o descrizione...">
+        <button class="btn-gold" id="btnAddLink" style="display:none;" onclick="openLinkModal()">+ Aggiungi Link</button>
+      </div>
+      <div id="linksListContainer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTIONE REPARTO -->
+  <div class="modal-overlay hidden" id="stepClickModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="stepClickTitle">Gestione Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStepClickModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 18px;" id="stepClickSub">Seleziona l'azione da eseguire per questo reparto:</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn-gold stepact" id="btnApproveNext" style="display:none; color:#000;" onclick="approveAndNext()">✅ Approva e Passa Avanti</button>
+        <button class="btn-gold stepact" id="btnExecuteFinal" style="display:none; background: var(--success-green); color:#fff;" onclick="executeFinalDepartment()">✅ ESEGUITO (Conferma completamento)</button>
+        <button class="btn-gold stepact" id="btnGoCurrent" style="display:none; color:#000;" onclick="goToCurrentStep()">👉 Vai al reparto attuale</button>
+        <button class="btn-sm stepact" id="btnResolveDept" style="display:none; background: var(--success-green);" onclick="resolveDeptMarkers()">✅ Risolvi stalli / avvisi di questo reparto</button>
+        <button class="btn-gold stepact" id="btnRequestEarly" style="display:none; background: var(--status-fuchsia); color:#fff;" onclick="requestEarlyStart()">🙋 Chiedi a Legal la partenza anticipata</button>
+        <div id="earlyStartBox" style="display:flex; flex-direction:column; gap:12px;"></div>
+        <button class="btn-sm stepact" id="btnStall" style="background: #a855f7;" onclick="openStatusModal()">🟣 Segnala Stallo / Attesa</button>
+        <button class="btn-sm stepact" id="btnSendBack" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
+        <button class="btn-sm stepact" id="btnBlock" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
+        <button class="btn-sm stepact" style="background: #2563eb;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
+  <div class="modal-overlay hidden" id="quickChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
+      </div>
+      <form onsubmit="saveQuickChatFromStep(event)">
+        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+        </div>
+        <div class="form-group">
+          <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
+          <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Invia Messaggio in Chat</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL RIMANDA INDIETRO -->
+  <div class="modal-overlay hidden" id="sendBackModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="sendBackModalTitle">Rimanda Indietro / a Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeSendBackModal()">✕</button>
+      </div>
+      <form onsubmit="saveSendBackAction(event)">
+        <div class="form-group">
+          <label for="sendBackTargetSelect">A quale Reparto vuoi rimandare la pratica?</label>
+          <select id="sendBackTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="sendBackNoteInput">Motivo del rimando / Cosa bisogna rivedere *</label>
+          <textarea id="sendBackNoteInput" class="form-control" rows="3" required placeholder="Es. Rimandato a Tech Serv..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Conferma Rimando</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL STALLO -->
+  <div class="modal-overlay hidden" id="statusModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="statusModalTitle">Segnala Stallo / Attesa (Viola)</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeStatusModal()">✕</button>
+      </div>
+      <form onsubmit="saveDepartmentStatus(event)">
+        <div class="form-group" id="statusTargetGroup">
+          <label for="statusTargetSelect">Invia Stallo a quale Reparto?</label>
+          <select id="statusTargetSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="statusNoteInput">Motivo dello Stallo / Attesa *</label>
+          <textarea id="statusNoteInput" class="form-control" rows="3" required placeholder="Es. In attesa di chiarimenti..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Conferma Stallo</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL BLOCCA -->
+  <div class="modal-overlay hidden" id="interveneModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="interveneModalTitle">Blocca Reparto</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeInterveneModal()">✕</button>
+      </div>
+      <form onsubmit="confirmInterveneAction(event)">
+        <div class="form-group">
+          <label for="interveneNote">Motivo del Blocco / Annullamento *</label>
+          <textarea id="interveneNote" class="form-control" rows="3" required placeholder="Es. Spettacolo annullato..."></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold" style="background: var(--danger-red); color: #fff;">Conferma Blocco (X Rossa)</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL PRATICHE ARCHIVIATE -->
+  <div class="modal-overlay hidden" id="archiveModal">
+    <div class="modal-card" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">📦 Gestione Pratiche Archiviate</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeArchiveModal()">✕</button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Qui puoi consultare lo storico delle pratiche completate o annullate, riaprirle oppure eliminarle definitivamente.</p>
+      <div id="archiveListContainer" style="max-height: 450px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL NUOVA PRATICA -->
+  <div class="modal-overlay hidden" id="newModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Pratica Spettacolo</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeNewModal()">✕</button>
+      </div>
+      <form onsubmit="savePratica(event)">
+        <div class="form-group">
+          <label for="formClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="formClient" class="form-control form-control-lg" required placeholder="Es. Teatro Politeama...">
+        </div>
+        <div class="form-group">
+          <label for="formTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="formTitle" class="form-control" required placeholder="Es. Caravaggio Rock Musical...">
+        </div>
+        <div class="form-group">
+          <label for="formDescription">Descrizione (Opzionale)</label>
+          <textarea id="formDescription" class="form-control" rows="3" placeholder="Note o dettagli sulla pratica..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="formShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="formOwnerExt" class="form-control" placeholder="Es. Mario Rossi...">
+        </div>
+        <div class="form-group">
+          <label for="formOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="formOwnerInt" class="form-control" placeholder="Es. Bea / Fulvio...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Crea Pratica</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICA PRATICA -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Dati Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditModal()">✕</button>
+      </div>
+      <form onsubmit="updatePratica(event)">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editClient" style="color: var(--gold-light); font-size: 15px;">Teatro / Committente *</label>
+          <input type="text" id="editClient" class="form-control form-control-lg" required>
+        </div>
+        <div class="form-group">
+          <label for="editTitle">Titolo dello Spettacolo *</label>
+          <input type="text" id="editTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editDescription">Descrizione (Opzionale)</label>
+          <textarea id="editDescription" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
+          <input type="date" id="editShowDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
+          <input type="text" id="editOwnerExt" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editOwnerInt">Referente Interno (Opzionale)</label>
+          <input type="text" id="editOwnerInt" class="form-control">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifiche</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL TASK MANUALE -->
+  <div class="modal-overlay hidden" id="todoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Aggiungi Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveManualTodo(event)">
+        <div class="form-group">
+          <label for="todoTitle">Titolo Attività *</label>
+          <input type="text" id="todoTitle" class="form-control" required placeholder="Es. Chiamare teatro...">
+        </div>
+        <div class="form-group">
+          <label for="todoSit">Reparto di Riferimento *</label>
+          <select id="todoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="todoAssignee">Responsabile Interno (Opzionale)</label>
+          <input type="text" id="todoAssignee" class="form-control" placeholder="Es. Bea, Fulvio...">
+        </div>
+        <div class="form-group">
+          <label for="todoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="todoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="todoAction">Azione da fare *</label>
+          <input type="text" id="todoAction" class="form-control" required placeholder="Es. Inviare materiali con link...">
+        </div>
+        <div class="form-group">
+          <label>Elenco passaggi (opzionale)</label>
+          <div id="todoChecklistEditor"></div>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="addChecklistRow('todoChecklistEditor')">+ Aggiungi punto</button>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Aggiungi a To-Do</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICA TASK -->
+  <div class="modal-overlay hidden" id="editTodoModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Task Manuale</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditTodoModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedManualTodo(event)">
+        <input type="hidden" id="editTodoId">
+        <div class="form-group">
+          <label for="editTodoTitle">Titolo Attività *</label>
+          <input type="text" id="editTodoTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editTodoSit">Reparto di Riferimento *</label>
+          <select id="editTodoSit" class="form-control" required>
+            <option value="Prospect">Prospect</option><option value="Tech Serv">Tech Serv</option><option value="Admin">Admin</option><option value="Deal">Deal</option><option value="Legal">Legal</option><option value="Promo">Promo</option><option value="PR">PR</option><option value="Logistics">Logistics</option><option value="Art Director">Art Director</option><option value="Tutti i reparti">Tutti i reparti</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editTodoAssignee">Responsabile Interno (Opzionale)</label>
+          <input type="text" id="editTodoAssignee" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoDeadline">Scadenza - Entro il (Opzionale)</label>
+          <input type="date" id="editTodoDeadline" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTodoAction">Azione / Note *</label>
+          <textarea id="editTodoAction" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Elenco passaggi (spunta quelli fatti)</label>
+          <div id="editTodoChecklistEditor"></div>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="addChecklistRow('editTodoChecklistEditor')">+ Aggiungi punto</button>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <input type="checkbox" id="editTodoIsResolved" style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="editTodoIsResolved" style="margin: 0; cursor: pointer; color: var(--gold-light); font-size: 14px;">Segna come RISOLTO</label>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifiche</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LINK UTILE -->
+  <div class="modal-overlay hidden" id="linkModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="linkModalTitle">Aggiungi Link Utile</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeLinkModal()">✕</button>
+      </div>
+      <form onsubmit="saveLinkItem(event)">
+        <input type="hidden" id="editLinkId">
+        <div class="form-group">
+          <label for="linkTitleInput">Titolo *</label>
+          <input type="text" id="linkTitleInput" class="form-control" required placeholder="Es. Modello Contratto Teatro...">
+        </div>
+        <div class="form-group">
+          <label for="linkDescInput">Descrizione *</label>
+          <textarea id="linkDescInput" class="form-control" rows="3" required placeholder="Es. Linee guida e note importanti per la compilazione..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="linkAnchorTextInput">Testo del Link (Opzionale - parola/frase cliccabile)</label>
+          <input type="text" id="linkAnchorTextInput" class="form-control" placeholder="Es. Apri Modello Contratto">
+        </div>
+        <div class="form-group">
+          <label for="linkUrlInput">Link (URL) *</label>
+          <input type="text" id="linkUrlInput" class="form-control" required placeholder="Es. https://drive.google.com/...">
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Link</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHAT TASK -->
+  <div class="modal-overlay hidden" id="todoChatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="todoChatModalTitle">Chat Task: ...</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeTodoChatModal()">✕</button>
+      </div>
+      <input type="hidden" id="todoChatId">
+      <input type="hidden" id="todoChatPraticaId">
+      <div style="background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+        <div style="font-size: 13px; color: var(--gold-light); font-weight: bold; margin-bottom: 8px;">Aggiungi avanzamento o commento</div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <textarea id="todoChatNewText" class="form-control" rows="3" aria-label="Commento" placeholder="Scrivi qui cosa è stato fatto..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="toggleResolveFromChat()" id="btnTodoResolveToggle" style="display:none;">✅ Segna Risolto</button>
+          <div style="flex:1;"></div>
+          <button type="button" class="btn-gold" style="padding: 10px 20px; font-size: 14px;" onclick="addTodoChatMessage()">💬 Invia Aggiornamento</button>
+        </div>
+      </div>
+      <div id="todoChatMessages" style="max-height: 320px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL CONSULTA CHAT -->
+  <div class="modal-overlay hidden" id="chatModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="chatModalTitle">Consulta Chat & Storico Pratica</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeChatModal()">✕</button>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+        ℹ️ Visualizzazione cronologia e messaggi di tutti i reparti. Per aggiungere messaggi o interagire, utilizza i tasti all'interno dei reparti (*stepper*).
+      </div>
+      <div id="chatMessages" style="max-height: 380px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICA MESSAGGIO -->
+  <div class="modal-overlay hidden" id="editChatMsgModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Messaggio / Nota</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditChatMsgModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedChatMsg(event)">
+        <input type="hidden" id="editChatType">
+        <input type="hidden" id="editChatManualId">
+        <input type="hidden" id="editChatPraticaId">
+        <input type="hidden" id="editChatIndex">
+        <div class="form-group">
+          <label for="editChatText">Testo della Nota / Messaggio *</label>
+          <textarea id="editChatText" class="form-control" rows="4" required></textarea>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifica</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ============ UTILITÀ ============
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+    const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+
+    function showBanner(msg) {
+      const b = $('dataBanner');
+      if (!msg) { b.style.display = 'none'; return; }
+      b.textContent = msg;
+      b.style.display = 'block';
+    }
+
+    // Scroll back to top logic
+    window.onscroll = function() {
+      const btn = $('scrollTopBtn');
+      if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        btn.style.display = "flex";
+      } else {
+        btn.style.display = "none";
+      }
+    };
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ============ SUPABASE ============
+    const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
+
+    const client = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } })
+      : null;
+
+    const ROUTE_STEPS = [
+      { id: 'Prospect', label: 'Prospect' },
+      { id: 'TechServ', label: 'Tech Serv' },
+      { id: 'Admin', label: 'Admin' },
+      { id: 'Deal', label: 'Deal' },
+      { id: 'Legal', label: 'Legal' },
+      { id: 'Promo', label: 'Promo' },
+      { id: 'PR', label: 'PR' },
+      { id: 'Logistics', label: 'Logistics' }
+    ];
+
+    let pratiche = [];
+    let manualTodos = [];
+    let archivedTodos = [];
+    let utileLinks = [];
+    let isArchivedSectionOpen = false;
+    let selectedStepIdx = null;
+
+    let dataLoaded = false;
+    let linksLoaded = false;
+    let legacyLinks = [];
+    let session = null;
+    let currentTab = 'links'; // Default tab set to 'links' so logged-out users see Useful Links first
+    let rtChannel = null;
+    let linksError = '';
+    let pendingSaves = 0;
+
+    let activeItemId = null;
+    Object.defineProperty(window, 'activeItem', {
+      get() { return pratiche.find(p => p.id === activeItemId) || null; },
+      set(v) { activeItemId = v ? v.id : null; }
+    });
+
+    function formatDateIt(dateStr) {
+      if (!dateStr) return '';
+      if (dateStr.includes('/')) return dateStr;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return dateStr;
+    }
+
+    function linkify(inputText) {
+      if (!inputText) return '';
+      const text = esc(inputText);
+      const re = /((?:https?|ftp):\/\/[^\s<]+)|(^|[^@\w.\/-])(www\.[^\s<]+|(?:[a-z0-9-]+\.)+(?:com|it|org|net|eu|io|app|dev|co|me|ly|be|tv|fm|info|biz)(?![a-z0-9-])(?:\/[^\s<]*)?)/gi;
+      const tailRe = /(&quot;|&#39;|&gt;|&lt;|&[.,;:!?)\]}])$/;
+      return text.replace(re, (m, full, pre, bare) => {
+        let url = full || bare;
+        let tail = '';
+        let t;
+        while ((t = url.match(tailRe)) !== null) { tail = t[1] + tail; url = url.slice(0, -t[1].length); }
+        if (!url) return m;
+        const href = full ? url : 'https://' + url;
+        return (full ? '' : pre) + `<a class="auto-link" href="${href}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${url}</a>` + tail;
+      });
+    }
+
+    function clipKeepUrls(text, n) {
+      const t = String(text || '');
+      if (t.length <= n) return t;
+      let cut = n;
+      const re = /(?:https?|ftp):\/\/\S+|www\.\S+/gi;
+      let m;
+      while ((m = re.exec(t)) !== null) {
+        if (m.index < cut && m.index + m[0].length > cut) { cut = m.index + m[0].length; break; }
+      }
+      return t.length > cut ? t.substring(0, cut) + '…' : t;
+    }
+
+    // Filter chat list to get top maxItems
+    function getRecentUserChatMessages(historyList, maxItems = 3) {
+      if (!historyList || !Array.isArray(historyList)) return [];
+      return historyList.slice(-maxItems);
+    }
+
+    // ============ CARICAMENTO / SALVATAGGIO ============
+    function applyData(d) {
+      pratiche = d.pratiche || [];
+      manualTodos = d.manualTodos || [];
+      archivedTodos = d.archivedTodos || [];
+      legacyLinks = d.utileLinks || [];
+
+      pratiche.forEach(p => {
+        if (p.owner && !p.ownerExt && !p.ownerInt) p.ownerExt = p.owner;
+        if (!p.notesHistory) p.notesHistory = [];
+        const nine = p.currentStepIdx === 8 || (p.approvedSteps || []).includes(8);
+        if (nine) {
+          p.approvedSteps = (p.approvedSteps || []).filter(i => i !== 5).map(i => i > 5 ? i - 1 : i);
+          if (p.currentStepIdx >= 5) p.currentStepIdx = 5;
+        }
+      });
+
+      manualTodos.forEach((t, i) => {
+        t.isManual = true;
+        if (!t.id) t.id = 'mt_fixed_' + i + '_' + Date.now();
+        if (!t.actionOriginal && t.action) t.actionOriginal = t.action;
+        if (!t.chatHistory) t.chatHistory = t.actionOriginal ? [{ date: 'Storico', text: t.actionOriginal }] : [];
+        if (!t.checklist && Array.isArray(t.subtasks)) {
+          t.checklist = t.subtasks.map((x, k) => ({ id: 'cl_sub_' + k, text: (x && x.text) || '', done: !!(x && x.done) })).filter(x => x.text);
+        }
+        delete t.subtasks;
+        if (t.isExpanded === undefined) t.isExpanded = false;
+      });
+    }
+
+    async function loadData(canRetry = true) {
+      if (!client || !session) return;
+      try {
+        const { data, error } = await client.from('workflow').select('data').eq('id', 'main').maybeSingle();
+
+        if (error) {
+          console.error('Errore di caricamento:', error);
+          if (/jwt|token/i.test(error.message || '') && canRetry) {
+            const { data: r, error: rErr } = await client.auth.refreshSession();
+            if (!rErr && r && r.session) { session = r.session; return loadData(false); }
+            client.auth.signOut();
+            return;
+          }
+          if (!dataLoaded) showBanner('⚠️ Errore di caricamento dati: il salvataggio è disattivato per non sovrascrivere i dati esistenti. Ricarica la pagina.');
+          return;
+        }
+
+        if (data && data.data) {
+          applyData(data.data);
+        } else {
+          pratiche = getDemoData();
+          manualTodos = []; archivedTodos = []; legacyLinks = [];
+        }
+        dataLoaded = true;
+        showBanner('');
+      } catch (e) {
+        console.error('Eccezione di caricamento:', e);
+        if (!dataLoaded) showBanner('⚠️ Errore di rete: il salvataggio è disattivato finché i dati non vengono caricati. Ricarica la pagina.');
+      }
+    }
+
+    async function loadLinks() {
+      if (!client) return;
+      try {
+        const { data, error } = await client.from('workflow').select('data').eq('id', 'links').maybeSingle();
+        if (error) { console.error('Errore link:', error); linksError = error.message || 'errore sconosciuto'; return; }
+        linksError = '';
+        if (data && data.data) {
+          utileLinks = data.data.utileLinks || [];
+          linksLoaded = true;
+        } else if (session && dataLoaded) {
+          utileLinks = legacyLinks.slice();
+          linksLoaded = true;
+          const err = await writeRow('links', { utileLinks });
+          if (err) {
+            console.error('Migrazione link non riuscita:', err);
+            showBanner('⚠️ I link NON sono pubblicati per i visitatori: ' + (err.message || 'errore database'));
+          }
+        } else if (!session) {
+          linksError = 'NOROW';
+        }
+      } catch (e) { console.error('Eccezione link:', e); linksError = 'rete non raggiungibile'; }
+    }
+
+    async function loadAll() {
+      await loadData();
+      await loadLinks();
+      initDropdownOptions();
+      renderApp();
+    }
+
+    async function writeRow(id, payload) {
+      let { data, error } = await client.from('workflow').update({ data: payload }).eq('id', id).select('id');
+      if (!error && (!data || data.length === 0)) {
+        ({ error } = await client.from('workflow').insert({ id, data: payload }));
+      }
+      return error;
+    }
+
+    let saveChain = Promise.resolve();
+    function enqueue(fn) {
+      pendingSaves++;
+      saveChain = saveChain.then(fn, fn).then(() => { pendingSaves--; }, () => { pendingSaves--; });
+      return saveChain;
+    }
+    const saveData = () => enqueue(doSave);
+    const saveLinks = () => enqueue(doSaveLinks);
+
+    async function doSave() {
+      if (!client || !dataLoaded || !session) {
+        alert('Salvataggio bloccato: accesso scaduto o dati non caricati. Ricarica la pagina e rifai l\'accesso.');
+        return;
+      }
+      try {
+        await client.auth.getSession();
+        const error = await writeRow('main', { pratiche, manualTodos, archivedTodos, utileLinks: legacyLinks });
+        if (error) throw error;
+        showBanner('');
+        renderApp();
+      } catch (err) {
+        console.error('Errore di salvataggio:', err);
+        showBanner('⚠️ Salvataggio NON riuscito. Ricarico i dati dal server: ripeti l\'ultima modifica.');
+        setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
+      }
+    }
+
+    async function doSaveLinks() {
+      if (!client || !linksLoaded || !session) {
+        alert('Salvataggio link bloccato: serve l\'accesso. Ricarica la pagina e rifai l\'accesso.');
+        return;
+      }
+      try {
+        await client.auth.getSession();
+        const error = await writeRow('links', { utileLinks });
+        if (error) throw error;
+        showBanner('');
+        renderApp();
+      } catch (err) {
+        console.error('Errore salvataggio link:', err);
+        showBanner('⚠️ Salvataggio dei link NON riuscito. Ricarico: ripeti la modifica.');
+        setTimeout(() => { if (pendingSaves === 0) loadAll(); }, 800);
+      }
+    }
+
+    function exportBackup() {
+      if (!session) return;
+      const blob = new Blob([JSON.stringify({ pratiche, manualTodos, archivedTodos, utileLinks }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'golden-ticket-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ============ REALTIME ============
+    function stopRealtime() {
+      if (client && rtChannel) { client.removeChannel(rtChannel); rtChannel = null; }
+    }
+
+    function startRealtime() {
+      if (!client) return;
+      stopRealtime();
+      try {
+        rtChannel = client
+          .channel('workflow-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'workflow' }, payload => {
+            const row = payload.new;
+            if (!row || !row.id || !row.data) return;
+            if (pendingSaves > 0) return;
+            if (row.id === 'main' && session) {
+              applyData(row.data);
+              dataLoaded = true;
+              initDropdownOptions();
+              renderApp();
+            } else if (row.id === 'links') {
+              utileLinks = row.data.utileLinks || [];
+              linksLoaded = true;
+              renderLinksList();
+            }
+          })
+          .subscribe((status, err) => {
+            if (err) console.warn('Realtime status warning:', status, err);
+          });
+      } catch (e) {
+        console.warn('Realtime initialization warning (safe fallback enabled):', e);
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || pendingSaves > 0) return;
+      if (session) client.auth.getSession().then(() => loadAll());
+      else loadLinks().then(renderApp);
+    });
+
+    // ============ LOGIN ============
+    function updateAuthUI() {
+      document.body.classList.toggle('logged-out', !session);
+      $('btnBackup').style.display = session ? '' : 'none';
+      $('btnAddLink').style.display = session ? '' : 'none';
+      $('btnAuth').textContent = session ? '🚪 Esci' : '🔒 Accedi';
+    }
+
+    function updateView() {
+      const locked = !session && currentTab !== 'links';
+      $('loginGate').style.display = locked ? 'block' : 'none';
+      $('sectionFlussi').style.display = (!locked && currentTab === 'flussi') ? 'block' : 'none';
+      $('sectionTodo').style.display = (!locked && currentTab === 'todo') ? 'block' : 'none';
+      $('sectionLinks').style.display = currentTab === 'links' ? 'block' : 'none';
+      $('btnTabFlussi').className = currentTab === 'flussi' ? 'tab-btn active' : 'tab-btn';
+      $('btnTabTodo').className = currentTab === 'todo' ? 'tab-btn active' : 'tab-btn';
+      $('btnTabLinks').className = currentTab === 'links' ? 'tab-btn active' : 'tab-btn';
+    }
+
+    function switchTab(tab) { currentTab = tab; updateView(); }
+
+    function goToPraticaFromTodo(praticaId) {
+      if (!praticaId) return;
+      const p = pratiche.find(x => x.id === praticaId);
+      if (p) {
+        p.isArchived = false;
+        p.isExpanded = true;
+      }
+      switchTab('flussi');
+      renderFeed();
+      setTimeout(() => {
+        const el = Array.from(document.querySelectorAll('.card')).find(c => c.innerHTML.includes(`openChatModal('${praticaId}')`));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+
+    async function doLogin(e) {
+      e.preventDefault();
+      const err = $('loginError');
+      const btn = $('loginSubmit');
+      err.style.display = 'none';
+      if (!client) { err.textContent = 'Connessione non disponibile. Ricarica la pagina.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = 'Accesso in corso…';
+      const { error } = await client.auth.signInWithPassword({ email: $('loginEmail').value.trim(), password: $('loginPassword').value });
+      btn.disabled = false; btn.textContent = 'Accedi';
+      if (error) {
+        err.textContent = 'Email o password non corretti.';
+        err.style.display = 'block';
+        return;
+      }
+      lsSet('gt_login_email', $('loginEmail').value.trim());
+      $('loginPassword').value = '';
+    }
+
+    function onAuthButton() {
+      if (session) {
+        if (confirm('Vuoi uscire?')) client.auth.signOut();
+      } else {
+        if (currentTab === 'links') currentTab = 'todo';
+        updateView();
+        const em = $('loginEmail'); if (em) em.focus();
+      }
+    }
+
+    async function handleSignedIn(sess) {
+      session = sess;
+      updateAuthUI();
+      updateView();
+      await loadAll();
+      startRealtime();
+    }
+
+    function handleSignedOut() {
+      session = null;
+      dataLoaded = false;
+      pratiche = []; manualTodos = []; archivedTodos = []; legacyLinks = [];
+      selectedStepIdx = null;
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+      currentTab = 'links'; // Ensure switching back to links tab upon logout
+      updateAuthUI();
+      updateView();
+      renderApp();
+      loadLinks().then(() => { renderApp(); startRealtime(); });
+    }
+
+    async function initAuth() {
+      const savedEmail = lsGet('gt_login_email');
+      if (savedEmail) $('loginEmail').value = savedEmail;
+      updateAuthUI();
+      updateView();
+      if (!client) {
+        showBanner('⚠️ Impossibile caricare la libreria di connessione (Supabase). Controlla la rete e ricarica la pagina.');
+        return;
+      }
+      client.auth.onAuthStateChange((event, sess) => {
+        if (event === 'SIGNED_OUT') {
+          setTimeout(handleSignedOut, 0);
+        } else if (event === 'SIGNED_IN' && sess && !session) {
+          setTimeout(() => handleSignedIn(sess), 0);
+        } else if (sess) {
+          session = sess;
+        }
+      });
+      const { data } = await client.auth.getSession();
+      if (data && data.session) {
+        await handleSignedIn(data.session);
+      } else {
+        await loadLinks();
+        renderApp();
+        startRealtime();
+      }
+    }
+
+    function getDemoData() {
+      return [{
+        id: 'p_1',
+        title: 'Caravaggio - Rebel Rock Musical',
+        client: 'Teatro Manzoni Cassino',
+        description: 'Tour invernale 2027',
+        showDate: '2027-03-09',
+        ownerExt: 'Mario Rossi',
+        ownerInt: 'Fabrizio R.',
+        currentStepIdx: 1,
+        approvedSteps: [0],
+        statusMessages: [],
+        alertsList: [],
+        mailDepts: [],
+        isArchived: false,
+        isExpanded: false,
+        todoNotes: [],
+        notesHistory: [{ date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }]
+      }];
+    }
+
+    function renderApp() {
+      renderFeed();
+      renderTodoList();
+      renderArchivedTodoList();
+      renderLinksList();
+      updateArchiveCount();
+    }
+
+    // Toggle unico per i Flussi
+    function toggleAllFlussi() {
+      const btn = $('btnToggleAllFlussi');
+      const shouldExpand = btn.innerText.includes('Espandi');
+      pratiche.forEach(p => p.isExpanded = shouldExpand);
+      renderFeed();
+    }
+
+    // Toggle unico per i Todo
+    function toggleAllTodos() {
+      const btn = $('btnToggleAllTodos');
+      const shouldExpand = btn.innerText.includes('Espandi');
+      manualTodos.forEach(t => t.isExpanded = shouldExpand);
+      renderTodoList();
+    }
+
+    function toggleCardExpand(id) {
+      const p = pratiche.find(item => item.id === id);
+      if (p) { p.isExpanded = !p.isExpanded; renderFeed(); }
+    }
+
+    function updateArchiveCount() {
+      const badge = $('archiveCountBadge');
+      if (badge) badge.innerText = pratiche.filter(p => p.isArchived).length;
+    }
+
+    function initDropdownOptions() {
+      const selectShow = $('filterShowTitle');
+      if (!selectShow) return;
+      const currentShowVal = selectShow.value;
+
+      const showsMap = new Map();
+      pratiche.forEach(p => {
+        if (p.title && p.title.trim() !== '') {
+          const original = p.title.trim();
+          const lower = original.toLowerCase();
+          if (!showsMap.has(lower)) showsMap.set(lower, original);
+        }
+      });
+
+      selectShow.innerHTML = '<option value="ALL">🎭 Tutti gli Spettacoli</option>';
+      Array.from(showsMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(showTitle => {
+        const opt = document.createElement('option');
+        opt.value = showTitle;
+        opt.innerText = '🎭 ' + showTitle;
+        if (showTitle.toLowerCase() === currentShowVal.toLowerCase()) opt.selected = true;
+        selectShow.appendChild(opt);
+      });
+
+      initAssigneeDropdownOptions();
+    }
+
+    function initAssigneeDropdownOptions() {
+      const select = $('filterTodoAssignee');
+      if (!select) return;
+      const currentVal = select.value;
+
+      const assigneesMap = new Map();
+      const addName = (name) => {
+        if (name && name.trim() !== '') {
+          const original = name.trim();
+          const lower = original.toLowerCase();
+          if (!assigneesMap.has(lower)) assigneesMap.set(lower, original);
+        }
+      };
+
+      manualTodos.forEach(t => addName(t.assignee));
+      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerInt); });
+
+      select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili Interni</option>';
+      Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = '👤 ' + name;
+        if (name.toLowerCase() === currentVal.toLowerCase()) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    // Direct deletion helper for chat previews
+    async function deleteSingleFlussiChatMessageDirect(praticaId, index) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.notesHistory) return;
+      p.notesHistory.splice(index, 1);
+      await saveData();
+      renderFeed();
+    }
+
+    async function deleteSingleTodoChatMessageDirect(taskId, index) {
+      const item = manualTodos.find(t => t.id === taskId);
+      if (!item || !item.chatHistory) return;
+      item.chatHistory.splice(index, 1);
+      await saveData();
+      renderTodoList();
+    }
+
+    async function deleteSinglePraticaTodoMessageDirect(praticaId, index) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.todoNotes) return;
+      p.todoNotes.splice(index, 1);
+      await saveData();
+      renderTodoList();
+    }
+
+    function renderFeed() {
+      initDropdownOptions();
+
+      // Update Flussi toggle button text state
+      const flussiBtn = $('btnToggleAllFlussi');
+      if (flussiBtn && pratiche.filter(p => !p.isArchived).length > 0) {
+        const allExpanded = pratiche.filter(p => !p.isArchived).every(p => p.isExpanded);
+        flussiBtn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
+      }
+
+      const container = $('feedList');
+      if (!container) return;
+      const search = $('searchInput').value.toLowerCase();
+      const filterShow = $('filterShowTitle').value;
+      const filterDept = $('filterDept').value;
+      container.innerHTML = '';
+
+      const activePratiche = pratiche.filter(p => !p.isArchived);
+
+      const filteredPratiche = activePratiche.filter(p => {
+        const matchSearch = (p.title || '').toLowerCase().includes(search) || (p.client || '').toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.showDate || '').toLowerCase().includes(search) || (p.ownerExt || '').toLowerCase().includes(search) || (p.ownerInt || '').toLowerCase().includes(search);
+        if (!matchSearch) return false;
+
+        if (filterShow !== 'ALL') {
+          if ((p.title || '').trim().toLowerCase() !== filterShow.trim().toLowerCase()) return false;
+        }
+
+        if (filterDept !== 'ALL') {
+          const stepIdx = p.currentStepIdx || 0;
+          const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
+          const isCurrent = (currentDeptLabel === filterDept);
+          const hasStatusHere = (p.statusMessages || []).some(st => st.dept === filterDept);
+          const hasAlertHere = (p.alertsList || []).some(al => al.target === filterDept);
+          const hasMailHere = (p.mailDepts || []).includes(filterDept);
+          if (!isCurrent && !hasStatusHere && !hasAlertHere && !hasMailHere) return false;
+        }
+        return true;
+      });
+
+      filteredPratiche.sort((a, b) => {
+        const hasDateA = !!(a.showDate && a.showDate.trim() !== '');
+        const hasDateB = !!(b.showDate && b.showDate.trim() !== '');
+        if (!hasDateA && hasDateB) return 1;
+        if (hasDateA && !hasDateB) return -1;
+        if (!hasDateA && !hasDateB) return 0;
+        return a.showDate.localeCompare(b.showDate);
+      });
+
+      if (filteredPratiche.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna pratica attiva trovata.</div>`;
+        return;
+      }
+
+      filteredPratiche.forEach((p) => {
+        if (!p.statusMessages) p.statusMessages = [];
+        if (!p.alertsList) p.alertsList = [];
+        if (!p.approvedSteps) p.approvedSteps = [];
+        if (!p.mailDepts) p.mailDepts = [];
+
+        const stepIdx = p.currentStepIdx || 0;
+        const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
+
+        const rejectedTargets = p.alertsList.filter(a => a.type === 'REJECT').map(a => a.target);
+        const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
+        const statusDepts = p.statusMessages.map(st => st.dept);
+
+        const isFullyDone = p.approvedSteps.includes(5) && p.approvedSteps.includes(6) && p.approvedSteps.includes(7);
+
+        let stepperHTML = ROUTE_STEPS.map((s, idx) => {
+          let cls = 'step-circle';
+          let symbol = idx + 1;
+
+          if (rejectedTargets.includes(s.label)) { cls += ' rejected'; symbol = '✕'; }
+          else if (statusDepts.includes(s.label)) { cls += ' status-purple'; symbol = '🟣'; }
+          else if (warnedTargets.includes(s.label)) { cls += ' warning-alert'; symbol = '⚠️'; }
+          else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
+          else if (isFullyDone) { cls += ' done'; symbol = '✓'; }
+          else if (idx >= 5) {
+            if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
+            else if (stepIdx >= 5 || (p.earlyStart || []).includes(s.label)) { cls += ' current-fuchsia'; symbol = '●'; }
+          }
+          else if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
+          else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
+
+          return `
+            <div class="step-item${isStepLocked(p, idx) && !stepHasMarker(p, s.label) ? ' step-locked' : ''}" role="button" tabindex="0" aria-label="Gestisci reparto ${esc(s.label)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openStepClickModal('${p.id}', ${idx})">
+              <div class="${cls}">${symbol}</div>
+              <div class="step-label">${esc(s.label)}</div>
+            </div>
+          `;
+        }).join('');
+
+        let bannersHTML = '';
+
+        if (isFullyDone && !p.isArchived) {
+          bannersHTML += `
+            <div class="alert-banner alert-archive">
+              <span>📦 Tutti i reparti hanno completato. Vuoi archiviare questa pratica?</span>
+              <button type="button" class="btn-solve-sm" onclick="archivePratica('${p.id}')">Sì, Archivia</button>
+            </div>
+          `;
+        }
+
+        p.statusMessages.forEach(st => {
+          bannersHTML += `
+            <div class="alert-banner alert-status">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+                🟣 <strong>Stato (${esc(st.dept)}):</strong> "${linkify(st.text)}"
+              </span>
+              <button type="button" class="btn-solve-sm" onclick="removeStatusMessage('${p.id}', '${st.id}')">✅ Risolto</button>
+            </div>
+          `;
+        });
+
+        p.alertsList.forEach((al) => {
+          const isReject = al.type === 'REJECT';
+          const bannerClass = isReject ? 'alert-banner alert-rejected' : 'alert-banner alert-warning';
+          const icon = isReject ? '❌' : '⚠️';
+
+          let previewText = al.text || '';
+          previewText = clipKeepUrls(previewText, 50);
+
+          bannersHTML += `
+            <div class="${bannerClass}">
+              <span onclick="openChatModal('${p.id}')" style="cursor:pointer; flex: 1;">
+                ${icon} <strong>${isReject ? `Bloccato (${esc(al.target)}):` : `Da ${esc(al.sender)} a ${esc(al.target)}:`}</strong> "${linkify(previewText)}"
+              </span>
+              <button type="button" class="btn-solve-sm" onclick="removeSingleAlert('${p.id}', '${al.id}')">✅ Risolto</button>
+            </div>
+          `;
+        });
+
+        (p.earlyRequests || []).forEach(d => {
+          bannersHTML += `
+            <div class="alert-banner alert-status">
+              <span style="flex: 1;">🙋 <strong>${esc(d)}</strong> chiede la partenza anticipata (contratto non ancora firmato)</span>
+              ${stepIdx === 4 ? `<button type="button" class="btn-solve-sm" onclick="enableEarlyStart('${p.id}', '${esc(d)}')">🚀 Consenti</button>` : ''}
+            </div>`;
+        });
+        if (stepIdx < 5) {
+          (p.earlyStart || []).forEach(d => {
+            bannersHTML += `
+              <div class="alert-banner alert-status">
+                <span style="flex: 1;">🚀 <strong>${esc(d)}</strong> in partenza anticipata: resta fucsia finché Legal non approva</span>
+                ${stepIdx === 4 ? `<button type="button" class="btn-solve-sm" style="background:#6b21a8;" onclick="revokeEarlyStart('${p.id}', '${esc(d)}')">⏹ Revoca</button>` : ''}
+              </div>`;
+          });
+        }
+
+        const chatHist = p.notesHistory || [];
+        if (chatHist.length > 0) {
+          const clip = (t, n) => clipKeepUrls(String(t || '').replace(/\s+/g, ' ').trim(), n);
+          const pinnedMsg = chatHist.find(m => m.pinned);
+          const recentChat = getRecentUserChatMessages(chatHist, 3);
+          
+          if (pinnedMsg) {
+            const pIdx = chatHist.indexOf(pinnedMsg);
+            bannersHTML += `
+              <div class="alert-banner alert-pinned" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span style="flex: 1; min-width: 0; cursor: pointer;" onclick="openChatModal('${p.id}')">
+                  📌 <strong>Messaggio fissato</strong> (${esc(pinnedMsg.dept)} · ${esc(pinnedMsg.date)}): <span class="lastmsg-text">"${linkify(clip(pinnedMsg.text, 220))}"</span>
+                </span>
+                <button type="button" onclick="event.stopPropagation(); deleteSingleFlussiChatMessageDirect('${p.id}', ${pIdx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
+              </div>
+            `;
+          }
+
+          recentChat.forEach(msg => {
+            if (!msg.pinned) {
+              const mIdx = chatHist.indexOf(msg);
+              bannersHTML += `
+                <div class="alert-banner alert-lastmsg" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <span style="flex: 1; min-width: 0; cursor: pointer;" onclick="openChatModal('${p.id}')">
+                    💬 <strong>Messaggio (${esc(msg.dept)} · ${esc(msg.date)}):</strong> <span class="lastmsg-text">"${linkify(clip(msg.text, 140))}"</span>
+                  </span>
+                  <button type="button" onclick="event.stopPropagation(); deleteSingleFlussiChatMessageDirect('${p.id}', ${mIdx})" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
+                </div>
+              `;
+            }
+          });
+        }
+
+        let phaseDisplayLabel = currentDeptLabel;
+        if (stepIdx >= 5) {
+          let pList = [];
+          if (!p.approvedSteps.includes(5)) pList.push('Promo');
+          if (!p.approvedSteps.includes(6)) pList.push('PR');
+          if (!p.approvedSteps.includes(7)) pList.push('Logistics');
+          phaseDisplayLabel = pList.length > 0 ? `In corso su: ${pList.join(', ')}` : `✅ Completato (Promo, PR & Logistics)`;
+        }
+
+        const isExpanded = !!p.isExpanded;
+        const formattedShowDate = esc(formatDateIt(p.showDate));
+
+        let infoHeaderHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
+            <div>
+              ${formattedShowDate ? `<div style="font-size:14px; color:var(--gold-light); margin-bottom:4px;">🎭 Data dello Spettacolo: <strong>${formattedShowDate}</strong></div>` : ''}
+              ${p.description ? `<div style="font-size:14px; color:#fff; margin-bottom:6px; line-height:1.4;">📝 <strong>Descrizione:</strong> ${linkify(p.description)}</div>` : ''}
+              ${(p.ownerExt || p.ownerInt) ? `
+                <div style="font-size:13px; color:var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
+                  ${p.ownerExt ? `<span>👤 <strong>Referente Esterno:</strong> ${linkify(p.ownerExt)}</span>` : ''}
+                  ${p.ownerInt ? `<span>🏢 <strong>Referente Interno:</strong> ${linkify(p.ownerInt)}</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+            <div>
+              <button type="button" class="btn-gold" style="padding: 8px 16px; font-size: 14px;" onclick="openChatModal('${p.id}')">💬 Consulta Chat</button>
+            </div>
+          </div>
+        `;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCardExpand('${p.id}')">
+            <div>
+              <div class="client-title-main">${linkify(p.client)}</div>
+              <div class="card-show-title">${linkify(p.title)} ${formattedShowDate ? `<span style="color: var(--gold-light); margin-left: 8px; font-weight: normal;">🎭 <strong>Data Spettacolo:</strong> ${formattedShowDate}</span>` : ''} ${isExpanded ? '' : ` <span style="font-size:12px; color:var(--gold-light); font-weight:normal; background:rgba(214,158,46,0.15); padding:2px 8px; border-radius:6px; margin-left:8px;">[Clicca per aprire ▾]</span>`}</div>
+            </div>
+            <div></div>
+          </div>
+
+          ${isExpanded ? `
+            <div style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+              ${infoHeaderHTML}
+              ${bannersHTML}
+              <div class="stepper-box">
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
+                  Fase Attuale: <strong style="color:var(--status-fuchsia); font-size:15px;">${esc(phaseDisplayLabel)}</strong>
+                </div>
+                <div class="stepper">${stepperHTML}</div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-danger-outline btn-sm" onclick="deletePratica('${p.id}')">Elimina</button>
+                  <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditModal('${p.id}')">✏️ Modifica</button>
+                  <button type="button" class="btn-secondary-outline btn-green-outline btn-sm" onclick="archivePratica('${p.id}')">📦 Archivia</button>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  ${stepIdx < 5 ? `<button type="button" class="btn-gold" style="background: var(--success-green); color:#fff;" onclick="approveCurrent('${p.id}')">▶️ Approva "${esc(currentDeptLabel)}" e manda avanti</button>` : ''}
+                  <button type="button" class="btn-gold" onclick="openStepClickModal('${p.id}', ${stepIdx})">⚙️ Gestisci Reparto</button>
+                </div>
+              </div>
+            </div>
+          ` : `
+            ${bannersHTML ? `<div style="margin-top: 10px;">${bannersHTML}</div>` : ''}
+          `}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function archivePratica(id) {
+      if (confirm('Vuoi archiviare questa pratica?')) {
+        const p = pratiche.find(item => item.id === id);
+        if (p) { p.isArchived = true; p.isExpanded = false; await saveData(); }
+      }
+    }
+
+    async function unarchivePratica(id) {
+      const p = pratiche.find(item => item.id === id);
+      if (p) { p.isArchived = false; p.isExpanded = true; await saveData(); openArchiveModal(); }
+    }
+
+    async function permanentDeletePratica(id) {
+      if (confirm('Vuoi eliminare definitivamente questa pratica dall\'archivio?')) {
+        pratiche = pratiche.filter(p => p.id !== id);
+        await saveData();
+        openArchiveModal();
+      }
+    }
+
+    function openArchiveModal() {
+      const container = $('archiveListContainer');
+      container.innerHTML = '';
+      const archivedItems = pratiche.filter(p => p.isArchived);
+
+      if (archivedItems.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessuna pratica archiviata al momento.</div>`;
+      } else {
+        archivedItems.forEach(p => {
+          const item = document.createElement('div');
+          item.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
+          const formattedShowDate = esc(formatDateIt(p.showDate));
+          item.innerHTML = `
+            <div>
+              <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${linkify(p.client)}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">${linkify(p.title)} ${formattedShowDate ? `(${formattedShowDate})` : ''}</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-solve-sm" onclick="unarchivePratica('${p.id}')">↩️ Riapri</button>
+              <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeletePratica('${p.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina definitivamente">✕</button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      }
+      $('archiveModal').classList.remove('hidden');
+    }
+
+    function closeArchiveModal() { $('archiveModal').classList.add('hidden'); }
+
+    async function removeStatusMessage(praticaId, statusId) {
+      const item = pratiche.find(p => p.id === praticaId);
+      if (!item || !item.statusMessages) return;
+      const removed = item.statusMessages.find(st => st.id === statusId);
+      item.statusMessages = item.statusMessages.filter(st => st.id !== statusId);
+      if (removed) {
+        if (!item.notesHistory) item.notesHistory = [];
+        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto stallo su ${removed.dept}: "${removed.text}"` });
+      }
+      await saveData();
+    }
+
+    async function removeSingleAlert(praticaId, alertId) {
+      const item = pratiche.find(p => p.id === praticaId);
+      if (!item || !item.alertsList) return;
+      const removed = item.alertsList.find(a => a.id === alertId);
+      item.alertsList = item.alertsList.filter(a => a.id !== alertId);
+      if (removed) {
+        if (!item.notesHistory) item.notesHistory = [];
+        item.notesHistory.push({ date: getNow(), dept: 'Sistema', text: `✅ Risolto e rimosso blocco/avviso su ${removed.target}: "${removed.text}"` });
+      }
+      await saveData();
+    }
+
+    function renderTodoList() {
+      initAssigneeDropdownOptions();
+
+      // Update To-Do toggle button text state
+      const todoBtn = $('btnToggleAllTodos');
+      if (todoBtn && manualTodos.length > 0) {
+        const allExpanded = manualTodos.every(t => t.isExpanded);
+        todoBtn.innerText = allExpanded ? '📁 Compatta Tutto' : '📂 Espandi Tutto';
+      }
+
+      const container = $('todoList');
+      if (!container) return;
+
+      const search = (($('searchTodoInput') || {}).value || '').toLowerCase();
+      const filterDept = (($('filterTodoDept') || {}).value || 'ALL');
+      const filterAssignee = (($('filterTodoAssignee') || {}).value || 'ALL');
+
+      const formattedManuals = [];
+      const resolvedManuals = [];
+
+      manualTodos.forEach(m => {
+        const item = { ...m, isManual: true };
+        if (!item.id) item.id = 'mt_fallback_' + Math.random().toString(36).substr(2, 6);
+        if (!item.actionOriginal && item.action) item.actionOriginal = item.action;
+        if (!item.chatHistory) item.chatHistory = item.actionOriginal ? [{ date: 'Storico', text: item.actionOriginal }] : [];
+        if (item.isResolved) resolvedManuals.push(item); else formattedManuals.push(item);
+      });
+
+      let autoTasks = [];
+
+      pratiche.filter(p => !p.isArchived).forEach(p => {
+        const stepIdx = p.currentStepIdx || 0;
+        const currentDept = ROUTE_STEPS[stepIdx].label;
+        if (!p.todoNotes) p.todoNotes = [];
+        if (!p.approvedSteps) p.approvedSteps = [];
+        const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
+        if (stepIdx < 5) {
+          (p.earlyStart || []).forEach(d => {
+            autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: d, situation: `🚀 ${d} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
+          });
+        }
+
+        if (p.statusMessages && p.statusMessages.length > 0) {
+          p.statusMessages.forEach(st => {
+            autoTasks.push({ ...base, id: 'st_auto_' + st.id, dept: st.dept, situation: `🟣 ${st.dept} - IN ATTESA`, action: `Motivo: ${st.text}` });
+          });
+        }
+
+        if (p.mailDepts && p.mailDepts.length > 0) {
+          p.mailDepts.forEach(dept => {
+            autoTasks.push({ ...base, id: 'mail_auto_' + dept + '_' + p.id, dept: dept, situation: `✉️ ${dept} - POSTA IN ARRIVO`, action: `Nuovo messaggio o comunicazione ricevuta in chat.`, mailDeptName: dept });
+          });
+        }
+
+        if (p.alertsList && p.alertsList.length > 0) {
+          p.alertsList.forEach(al => {
+            const isReject = al.type === 'REJECT';
+            autoTasks.push({ ...base, id: 'al_auto_' + al.id, dept: al.target, situation: isReject ? `❌ ${al.target} - BLOCCATO` : `⚠️ ${al.target} - DA: ${al.sender}`, action: `Nota: ${al.text}` });
+          });
+        }
+
+        if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
+          if (stepIdx >= 5) {
+            if (!p.approvedSteps.includes(5)) autoTasks.push({ ...base, id: 'wait_auto_promo_' + p.id, dept: 'Promo', situation: `⏳ Promo - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Promo.` });
+            if (!p.approvedSteps.includes(6)) autoTasks.push({ ...base, id: 'wait_auto_pr_' + p.id, dept: 'PR', situation: `⏳ PR - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da PR.` });
+            if (!p.approvedSteps.includes(7)) autoTasks.push({ ...base, id: 'wait_auto_log_' + p.id, dept: 'Logistics', situation: `⏳ Logistics - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Logistics.` });
+          } else {
+            autoTasks.push({ ...base, id: 'wait_auto_' + p.id, dept: currentDept, situation: `⏳ ${currentDept} - IN ATTESA`, action: `Pratica ferma in attesa di approvazione o avanzamento.` });
+          }
+        }
+      });
+
+      const sortTasksByDeadline = (list) => list.sort((a, b) => {
+        const dA = (a.deadline || '').trim();
+        const dB = (b.deadline || '').trim();
+        if (dA && !dB) return -1;
+        if (!dA && dB) return 1;
+        if (!dA && !dB) return 0;
+        return dA.localeCompare(dB);
+      });
+
+      const manualsAll = sortTasksByDeadline([...formattedManuals, ...resolvedManuals]);
+      sortTasksByDeadline(autoTasks);
+
+      const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
+      let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
+
+      const filteredTasks = allTasks.filter(t => {
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
+        if (!matchSearch) return false;
+
+        if (filterDept !== 'ALL') {
+          if (t.isManual) {
+            const matchDept = t.dept === 'Tutti i reparti' || (t.dept || '').toLowerCase().includes(filterDept.toLowerCase()) || (t.situation || '').toLowerCase().includes(filterDept.toLowerCase());
+            if (!matchDept) return false;
+          } else if ((t.dept || '').toLowerCase() !== filterDept.toLowerCase()) return false;
+        }
+
+        if (filterAssignee !== 'ALL') {
+          if ((t.assignee || '').toLowerCase().trim() !== filterAssignee.toLowerCase().trim()) return false;
+        }
+        return true;
+      });
+
+      if (filteredTasks.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">Nessuna attività in sospeso per i filtri selezionati.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      let lastSection = null;
+      filteredTasks.forEach((t) => {
+        const section = t.pinnedTask ? 'pinned' : (t.isManual ? 'manual' : 'auto');
+        if (section !== lastSection) {
+          const h = document.createElement('div');
+          h.style.cssText = section === 'auto'
+            ? 'font-size: 18px; font-weight: 900; color: var(--gold-light); margin: 30px 0 12px 4px; border-top: 2px solid var(--border-color); padding-top: 20px;'
+            : 'font-size: 18px; font-weight: 900; color: var(--gold-light); margin: 20px 0 12px 4px;';
+          h.textContent = section === 'pinned' ? '📌 Fissati in alto' : (section === 'manual' ? '📝 Task Manuali' : '📊 Task Derivanti dai Flussi');
+          container.appendChild(h);
+          lastSection = section;
+        }
+        let badgeClass = 'todo-badge';
+        if (t.isResolved) badgeClass += ' green';
+        else if (t.situation && t.situation.includes('BLOCCATO')) badgeClass += ' red';
+        else if (t.situation && t.situation.includes('DA:')) badgeClass += ' amber';
+        else if (t.situation && t.situation.includes('POSTA IN ARRIVO')) badgeClass += ' amber';
+        else if (t.situation && (t.situation.includes('IN ATTESA') || t.situation.includes('PARTENZA ANTICIPATA'))) badgeClass += ' fuchsia';
+
+        const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
+        const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
+
+        const originalActionText = t.actionOriginal || t.action || '';
+        let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
+        let collapsedHTML = '';
+        const isExp = !t.isManual || !!t.isExpanded;
+        if (t.isManual && t.checklist && t.checklist.length > 0) {
+          collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Passaggi: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completati</div>`;
+        }
+
+        if (t.isManual && t.checklist && t.checklist.length > 0) {
+          const doneCount = t.checklist.filter(c => c.done).length;
+          const rows = t.checklist.map((c, i) => {
+            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${t.id}', '${c.id}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
+          }).join('');
+          displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Passaggi (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
+        }
+
+        const commentBox = (m, delFn) => `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;">
+            <div class="todo-text-block" style="font-size: 13px; color: var(--gold-light); flex: 1; cursor: pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}">
+              💬 <strong>Messaggio [${esc(m.date)}]:</strong> ${linkify(m.text)}
+            </div>
+            <button type="button" onclick="event.stopPropagation(); ${delFn}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
+          </div>
+        `;
+
+        const pinBox = (m, delFn) => `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; background: rgba(229, 62, 62, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid #ff1a1a; box-shadow: 0 0 12px rgba(255, 26, 26, 0.3); margin-top: 6px;">
+            <div class="todo-text-block" style="font-size: 14px; color: #fff; flex: 1; cursor: pointer;" onclick="${t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`}">
+              📌 <strong style="color: #fc8181;">Fissato [${esc(m.date)}]:</strong> ${linkify(m.text)}
+            </div>
+            <button type="button" onclick="event.stopPropagation(); ${delFn}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio">✕</button>
+          </div>
+        `;
+
+        const chatArr = t.isManual ? (t.chatHistory || []) : (t.todoNotes || []);
+        if (chatArr.length > 0) {
+          const pinnedMsg = chatArr.find(m => m.pinned);
+          const recentUserMsgs = getRecentUserChatMessages(chatArr, 3);
+          
+          if (pinnedMsg) {
+            const pIdx = chatArr.indexOf(pinnedMsg);
+            const delFn = t.isManual ? `deleteSingleTodoChatMessageDirect('${t.id}', ${pIdx})` : `deleteSinglePraticaTodoMessageDirect('${t.praticaId}', ${pIdx})`;
+            displayContentHTML += pinBox(pinnedMsg, delFn);
+            collapsedHTML += pinBox(pinnedMsg, delFn);
+          }
+
+          recentUserMsgs.forEach(msg => {
+            if (!msg.pinned) {
+              const mIdx = chatArr.indexOf(msg);
+              const delFn = t.isManual ? `deleteSingleTodoChatMessageDirect('${t.id}', ${mIdx})` : `deleteSinglePraticaTodoMessageDirect('${t.praticaId}', ${mIdx})`;
+              displayContentHTML += commentBox(msg, delFn);
+            }
+          });
+        }
+
+        const chatButtonOnClick = t.isManual ? `openTodoChatModal('${t.id}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
+        const gotoFlussoBtnHTML = (!t.isManual && t.praticaId) ? `<button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="goToPraticaFromTodo('${t.praticaId}')" title="Vai al flusso di provenienza">🔗 Flusso</button>` : '';
+
+        let actionTabsHTML = '';
+        if (t.isManual) {
+          const resolveBtnStyle = t.isResolved ? 'background: #d69e2e; color: #000;' : 'background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid var(--success-green);';
+          const resolveBtnText = t.isResolved ? '↩️ Riapri' : '✅ Risolto';
+          actionTabsHTML = `
+            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn-solve-sm" style="${resolveBtnStyle}" onclick="toggleManualTodoResolved('${t.id}')">${resolveBtnText}</button>
+              <button type="button" class="btn-solve-sm" style="background: rgba(214, 158, 46, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main);" onclick="archiveManualTodoWithPrompt('${t.id}')">📦 Archivia</button>
+            </div>
+          `;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'todo-card';
+        if (t.pinnedTask) item.style.border = '2.5px solid #ff1a1a';
+        if (t.isResolved) item.style.opacity = '0.75';
+
+        item.innerHTML = `
+          <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
+            <div style="width: 10px; flex-shrink: 0;"></div>
+            <div style="flex: 1; min-width: 0; overflow: hidden;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span class="${badgeClass}">${t.isResolved ? '✅ RISOLTO' : esc(t.situation)}</span>
+                  ${assigneeBadgeHTML}
+                  ${deadlineBadgeHTML}
+                </div>
+                ${isExp ? actionTabsHTML : ''}
+              </div>
+              <div ${t.isManual ? `onclick="toggleTodoExpand('${t.id}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
+              ${isExp ? displayContentHTML : collapsedHTML}
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex-wrap: wrap; max-width: 150px; flex-shrink: 0;">
+              ${gotoFlussoBtnHTML}
+              <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
+              <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" onclick="${t.isManual ? `toggleTaskPin('${t.id}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
+              ${t.isManual && isExp ? `
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${t.id}')">✏️</button>
+                <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderLinksList() {
+      const container = $('linksListContainer');
+      if (!container) return;
+
+      const search = (($('searchLinkInput') || {}).value || '').toLowerCase();
+      container.innerHTML = '';
+      if (!utileLinks) utileLinks = [];
+
+      const filteredLinks = utileLinks.filter(l => (l.title || '').toLowerCase().includes(search) || (l.description || '').toLowerCase().includes(search) || (l.url || '').toLowerCase().includes(search) || (l.anchorText || '').toLowerCase().includes(search));
+
+      if (filteredLinks.length === 0) {
+        let emptyMsg = 'Nessun link utile inserito.';
+        if (linksError === 'NOROW') emptyMsg = 'I link non sono ancora stati pubblicati. Chiedi a chi ha l\'accesso di aprire l\'app almeno una volta.';
+        else if (linksError) emptyMsg = 'Impossibile caricare i link (' + linksError + ').';
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 15px;">${esc(emptyMsg)}</div>`;
+        return;
+      }
+
+      filteredLinks.forEach((linkItem) => {
+        const card = document.createElement('div');
+        card.className = 'card link-item-card';
+        const displayText = linkItem.anchorText && linkItem.anchorText.trim() !== '' ? esc(linkItem.anchorText) : esc(linkItem.url);
+        const targetUrl = linkItem.url.startsWith('http://') || linkItem.url.startsWith('https://') ? linkItem.url : 'https://' + linkItem.url;
+        const linkHTML = `<a class="auto-link" href="${esc(targetUrl)}" target="_blank" rel="noopener noreferrer">${displayText}</a>`;
+
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 0; overflow: hidden;">
+              <div style="font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 6px; word-break: break-word;">${linkify(linkItem.title)}</div>
+              <div style="font-size: 14px; color: #fff; margin-bottom: 10px; word-break: break-word; line-height: 1.4;">${linkify(linkItem.description)}</div>
+              <div style="font-size: 14px; word-break: break-all; background: rgba(214,158,46,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                🔗 ${linkHTML}
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+              <button type="button" class="btn-secondary-outline btn-sm" onclick="openEditLinkModal('${linkItem.id}')">✏️ Modifica</button>
+              <button type="button" aria-label="Elimina link" onclick="confirmDeleteLinkItem('${linkItem.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px;" title="Elimina link">✕</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openLinkModal() {
+      $('editLinkId').value = '';
+      $('linkTitleInput').value = '';
+      $('linkDescInput').value = '';
+      $('linkAnchorTextInput').value = '';
+      $('linkUrlInput').value = '';
+      $('linkModalTitle').innerText = 'Aggiungi Link Utile';
+      $('linkModal').classList.remove('hidden');
+    }
+
+    function closeLinkModal() { $('linkModal').classList.add('hidden'); }
+
+    async function saveLinkItem(e) {
+      e.preventDefault();
+      const id = $('editLinkId').value;
+      const title = $('linkTitleInput').value.trim();
+      const description = $('linkDescInput').value.trim();
+      const anchorText = $('linkAnchorTextInput').value.trim();
+      let url = $('linkUrlInput').value.trim();
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+      if (id) {
+        const item = utileLinks.find(l => l.id === id);
+        if (item) { item.title = title; item.description = description; item.anchorText = anchorText; item.url = url; }
+      } else {
+        utileLinks.unshift({ id: 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), title, description, anchorText, url });
+      }
+
+      closeLinkModal();
+      await saveLinks();
+    }
+
+    function openEditLinkModal(id) {
+      const item = utileLinks.find(l => l.id === id);
+      if (!item) return;
+      $('editLinkId').value = item.id;
+      $('linkTitleInput').value = item.title || '';
+      $('linkDescInput').value = item.description || '';
+      $('linkAnchorTextInput').value = item.anchorText || '';
+      $('linkUrlInput').value = item.url || '';
+      $('linkModalTitle').innerText = 'Modifica Link Utile';
+      $('linkModal').classList.remove('hidden');
+    }
+
+    async function confirmDeleteLinkItem(id) {
+      if (confirm('Vuoi eliminare questo link utile?')) {
+        utileLinks = utileLinks.filter(l => l.id !== id);
+        await saveLinks();
+      }
+    }
+
+    async function toggleManualTodoResolved(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.isResolved = !item.isResolved;
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        await saveData();
+      }
+    }
+
+    async function archiveManualTodoWithPrompt(id) {
+      if (confirm('Vuoi archiviare questo task?')) {
+        const itemIdx = manualTodos.findIndex(t => t.id === id);
+        if (itemIdx !== -1) {
+          const removed = manualTodos.splice(itemIdx, 1)[0];
+          removed.archivedAt = getNow();
+          delete removed.pinnedTask;
+          if (!archivedTodos) archivedTodos = [];
+          archivedTodos.unshift(removed);
+          await saveData();
+        }
+      }
+    }
+
+    async function confirmDeleteManualTodo(id) {
+      if (confirm('Vuoi eliminare definitivamente questo task?')) {
+        const itemIdx = manualTodos.findIndex(t => t.id === id);
+        if (itemIdx !== -1) {
+          manualTodos.splice(itemIdx, 1);
+          await saveData();
+        }
+      }
+    }
+
+    function toggleArchivedTodosSection() {
+      isArchivedSectionOpen = !isArchivedSectionOpen;
+      $('archivedTodosContainer').style.display = isArchivedSectionOpen ? 'block' : 'none';
+      $('archivedToggleLabel').innerText = isArchivedSectionOpen ? '[ Clicca per chiudere ▴ ]' : '[ Clicca per aprire ▾ ]';
+    }
+
+    function jumpToArchivedTodos() {
+      if (!isArchivedSectionOpen) {
+        isArchivedSectionOpen = true;
+        $('archivedTodosContainer').style.display = 'block';
+        $('archivedToggleLabel').innerText = '[ Clicca per chiudere ▴ ]';
+      }
+      const anchor = $('archivedTodosAnchorSection');
+      if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderArchivedTodoList() {
+      const container = $('archivedTodosContainer');
+      const badgeTop = $('archivedTodoCountBadge');
+      const badgeBottom = $('archivedTodoCountBadgeBottom');
+      if (!container || !badgeTop || !badgeBottom) return;
+
+      if (!archivedTodos) archivedTodos = [];
+      badgeTop.innerText = archivedTodos.length;
+      badgeBottom.innerText = archivedTodos.length;
+
+      container.innerHTML = '';
+      if (archivedTodos.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 14px;">Nessun task archiviato.</div>`;
+        return;
+      }
+
+      archivedTodos.forEach((t) => {
+        const item = document.createElement('div');
+        item.style.cssText = "background: #1c0507; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; opacity: 0.85;";
+
+        const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee" style="margin-left: 6px;">👤 ${linkify(t.assignee)}</span>` : '';
+        const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline" style="margin-left: 6px;">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
+
+        item.innerHTML = `
+          <div style="flex: 1; min-width: 0; overflow: hidden;">
+            <div>
+              <span class="todo-badge" style="background: rgba(160, 174, 192, 0.2); color: #cbd5e0;">📦 ARCHIVIATO (${esc(t.archivedAt || 'Storico')})</span>
+              ${assigneeBadgeHTML}
+              ${deadlineBadgeHTML}
+            </div>
+            <div style="font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 2px; word-break: break-word;">${linkify(t.title)}</div>
+            <div class="todo-text-block" style="font-size: 13px; color: var(--text-muted);">${linkify(t.actionOriginal || t.action || '')}</div>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+            <button type="button" class="btn-solve-sm" style="background: var(--gold-main); color:#000;" onclick="restoreArchivedTodo('${t.id}')">↩️ Ripristina</button>
+            <button type="button" aria-label="Elimina definitivamente" onclick="permanentDeleteArchivedTodo('${t.id}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:18px; padding: 4px;" title="Elimina definitivamente">✕</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    async function restoreArchivedTodo(id) {
+      const idx = archivedTodos.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        const restored = archivedTodos.splice(idx, 1)[0];
+        delete restored.archivedAt;
+        manualTodos.push(restored);
+        await saveData();
+      }
+    }
+
+    async function permanentDeleteArchivedTodo(id) {
+      if (confirm('Vuoi eliminare definitivamente questo task dall\'archivio?')) {
+        archivedTodos = archivedTodos.filter(t => t.id !== id);
+        await saveData();
+      }
+    }
+
+    function openTodoChatModal(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      $('todoChatId').value = item.id;
+      $('todoChatPraticaId').value = '';
+      $('todoChatModalTitle').innerText = `Chat Task: ${item.title}`;
+      $('todoChatNewText').value = '';
+      $('btnTodoResolveToggle').style.display = 'block';
+
+      const btn = $('btnTodoResolveToggle');
+      if (item.isResolved) {
+        btn.innerText = '↩️ Riapri Task';
+        btn.style.background = '#d69e2e';
+        btn.style.color = '#000';
+      } else {
+        btn.innerText = '✅ Segna Risolto';
+        btn.style.background = 'var(--success-green)';
+        btn.style.color = '#fff';
+      }
+
+      $('todoChatModal').classList.remove('hidden');
+      renderTodoChatMessages(item, null);
+    }
+
+    function openPraticaTodoChatModal(praticaId) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (!p) return;
+      $('todoChatId').value = '';
+      $('todoChatPraticaId').value = p.id;
+      $('todoChatModalTitle').innerText = `Chat Operativa: ${p.client} - ${p.title}`;
+      $('todoChatNewText').value = '';
+      $('btnTodoResolveToggle').style.display = 'none';
+      if (!p.todoNotes) p.todoNotes = [];
+      $('todoChatModal').classList.remove('hidden');
+      renderTodoChatMessages(null, p);
+    }
+
+    function closeTodoChatModal() { $('todoChatModal').classList.add('hidden'); }
+
+    async function togglePinTodoChat(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory) return;
+      pinToggle(item.chatHistory, index);
+      await saveData();
+      renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
+    }
+
+    async function togglePinPraticaTodo(praticaId, index) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.todoNotes) return;
+      pinToggle(p.todoNotes, index);
+      await saveData();
+      renderTodoChatMessages(null, pratiche.find(x => x.id === praticaId) || p);
+    }
+
+    function renderTodoChatMessages(manualItem, praticaItem) {
+      const box = $('todoChatMessages');
+      box.innerHTML = '';
+
+      let messagesArray = [];
+      if (manualItem) messagesArray = manualItem.chatHistory || [];
+      if (praticaItem) messagesArray = praticaItem.todoNotes || [];
+
+      if (messagesArray.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 13px;">Nessun messaggio in questa chat operativa.</div>`;
+        return;
+      }
+
+      let html = '';
+      pinnedFirstOrder(messagesArray).forEach(index => {
+        const msg = messagesArray[index];
+        html += chatMsgCard({
+          dept: '', date: msg.date, text: msg.text, pinned: !!msg.pinned,
+          pinCall: manualItem ? `togglePinTodoChat('${manualItem.id}', ${index})` : `togglePinPraticaTodo('${praticaItem.id}', ${index})`,
+          editCall: manualItem ? `openEditTodoChatMessageModal('${manualItem.id}', ${index})` : `openEditPraticaTodoMessageModal('${praticaItem.id}', ${index})`,
+          delCall: manualItem ? `confirmDeleteTodoChatMessage('${manualItem.id}', ${index})` : `confirmDeletePraticaTodoMessage('${praticaItem.id}', ${index})`
+        });
+      });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function openEditTodoChatMessageModal(itemId, index) {
+      const item = manualTodos.find(t => t.id === itemId);
+      if (!item || !item.chatHistory || !item.chatHistory[index]) return;
+      $('editChatType').value = 'manualTodo';
+      $('editChatManualId').value = itemId;
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = item.chatHistory[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function openEditPraticaTodoMessageModal(praticaId, index) {
+      const p = pratiche.find(item => item.id === praticaId);
+      if (!p || !p.todoNotes || !p.todoNotes[index]) return;
+      $('editChatType').value = 'praticaTodo';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = praticaId;
+      $('editChatIndex').value = index;
+      $('editChatText').value = p.todoNotes[index].text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    async function confirmDeleteTodoChatMessage(itemId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const item = manualTodos.find(t => t.id === itemId);
+        if (item && item.chatHistory) {
+          item.chatHistory.splice(msgIndex, 1);
+          await saveData();
+          renderTodoChatMessages(manualTodos.find(t => t.id === itemId) || item, null);
+        }
+      }
+    }
+
+    async function confirmDeletePraticaTodoMessage(praticaId, msgIndex) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes) {
+          p.todoNotes.splice(msgIndex, 1);
+          await saveData();
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
+        }
+      }
+    }
+
+    async function addTodoChatMessage() {
+      const manualId = $('todoChatId').value;
+      const praticaId = $('todoChatPraticaId').value;
+      const text = $('todoChatNewText').value.trim();
+      if (!text) return;
+
+      if (manualId) {
+        const manualObj = manualTodos.find(t => t.id === manualId);
+        if (manualObj) {
+          if (!manualObj.chatHistory) manualObj.chatHistory = [];
+          manualObj.chatHistory.push({ date: getNow(), text: text });
+        }
+      } else if (praticaId) {
+        const praticaObj = pratiche.find(item => item.id === praticaId);
+        if (praticaObj) {
+          if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
+          praticaObj.todoNotes.push({ date: getNow(), text: text });
+        }
+      }
+
+      $('todoChatNewText').value = '';
+      await saveData();
+
+      if (manualId) openTodoChatModal(manualId);
+      if (praticaId) openPraticaTodoChatModal(praticaId);
+    }
+
+    async function toggleResolveFromChat() {
+      const id = $('todoChatId').value;
+      if (!id) return;
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.isResolved = !item.isResolved;
+        if (!item.chatHistory) item.chatHistory = [];
+        item.chatHistory.push({ date: getNow(), text: item.isResolved ? '✅ Task segnato come risolto.' : '↩️ Task riaperto.' });
+        await saveData();
+        closeTodoChatModal();
+      }
+    }
+
+    function renumberChecklist(containerId) {
+      [...$(containerId).children].forEach((r, i) => { r.querySelector('.cl-num').textContent = (i + 1) + '.'; });
+    }
+
+    function addChecklistRow(containerId, item) {
+      const c = $(containerId);
+      const row = document.createElement('div');
+      row.className = 'cl-row';
+      row.dataset.id = (item && item.id) || ('cl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+      row.innerHTML = `<span class="cl-num"></span>
+        <input type="checkbox" class="cl-done" aria-label="Fatto">
+        <input type="text" class="form-control cl-text" aria-label="Testo del punto" placeholder="Es. Telefonare per l'approvazione...">
+        <button type="button" class="cl-del" aria-label="Elimina punto">✕</button>`;
+      row.querySelector('.cl-done').checked = !!(item && item.done);
+      row.querySelector('.cl-text').value = item ? (item.text || '') : '';
+      row.querySelector('.cl-del').onclick = () => { row.remove(); renumberChecklist(containerId); };
+      row.querySelector('.cl-text').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addChecklistRow(containerId); }
+      });
+      c.appendChild(row);
+      renumberChecklist(containerId);
+      if (!item) row.querySelector('.cl-text').focus();
+    }
+
+    function fillChecklist(containerId, list) {
+      $(containerId).innerHTML = '';
+      (list || []).forEach(it => addChecklistRow(containerId, it));
+    }
+
+    function readChecklist(containerId) {
+      return [...$(containerId).querySelectorAll('.cl-row')]
+        .map(r => ({ id: r.dataset.id, text: r.querySelector('.cl-text').value.trim(), done: r.querySelector('.cl-done').checked }))
+        .filter(x => x.text);
+    }
+
+    async function toggleTaskPin(id) {
+      const it = manualTodos.find(t => t.id === id);
+      if (!it) return;
+      it.pinnedTask = !it.pinnedTask;
+      await saveData();
+    }
+
+    async function toggleAutoTaskPin(praticaId) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p) return;
+      p.todoPinned = !p.todoPinned;
+      await saveData();
+    }
+
+    function toggleTodoExpand(id) {
+      const t = manualTodos.find(x => x.id === id);
+      if (t) { t.isExpanded = !t.isExpanded; renderTodoList(); }
+    }
+
+    async function toggleChecklistItem(taskId, itemId) {
+      const task = manualTodos.find(t => t.id === taskId);
+      if (!task || !task.checklist) return;
+      const it = task.checklist.find(c => c.id === itemId);
+      if (!it) return;
+      it.done = !it.done;
+      await saveData();
+    }
+
+    function openTodoModal() {
+      fillChecklist('todoChecklistEditor', []);
+      $('todoTitle').value = '';
+      $('todoAssignee').value = '';
+      $('todoDeadline').value = '';
+      $('todoAction').value = '';
+      $('todoModal').classList.remove('hidden');
+    }
+    function closeTodoModal() { $('todoModal').classList.add('hidden'); }
+
+    async function saveManualTodo(e) {
+      e.preventDefault();
+      const sitVal = $('todoSit').value;
+      const initialAction = $('todoAction').value;
+      const newId = 'mt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+
+      manualTodos.unshift({
+        id: newId,
+        title: $('todoTitle').value,
+        dept: sitVal,
+        assignee: $('todoAssignee').value.trim(),
+        deadline: $('todoDeadline').value.trim(),
+        situation: `📌 ${sitVal}`,
+        actionOriginal: initialAction,
+        action: initialAction,
+        chatHistory: [{ date: getNow(), text: initialAction }],
+        isManual: true,
+        isResolved: false,
+        checklist: readChecklist('todoChecklistEditor')
+      });
+
+      closeTodoModal();
+      await saveData();
+    }
+
+    function openEditTodoModal(id) {
+      const item = manualTodos.find(t => t.id === id);
+      if (!item) return;
+      $('editTodoId').value = item.id;
+      $('editTodoTitle').value = item.title || '';
+
+      const selectSit = $('editTodoSit');
+      if (item.dept && [...selectSit.options].some(o => o.value === item.dept)) selectSit.value = item.dept;
+
+      $('editTodoAssignee').value = item.assignee || '';
+      $('editTodoDeadline').value = item.deadline || '';
+      $('editTodoAction').value = item.actionOriginal || item.action || '';
+      $('editTodoIsResolved').checked = !!item.isResolved;
+      fillChecklist('editTodoChecklistEditor', item.checklist);
+      $('editTodoModal').classList.remove('hidden');
+    }
+
+    function closeEditTodoModal() { $('editTodoModal').classList.add('hidden'); }
+
+    async function saveEditedManualTodo(e) {
+      e.preventDefault();
+      const id = $('editTodoId').value;
+      const item = manualTodos.find(t => t.id === id);
+      if (item) {
+        item.title = $('editTodoTitle').value;
+        const sitVal = $('editTodoSit').value;
+        item.dept = sitVal;
+        item.assignee = $('editTodoAssignee').value.trim();
+        item.deadline = $('editTodoDeadline').value.trim();
+        item.isResolved = $('editTodoIsResolved').checked;
+        if (!item.isResolved) item.situation = `📌 ${sitVal}`;
+        item.actionOriginal = $('editTodoAction').value;
+        item.action = item.actionOriginal;
+        item.checklist = readChecklist('editTodoChecklistEditor');
+        closeEditTodoModal();
+        await saveData();
+      }
+    }
+
+    function isStepLocked(p, idx) {
+      const cur = p.currentStepIdx || 0;
+      if (idx >= 5) return cur < 5 && !isEarlyStarted(p, idx);
+      return idx > cur;
+    }
+    function reachMax(p) {
+      const cur = p.currentStepIdx || 0;
+      return cur >= 5 ? ROUTE_STEPS.length - 1 : cur;
+    }
+    function stepHasMarker(p, label) {
+      return (p.mailDepts || []).includes(label)
+        || (p.statusMessages || []).some(st => st.dept === label)
+        || (p.alertsList || []).some(al => al.target === label);
+    }
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+
+    function openStepClickModal(id, idx) {
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      const deptLabel = ROUTE_STEPS[idx].label;
+
+      const chatOnly = isStepLocked(activeItem, idx) && !stepHasMarker(activeItem, deptLabel);
+      selectedStepIdx = idx;
+      ['btnStall', 'btnSendBack', 'btnBlock'].forEach(b => { $(b).style.display = chatOnly ? 'none' : 'block'; });
+
+      if (activeItem.mailDepts && activeItem.mailDepts.includes(deptLabel)) {
+        activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
+        saveData();
+      }
+
+      $('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
+      $('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
+
+      const isCurrentStep = (idx === (activeItem.currentStepIdx || 0));
+      const btnApprove = $('btnApproveNext');
+      const btnExecuteFinal = $('btnExecuteFinal');
+
+      btnApprove.style.display = 'none';
+      btnExecuteFinal.style.display = 'none';
+
+      const curIdx = activeItem.currentStepIdx || 0;
+      const curLabel = ROUTE_STEPS[curIdx].label;
+      const inParallel = curIdx >= 5 && idx >= 5;
+      $('btnGoCurrent').style.display = 'none';
+      $('btnResolveDept').style.display = stepHasMarker(activeItem, deptLabel) ? 'block' : 'none';
+      if (!isCurrentStep && !inParallel) {
+        if (curIdx < 5) {
+          $('stepClickSub').innerText = `⚠️ La pratica è attualmente su "${curLabel}". Il pulsante per mandarla avanti è nel reparto attuale.`;
+          $('btnGoCurrent').innerText = `👉 Vai a "${curLabel}" (per mandare avanti)`;
+          $('btnGoCurrent').style.display = 'block';
+        } else {
+          $('stepClickSub').innerText = `La pratica è nella fase parallela (Promo, PR, Logistics): conferma ESEGUITO dai rispettivi pallini.`;
+        }
+      }
+
+      if (activeItem.currentStepIdx >= 5 && (idx >= 5)) {
+        const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
+        btnExecuteFinal.style.display = 'block';
+        btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
+      } else if (isCurrentStep && (activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        btnApprove.style.display = 'block';
+        btnApprove.innerText = `✅ Approva "${deptLabel}" e Passa Avanti`;
+      }
+
+      if (chatOnly) {
+        const cur = ROUTE_STEPS[activeItem.currentStepIdx || 0].label;
+        ['btnApproveNext', 'btnExecuteFinal', 'btnGoCurrent', 'btnResolveDept'].forEach(b => { $(b).style.display = 'none'; });
+        $('stepClickSub').innerText = `🔒 "${deptLabel}" non è ancora attivo (la pratica è su "${cur}"). Per ora puoi solo scrivere in chat.`;
+      }
+      $('btnRequestEarly').style.display = 'none';
+      $('earlyStartBox').innerHTML = '';
+      if (idx >= 5 && curIdx === 4) {
+        const already = (activeItem.earlyStart || []).includes(deptLabel);
+        const asked = (activeItem.earlyRequests || []).includes(deptLabel);
+        if (!already && !asked) {
+          $('btnRequestEarly').style.display = 'block';
+          $('btnRequestEarly').innerText = `🙋 Chiedi a Legal la partenza anticipata di ${deptLabel}`;
+        } else if (asked && !already) {
+          $('stepClickSub').innerText = `🙋 Hai già chiesto a Legal la partenza anticipata. Attendi la sua risposta (nel frattempo puoi scrivere in chat).`;
+        }
+      }
+      if (idx >= 5 && curIdx < 5 && isEarlyStarted(activeItem, idx)) {
+        $('stepClickSub').innerText = `🚀 Partenza anticipata consentita da Legal: puoi lavorare, ma il reparto resta fucsia finché Legal non approva (contratto da firmare).`;
+      }
+      if (idx === 4 && curIdx === 4) {
+        $('earlyStartBox').innerHTML = ['Promo', 'PR', 'Logistics'].map(d => {
+          const on = (activeItem.earlyStart || []).includes(d);
+          const req = (activeItem.earlyRequests || []).includes(d) ? ' 🙋 (richiesta in corso)' : '';
+          return `<button type="button" class="btn-sm stepact" style="background: ${on ? '#6b21a8' : 'var(--status-fuchsia)'};" onclick="${on ? 'revokeEarlyStart' : 'enableEarlyStart'}('${activeItem.id}', '${d}')">${on ? '⏹ Revoca partenza anticipata' : '🚀 Consenti partenza anticipata'}: ${d}${req}</button>`;
+        }).join('');
+      }
+      $('stepClickModal').classList.remove('hidden');
+    }
+
+    function goToCurrentStep() {
+      const p = activeItem;
+      if (!p) return;
+      const id = p.id, cur = p.currentStepIdx || 0;
+      closeStepClickModal();
+      openStepClickModal(id, cur);
+    }
+
+    async function resolveDeptMarkers() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const label = ROUTE_STEPS[selectedStepIdx].label;
+      activeItem.statusMessages = (activeItem.statusMessages || []).filter(st => st.dept !== label);
+      activeItem.alertsList = (activeItem.alertsList || []).filter(al => al.target !== label);
+      activeItem.mailDepts = (activeItem.mailDepts || []).filter(d => d !== label);
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({ date: getNow(), dept: label, text: `✅ Risolti stalli/avvisi su ${label}.` });
+      closeStepClickModal();
+      await saveData();
+    }
+
+    async function approveCurrent(id) {
+      const p = pratiche.find(x => x.id === id);
+      if (!p) return;
+      const cur = p.currentStepIdx || 0;
+      if (cur >= 5) return;
+      if (!confirm(`Approvare "${ROUTE_STEPS[cur].label}" e mandare avanti la pratica?`)) return;
+      activeItem = p;
+      selectedStepIdx = cur;
+      await approveAndNext();
+    }
+
+    function isEarlyStarted(p, idx) {
+      return (p.earlyStart || []).includes(ROUTE_STEPS[idx].label);
+    }
+
+    async function requestEarlyStart() {
+      const p = activeItem;
+      if (!p || selectedStepIdx === null || (p.currentStepIdx || 0) !== 4) return;
+      const dept = ROUTE_STEPS[selectedStepIdx].label;
+      if (!p.earlyRequests) p.earlyRequests = [];
+      if (!p.earlyRequests.includes(dept)) p.earlyRequests.push(dept);
+      if (!p.mailDepts) p.mailDepts = [];
+      if (!p.mailDepts.includes('Legal')) p.mailDepts.push('Legal');
+      p.notesHistory.push({ date: getNow(), dept, text: `🙋 ${dept} chiede a Legal la partenza anticipata (contratto non ancora firmato: resterà fucsia finché Legal non approva).` });
+      closeStepClickModal();
+      await saveData();
+    }
+
+    async function enableEarlyStart(pid, dept) {
+      const p = pratiche.find(x => x.id === pid);
+      if (!p || (p.currentStepIdx || 0) !== 4) return;
+      if (!p.earlyStart) p.earlyStart = [];
+      if (!p.earlyStart.includes(dept)) p.earlyStart.push(dept);
+      p.earlyRequests = (p.earlyRequests || []).filter(d => d !== dept);
+      if (!p.mailDepts) p.mailDepts = [];
+      if (!p.mailDepts.includes(dept)) p.mailDepts.push(dept);
+      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `🚀 Legal consente la partenza anticipata a ${dept}: può lavorare ma resta fucsia finché Legal non approva (contratto da firmare).` });
+      closeStepClickModal();
+      await saveData();
+    }
+
+    async function revokeEarlyStart(pid, dept) {
+      const p = pratiche.find(x => x.id === pid);
+      if (!p || (p.currentStepIdx || 0) !== 4) return;
+      p.earlyStart = (p.earlyStart || []).filter(d => d !== dept);
+      p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `⏹ Legal revoca la partenza anticipata a ${dept}.` });
+      closeStepClickModal();
+      await saveData();
+    }
+
+    function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
+
+    function openQuickChatFromStep() {
+      closeStepClickModal();
+      if (!activeItem || selectedStepIdx === null) return;
+      $('quickChatSenderLabel').innerText = ROUTE_STEPS[selectedStepIdx].label;
+      $('quickChatTextInput').value = '';
+      $('quickChatModal').classList.remove('hidden');
+    }
+
+    function closeQuickChatModal() { $('quickChatModal').classList.add('hidden'); }
+
+    async function saveQuickChatFromStep(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      const text = $('quickChatTextInput').value.trim();
+      if (!text) return;
+
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
+
+      closeQuickChatModal();
+      await saveData();
+    }
+
+    function openSendBackModal() {
+      closeStepClickModal();
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      $('sendBackModalTitle').innerText = `Rimanda da "${currentDeptLabel}" ad altro reparto`;
+
+      const select = $('sendBackTargetSelect');
+      select.innerHTML = '';
+
+      const maxIdxBack = reachMax(activeItem);
+      ROUTE_STEPS.forEach((s, idx) => {
+        if (idx > maxIdxBack) return;
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.innerText = s.label + (idx < selectedStepIdx ? ' (Indietro)' : idx === selectedStepIdx ? ' (Stesso reparto)' : ' (Avanti)');
+        if (idx === Math.max(0, selectedStepIdx - 1)) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      $('sendBackNoteInput').value = '';
+      $('sendBackModal').classList.remove('hidden');
+    }
+
+    function closeSendBackModal() { $('sendBackModal').classList.add('hidden'); }
+
+    async function saveSendBackAction(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetStepIdx = parseInt($('sendBackTargetSelect').value);
+      const targetDept = ROUTE_STEPS[targetStepIdx].label;
+      const note = $('sendBackNoteInput').value.trim();
+
+      activeItem.currentStepIdx = targetStepIdx;
+      if (targetStepIdx < 4) { activeItem.earlyStart = []; activeItem.earlyRequests = []; }
+
+      if (targetStepIdx <= selectedStepIdx) {
+        const bothParallel = targetStepIdx >= 5 && selectedStepIdx >= 5;
+        activeItem.approvedSteps = (activeItem.approvedSteps || []).filter(i => bothParallel ? i !== targetStepIdx : i < targetStepIdx);
+      }
+
+      if (!activeItem.alertsList) activeItem.alertsList = [];
+      activeItem.alertsList.push({
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'WARN',
+        sender: senderDept,
+        target: targetDept,
+        text: `Rimandato indietro: ${note}`
+      });
+
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `↩️ [Rimandato a ${targetDept}]: ${note}` });
+
+      closeSendBackModal();
+      await saveData();
+    }
+
+    function openStatusModal() {
+      closeStepClickModal();
+      const currentDeptLabel = ROUTE_STEPS[selectedStepIdx].label;
+      $('statusModalTitle').innerText = `Segnala Stallo / Metti in Attesa da "${currentDeptLabel}"`;
+
+      const select = $('statusTargetSelect');
+      select.innerHTML = '';
+
+      const maxIdxStatus = reachMax(activeItem);
+      ROUTE_STEPS.forEach((s, idx) => {
+        if (idx > maxIdxStatus) return;
+        const opt = document.createElement('option');
+        opt.value = s.label;
+        opt.innerText = s.label + (s.label === currentDeptLabel ? ' (Questo reparto)' : ' (Rimanda a questo reparto)');
+        if (s.label === currentDeptLabel) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      $('statusNoteInput').value = '';
+      $('statusModal').classList.remove('hidden');
+    }
+
+    function closeStatusModal() { $('statusModal').classList.add('hidden'); }
+
+    async function saveDepartmentStatus(event) {
+      event.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const targetDept = $('statusTargetSelect').value;
+      const text = $('statusNoteInput').value.trim();
+
+      if (!activeItem.statusMessages) activeItem.statusMessages = [];
+      activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== senderDept);
+
+      activeItem.statusMessages.push({
+        id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        dept: targetDept,
+        text: text
+      });
+
+      if (senderDept !== targetDept) {
+        if (!activeItem.mailDepts) activeItem.mailDepts = [];
+        if (!activeItem.mailDepts.includes(targetDept)) activeItem.mailDepts.push(targetDept);
+      }
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `🟣 [Stato Stallo da ${senderDept} a ${targetDept}]: ${text}` });
+
+      closeStatusModal();
+      await saveData();
+    }
+
+    async function approveAndNext() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+      if (!activeItem.approvedSteps.includes(selectedStepIdx)) activeItem.approvedSteps.push(selectedStepIdx);
+
+      if (activeItem.statusMessages) activeItem.statusMessages = activeItem.statusMessages.filter(st => st.dept !== deptLabel);
+      if (activeItem.mailDepts) activeItem.mailDepts = activeItem.mailDepts.filter(d => d !== deptLabel);
+      if (activeItem.alertsList) activeItem.alertsList = activeItem.alertsList.filter(al => al.target !== deptLabel);
+
+      if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
+        activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
+
+        if (activeItem.currentStepIdx === 5) {
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
+          activeItem.earlyStart = [];
+          activeItem.earlyRequests = [];
+        } else {
+          const nextDept = ROUTE_STEPS[activeItem.currentStepIdx].label;
+          activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato. Passato al reparto: ${nextDept}` });
+        }
+      } else {
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Ultimo reparto completato.` });
+      }
+
+      closeStepClickModal();
+      await saveData();
+    }
+
+    async function executeFinalDepartment() {
+      if (!activeItem || selectedStepIdx < 5) return;
+      const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
+
+      if (!activeItem.approvedSteps) activeItem.approvedSteps = [];
+      const isAlreadyDone = activeItem.approvedSteps.includes(selectedStepIdx);
+
+      if (isAlreadyDone) {
+        activeItem.approvedSteps = activeItem.approvedSteps.filter(idx => idx !== selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `↩️ Annullato completamento (Eseguito rimosso).` });
+      } else {
+        activeItem.approvedSteps.push(selectedStepIdx);
+        activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ ${deptLabel} ha completato e cliccato Eseguito.` });
+      }
+
+      closeStepClickModal();
+      await saveData();
+    }
+
+    function openInterveneFromStepClick() {
+      closeStepClickModal();
+      $('interveneModalTitle').innerText = `Blocca Reparto "${ROUTE_STEPS[selectedStepIdx].label}"`;
+      $('interveneNote').value = '';
+      $('interveneModal').classList.remove('hidden');
+    }
+
+    function closeInterveneModal() { $('interveneModal').classList.add('hidden'); }
+
+    async function confirmInterveneAction(e) {
+      e.preventDefault();
+      if (!activeItem || selectedStepIdx === null) return;
+      const senderDept = ROUTE_STEPS[selectedStepIdx].label;
+      const note = $('interveneNote').value.trim() || 'Bloccato';
+
+      if (!activeItem.alertsList) activeItem.alertsList = [];
+      activeItem.alertsList.push({
+        id: 'al_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'REJECT',
+        sender: senderDept,
+        target: senderDept,
+        text: note
+      });
+
+      if (!activeItem.mailDepts) activeItem.mailDepts = [];
+      if (!activeItem.mailDepts.includes(senderDept)) activeItem.mailDepts.push(senderDept);
+
+      activeItem.notesHistory.push({ date: getNow(), dept: senderDept, text: `[REPARTO BLOCCATO ❌]: ${note}` });
+
+      closeInterveneModal();
+      await saveData();
+    }
+
+    function openChatModal(id) {
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      $('chatModalTitle').innerText = `Consulta Chat: ${activeItem.client} - ${activeItem.title}`;
+      $('chatModal').classList.remove('hidden');
+      renderChatMessages();
+    }
+
+    function chatMsgCard(o) {
+      const boxStyle = o.pinned
+        ? 'border: 3px solid #ff1a1a; background: #2a0505; position: sticky; top: 0; z-index: 2; box-shadow: 0 0 14px rgba(255,26,26,0.55);'
+        : 'border: 1.5px solid var(--border-color); background: #1c0507;';
+      return `
+        <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; color: var(--gold-light); font-weight: bold;">${o.pinned ? '📌 FISSATO · ' : ''}${o.dept ? esc(o.dept) + ' · ' : ''}${esc(o.date)}</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.pinCall}">${o.pinned ? '📌 Stacca' : '📌 Fissa'}</button>
+              <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.editCall}">✏️ Modifica</button>
+              <button type="button" aria-label="Elimina messaggio" onclick="${o.delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
+            </div>
+          </div>
+          <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(o.text)}</div>
+        </div>`;
+    }
+
+    function pinToggle(arr, index) {
+      const m = arr[index];
+      if (!m) return;
+      const was = !!m.pinned;
+      arr.forEach(x => { delete x.pinned; });
+      if (!was) m.pinned = true;
+    }
+
+    function pinnedFirstOrder(list) {
+      const order = list.map((_, i) => i);
+      const pi = list.findIndex(m => m.pinned);
+      if (pi >= 0) { order.splice(order.indexOf(pi), 1); order.unshift(pi); }
+      return order;
+    }
+
+    async function togglePinFlussi(index) {
+      const p = activeItem;
+      if (!p || !p.notesHistory) return;
+      pinToggle(p.notesHistory, index);
+      await saveData();
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const box = $('chatMessages');
+      box.innerHTML = '';
+      if (!activeItem) return;
+      if (!activeItem.notesHistory) activeItem.notesHistory = [];
+      const list = activeItem.notesHistory;
+
+      if (list.length === 0) {
+        box.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nessun messaggio in questa chat.</div>`;
+        return;
+      }
+
+      let html = '';
+      pinnedFirstOrder(list).forEach(index => {
+        const n = list[index];
+        html += chatMsgCard({ dept: n.dept, date: n.date, text: n.text, pinned: !!n.pinned,
+          pinCall: `togglePinFlussi(${index})`, editCall: `openEditFlussiChatMsgModal(${index})`, delCall: `confirmDeleteChatMsg(${index})` });
+      });
+      box.innerHTML = html;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function confirmDeleteChatMsg(index) {
+      if (confirm('Vuoi eliminare questo messaggio?')) {
+        if (activeItem && activeItem.notesHistory) {
+          activeItem.notesHistory.splice(index, 1);
+          await saveData();
+          renderChatMessages();
+        }
+      }
+    }
+
+    function openEditFlussiChatMsgModal(index) {
+      if (!activeItem) return;
+      const note = activeItem.notesHistory[index];
+      if (!note) return;
+      $('editChatType').value = 'flussi';
+      $('editChatManualId').value = '';
+      $('editChatPraticaId').value = '';
+      $('editChatIndex').value = index;
+      $('editChatText').value = note.text;
+      $('editChatMsgModal').classList.remove('hidden');
+    }
+
+    function closeEditChatMsgModal() { $('editChatMsgModal').classList.add('hidden'); }
+
+    async function saveEditedChatMsg(e) {
+      e.preventDefault();
+      const type = $('editChatType').value;
+      const index = parseInt($('editChatIndex').value);
+      const newText = $('editChatText').value.trim();
+
+      if (type === 'flussi') {
+        if (activeItem && activeItem.notesHistory[index]) {
+          activeItem.notesHistory[index].text = newText;
+          await saveData();
+          renderChatMessages();
+        }
+      } else if (type === 'manualTodo') {
+        const manualId = $('editChatManualId').value;
+        const item = manualTodos.find(t => t.id === manualId);
+        if (item && item.chatHistory && item.chatHistory[index]) {
+          item.chatHistory[index].text = newText;
+          await saveData();
+          renderTodoChatMessages(manualTodos.find(t => t.id === manualId) || item, null);
+        }
+      } else if (type === 'praticaTodo') {
+        const praticaId = $('editChatPraticaId').value;
+        const p = pratiche.find(item => item.id === praticaId);
+        if (p && p.todoNotes && p.todoNotes[index]) {
+          p.todoNotes[index].text = newText;
+          await saveData();
+          renderTodoChatMessages(null, pratiche.find(item => item.id === praticaId) || p);
+        }
+      }
+      closeEditChatMsgModal();
+    }
+
+    function closeChatModal() { $('chatModal').classList.add('hidden'); }
+
+    // ============ PRATICHE ============
+    function openNewModal() {
+      $('formClient').value = '';
+      $('formTitle').value = '';
+      $('formDescription').value = '';
+      $('formShowDate').value = '';
+      $('formOwnerExt').value = '';
+      $('formOwnerInt').value = '';
+      $('newModal').classList.remove('hidden');
+    }
+    function closeNewModal() { $('newModal').classList.add('hidden'); }
+
+    function openEditModal(id) {
+      const item = pratiche.find(p => p.id === id);
+      if (!item) return;
+      $('editId').value = item.id;
+      $('editClient').value = item.client || '';
+      $('editTitle').value = item.title || '';
+      $('editDescription').value = item.description || '';
+      $('editShowDate').value = item.showDate || '';
+      $('editOwnerExt').value = item.ownerExt || '';
+      $('editOwnerInt').value = item.ownerInt || '';
+      $('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() { $('editModal').classList.add('hidden'); }
+
+    async function updatePratica(e) {
+      e.preventDefault();
+      const id = $('editId').value;
+      const item = pratiche.find(p => p.id === id);
+      if (item) {
+        item.client = $('editClient').value;
+        item.title = $('editTitle').value;
+        item.description = $('editDescription').value.trim();
+        item.showDate = $('editShowDate').value.trim();
+        item.ownerExt = $('editOwnerExt').value.trim();
+        item.ownerInt = $('editOwnerInt').value.trim();
+        closeEditModal();
+        await saveData();
+      }
+    }
+
+    async function savePratica(e) {
+      e.preventDefault();
+      pratiche.unshift({
+        id: 'p_' + Date.now(),
+        title: $('formTitle').value,
+        client: $('formClient').value,
+        description: $('formDescription').value.trim(),
+        showDate: $('formShowDate').value.trim(),
+        ownerExt: $('formOwnerExt').value.trim(),
+        ownerInt: $('formOwnerInt').value.trim(),
+        currentStepIdx: 0,
+        approvedSteps: [],
+        statusMessages: [],
+        alertsList: [],
+        mailDepts: [],
+        isArchived: false,
+        isExpanded: false,
+        todoNotes: [],
+        notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
+      });
+
+      closeNewModal();
+      await saveData();
+    }
+
+    async function deletePratica(id) {
+      if (confirm('Confermi l\'eliminazione della pratica?')) {
+        pratiche = pratiche.filter(p => p.id !== id);
+        await saveData();
+      }
+    }
+
+    function getNow() {
+      return new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Modal click-outside logic and escape support
+    document.querySelectorAll('.modal-overlay').forEach(m => { 
+      m.setAttribute('role', 'dialog'); 
+      m.setAttribute('aria-modal', 'true');
+      m.addEventListener('click', e => {
+        if (e.target === m) {
+          const form = m.querySelector('form');
+          if (form) {
+            let hasInput = false;
+            form.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(i => {
+              if (i.value && i.value.trim() !== '') hasInput = true;
+            });
+            if (hasInput) {
+              if (!confirm('Ci sono modifiche o dati inseriti. Vuoi uscire senza salvare?')) return;
+            }
+          }
+          const closeBtn = m.querySelector('.close-x');
+          if (closeBtn) closeBtn.click();
+          else m.classList.add('hidden');
+        }
+      });
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const open = [...document.querySelectorAll('.modal-overlay:not(.hidden)')].pop();
+      if (open) { const b = open.querySelector('.close-x'); if (b) b.click(); }
+    });
+
+    initAuth();
+  </script>
+</body>
+</html>er-spacing: 1px; }
 
     .nav-tabs { display: flex; background: #2a080c; padding: 4px; border-radius: 12px; border: 1.5px solid var(--border-color); flex-wrap: wrap; gap: 4px; }
     .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.2s; }
