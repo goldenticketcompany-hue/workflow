@@ -41,8 +41,10 @@
     .alert-status { background: rgba(217, 70, 239, 0.15); color: #f5d0fe; border: 1.5px solid var(--status-fuchsia); }
     .alert-archive { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1.5px solid var(--success-green); }
     .alert-lastmsg { background: rgba(214, 158, 46, 0.12); color: var(--gold-light); border: 1.5px solid rgba(246, 224, 94, 0.55); cursor: pointer; }
-    .alert-pinned { background: rgba(246, 224, 94, 0.18); color: var(--gold-light); border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
-    .alert-pinned .lastmsg-text { color: #fff; }
+    .alert-pinned { background: rgba(246, 224, 94, 0.18); color: #fff; font-weight: 700; border: 3px solid var(--gold-light); box-shadow: 0 0 14px rgba(246, 224, 94, 0.35); cursor: pointer; }
+    .alert-pinned .lastmsg-text { color: #fff; font-weight: 700; }
+    .alert-pinned strong { color: #fff; font-weight: 900; }
+    .alert-pinned a.auto-link { color: #fff !important; }
     .lastmsg-text { font-weight: normal; color: #e2e8f0; overflow-wrap: anywhere; }
 
     .btn-solve-sm { background: var(--success-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -96,7 +98,6 @@
     .todo-badge.deadline { background: rgba(221, 107, 32, 0.25); color: #fbd38d; border: 1px solid var(--warning-amber); }
 
     .chat-msg-text, .todo-text-block { overflow-wrap: anywhere; word-break: normal; }
-    .todo-text-block { white-space: pre-line; }
     .chat-msg-text a, .todo-text-block a, .link-item-card a { color: var(--gold-light); text-decoration: underline; font-weight: bold; word-break: break-all; overflow-wrap: break-word; }
     .chat-msg-text a:hover, .todo-text-block a:hover, .link-item-card a:hover { color: #fff; }
 
@@ -280,7 +281,7 @@
         <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
       </div>
       <form onsubmit="saveQuickChatFromStep(event)">
-        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); margin-bottom: 14px;">
           <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
           <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
         </div>
@@ -385,8 +386,14 @@
           <textarea id="formDescription" class="form-control" rows="3" placeholder="Note o dettagli sulla pratica..."></textarea>
         </div>
         <div class="form-group">
-          <label for="formShowDate">Data dello Spettacolo (Opzionale)</label>
-          <input type="date" id="formShowDate" class="form-control">
+          <label for="formShowDate">Date dello Spettacolo / Evento (Opzionale)</label>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: bold;">dal</span>
+            <input type="date" id="formShowDate" class="form-control" style="flex: 1; min-width: 140px; width: auto;">
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: bold;">al</span>
+            <input type="date" id="formShowDateEnd" class="form-control" style="flex: 1; min-width: 140px; width: auto;">
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Se dura un solo giorno lascia vuoto "al".</div>
         </div>
         <div class="form-group">
           <label for="formOwnerExt">Referente Esterno (Opzionale)</label>
@@ -423,8 +430,14 @@
           <textarea id="editDescription" class="form-control" rows="3"></textarea>
         </div>
         <div class="form-group">
-          <label for="editShowDate">Data dello Spettacolo (Opzionale)</label>
-          <input type="date" id="editShowDate" class="form-control">
+          <label for="editShowDate">Date dello Spettacolo / Evento (Opzionale)</label>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: bold;">dal</span>
+            <input type="date" id="editShowDate" class="form-control" style="flex: 1; min-width: 140px; width: auto;">
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: bold;">al</span>
+            <input type="date" id="editShowDateEnd" class="form-control" style="flex: 1; min-width: 140px; width: auto;">
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Se dura un solo giorno lascia vuoto "al".</div>
         </div>
         <div class="form-group">
           <label for="editOwnerExt">Referente Esterno (Opzionale)</label>
@@ -636,11 +649,9 @@
   </div>
 
   <script>
-    // ============ UTILITÀ ============
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    // localStorage sicuro (Safari privato può lanciare eccezioni)
     const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
     const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
     const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
@@ -652,7 +663,6 @@
       b.style.display = 'block';
     }
 
-    // ============ SUPABASE ============
     const SUPABASE_URL = 'https://oswgtcjvtsyltbdvpoiw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zd2d0Y2p2dHN5bHRiZHZwb2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNDQwMjksImV4cCI6MjEwODkyMDAyOX0.YVM3MCIlib06-vSNcP0XkwgrPyFcvg34LLChV0AEpgc';
 
@@ -663,13 +673,13 @@
     const ROUTE_STEPS = [
       { id: 'Prospect', label: 'Prospect' },
       { id: 'TechServ', label: 'Tech Serv' },
-      { id: 'Logistics', label: 'Logistics' }, // <-- Nuovo pallino intermedio
+      { id: 'Logistics', label: 'Logistics' },
       { id: 'Admin', label: 'Admin' },
       { id: 'Deal', label: 'Deal' },
       { id: 'Legal', label: 'Legal' },
       { id: 'Promo', label: 'Promo' },
       { id: 'PR', label: 'PR' },
-      { id: 'LogisticsFinal', label: 'Logistics' } // <-- Reparto finale nella fase parallela
+      { id: 'LogisticsFinal', label: 'Logistics' }
     ];
 
     let pratiche = [];
@@ -679,25 +689,36 @@
     let isArchivedSectionOpen = false;
     let selectedStepIdx = null;
 
-    // Protezioni dati
-    let dataLoaded = false;   // finché è false NON si salva mai (evita di sovrascrivere i dati veri)
-    let linksLoaded = false;  // idem per i link utili
-    let legacyLinks = [];     // copia dei link ancora presenti nella riga 'main' (vecchio formato)
-    let session = null;       // sessione di login (null = visitatore senza accesso)
-    let currentTab = 'links';   // chi non ha fatto l'accesso parte dai Link Utili
+    let dataLoaded = false;
+    let linksLoaded = false;
+    let legacyLinks = [];
+    let session = null;
+    let currentTab = 'links';
     let rtChannel = null;
     let definedFolders = ['Generale'];
     let openFoldersMap = {};
     let userPickedTab = false;
-    let linksError = '';      // motivo per cui i link non si caricano (per mostrarlo a schermo)
-    let pendingSaves = 0;     // salvataggi in corso/in coda
+    let linksError = '';
+    let pendingSaves = 0;
 
-    // "activeItem" ora punta sempre all'oggetto aggiornato (cerca per id ad ogni lettura)
     let activeItemId = null;
     Object.defineProperty(window, 'activeItem', {
       get() { return pratiche.find(p => p.id === activeItemId) || null; },
       set(v) { activeItemId = v ? v.id : null; }
     });
+
+    // "09/03/2027" oppure "dal 09/03/2027 al 12/03/2027"
+    function formatShowDates(p) {
+      const a = formatDateIt((p && p.showDate) || ''), b = formatDateIt((p && p.showDateEnd) || '');
+      if (a && b && b !== a) return `dal ${a} al ${b}`;
+      if (!a && b) return `fino al ${b}`;
+      return a;
+    }
+    function checkShowDates(ds, de) {
+      if (de && !ds) { alert('Inserisci anche la data di inizio ("dal").'); return false; }
+      if (de && ds && de < ds) { alert('La data di fine ("al") non può essere precedente a quella di inizio ("dal").'); return false; }
+      return true;
+    }
 
     function formatDateIt(dateStr) {
       if (!dateStr) return '';
@@ -707,7 +728,6 @@
       return dateStr;
     }
 
-    // linkify ora fa l'escape del testo PRIMA di creare i link
     function linkify(inputText) {
       if (!inputText) return '';
       const text = esc(inputText);
@@ -1149,7 +1169,7 @@
       };
 
       manualTodos.forEach(t => addName(t.assignee));
-      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerExt); addName(p.ownerInt); });
+      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerInt); });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili Interni</option>';
       Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(name => {
@@ -1229,18 +1249,15 @@
           let cls = 'step-circle';
           let symbol = idx + 1;
 
-          const isEarlyStartTarget = idx >= 6 && (p.earlyStart || []).includes(s.label);
-          const isEarlierLogisticsDuplicate = idx === 2 && (p.earlyStart || []).includes('Logistics');
           if (rejectedTargets.includes(s.label)) { cls += ' rejected'; symbol = '✕'; }
           else if (statusDepts.includes(s.label)) { cls += ' status-purple'; symbol = '🟣'; }
           else if (warnedTargets.includes(s.label)) { cls += ' warning-alert'; symbol = '⚠️'; }
+          else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
           else if (isFullyDone) { cls += ' done'; symbol = '✓'; }
           else if (idx >= 6) {
             if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
-            else if (stepIdx >= 6 || isEarlyStartTarget) { cls += ' current-fuchsia'; symbol = '●'; }
-            else if (p.mailDepts.includes(s.label)) { cls += ' has-mail'; symbol = '✉️'; }
+            else if (stepIdx >= 6 || (p.earlyStart || []).includes(s.label)) { cls += ' current-fuchsia'; symbol = '●'; }
           }
-          else if (p.mailDepts.includes(s.label) && !isEarlierLogisticsDuplicate) { cls += ' has-mail'; symbol = '✉️'; }
           else if (p.approvedSteps.includes(idx)) { cls += ' done'; symbol = '✓'; }
           else if (idx === stepIdx) { cls += ' current-fuchsia'; symbol = '●'; }
 
@@ -1345,7 +1362,7 @@
         }
 
         const isExpanded = !!p.isExpanded;
-        const formattedShowDate = esc(formatDateIt(p.showDate));
+        const formattedShowDate = esc(formatShowDates(p));
 
         let infoHeaderHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
@@ -1438,7 +1455,7 @@
         archivedItems.forEach(p => {
           const item = document.createElement('div');
           item.style.cssText = "background: #2a080c; border: 1.5px solid var(--border-color); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
-          const formattedShowDate = esc(formatDateIt(p.showDate));
+          const formattedShowDate = esc(formatShowDates(p));
           item.innerHTML = `
             <div>
               <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);">${linkify(p.client)}</div>
@@ -1608,7 +1625,6 @@
         const assigneeBadgeHTML = t.assignee ? `<span class="todo-badge assignee">👤 ${linkify(t.assignee)}</span>` : '';
         const deadlineBadgeHTML = t.deadline ? `<span class="todo-badge deadline">⏳ Entro il: ${esc(formatDateIt(t.deadline))}</span>` : '';
 
-
         const item = document.createElement('div');
         item.className = 'todo-card';
         if (t.pinnedTask) item.className += ' pinned-task';
@@ -1636,7 +1652,7 @@
         const delFnFor = (idx) => t.isManual ? `deleteTodoMsgDirect('${safeId}', ${idx})` : `deletePraticaTodoMsgDirect('${t.praticaId}', ${idx})`;
         const openChatCall = t.isManual ? `openTodoChatModal('${safeId}')` : `openPraticaTodoChatModal('${t.praticaId}')`;
         const msgBox = (m, idx, isPin) => `<div style="display: flex; justify-content: space-between; align-items: flex-start; ${isPin ? 'background: rgba(246, 224, 94, 0.18); padding: 8px 12px; border-radius: 8px; border: 2.5px solid var(--gold-light); box-shadow: 0 0 12px rgba(246, 224, 94, 0.3); margin-top: 6px;' : 'background: rgba(214, 158, 46, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 4px;'}">
-            <div class="todo-text-block" style="font-size: ${isPin ? 14 : 13}px; color: ${isPin ? '#fff' : 'var(--gold-light)'}; flex: 1; cursor: pointer;" onclick="${openChatCall}">${isPin ? '📌 <strong style="color: var(--gold-light);">Fissato' : '💬 <strong>Messaggio'} [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
+            <div class="todo-text-block" style="font-size: ${isPin ? 14 : 13}px; color: ${isPin ? '#fff' : 'var(--gold-light)'};${isPin ? ' font-weight: 700;' : ''} flex: 1; cursor: pointer;" onclick="${openChatCall}">${isPin ? '📌 <strong style="color: #fff;">Fissato' : '💬 <strong>Messaggio'} [${esc(m.date)}]:</strong> ${linkify(m.text)}</div>
             <button type="button" onclick="event.stopPropagation(); ${delFnFor(idx)}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding:0 4px; margin-left:8px;" title="Elimina messaggio" aria-label="Elimina messaggio">✕</button>
           </div>`;
 
@@ -1668,7 +1684,6 @@
             </div>
           `;
         }
-
 
         item.innerHTML = `
           <div style="display: flex; align-items: flex-start; gap: 12px; width: 100%; min-width: 0;">
@@ -1938,7 +1953,6 @@
           delete removed.pinnedTask;
           if (!archivedTodos) archivedTodos = [];
           archivedTodos.unshift(removed);
-
           await saveData();
         }
       }
@@ -1949,7 +1963,6 @@
         const itemIdx = manualTodos.findIndex(t => t.id === id);
         if (itemIdx !== -1) {
           manualTodos.splice(itemIdx, 1);
-
           await saveData();
         }
       }
@@ -2169,14 +2182,12 @@
         if (manualObj) {
           if (!manualObj.chatHistory) manualObj.chatHistory = [];
           manualObj.chatHistory.push({ date: getNow(), text: text });
-
         }
       } else if (praticaId) {
         const praticaObj = pratiche.find(item => item.id === praticaId);
         if (praticaObj) {
           if (!praticaObj.todoNotes) praticaObj.todoNotes = [];
           praticaObj.todoNotes.push({ date: getNow(), text: text });
-
         }
       }
 
@@ -2378,7 +2389,6 @@
       }
     }
 
-    // ============ GESTIONE REPARTI (STEPPER) ============
     function isStepLocked(p, idx) {
       const cur = p.currentStepIdx || 0;
       if (idx >= 6) return cur < 6 && !isEarlyStarted(p, idx);
@@ -2459,7 +2469,6 @@
 
       $('btnRequestEarly').style.display = 'none';
       $('earlyStartBox').innerHTML = '';
-      // Legal è all'indice 5
       if (idx >= 6 && curIdx === 5) {
         const already = (activeItem.earlyStart || []).includes(deptLabel);
         const asked = (activeItem.earlyRequests || []).includes(deptLabel);
@@ -2534,7 +2543,6 @@
 
     async function requestEarlyStart() {
       const p = activeItem;
-      // Legal è all'indice 5
       if (!p || selectedStepIdx === null || (p.currentStepIdx || 0) !== 5) return;
       const dept = ROUTE_STEPS[selectedStepIdx].label;
       if (!p.earlyRequests) p.earlyRequests = [];
@@ -2542,7 +2550,6 @@
       if (!p.mailDepts) p.mailDepts = [];
       if (!p.mailDepts.includes('Legal')) p.mailDepts.push('Legal');
       p.notesHistory.push({ date: getNow(), dept, text: `🙋 ${dept} chiede a Legal la partenza anticipata (contratto non ancora firmato: resterà fucsia finché Legal non approva).` });
-
       closeStepClickModal();
       await saveData();
     }
@@ -2553,9 +2560,8 @@
       if (!p.earlyStart) p.earlyStart = [];
       if (!p.earlyStart.includes(dept)) p.earlyStart.push(dept);
       p.earlyRequests = (p.earlyRequests || []).filter(d => d !== dept);
-      // La deroga attiva il reparto parallelo: non deve generare un indicatore di posta blu.
       if (!p.mailDepts) p.mailDepts = [];
-      p.mailDepts = p.mailDepts.filter(d => d !== dept);
+      if (!p.mailDepts.includes(dept)) p.mailDepts.push(dept);
       p.notesHistory.push({ date: getNow(), dept: 'Legal', text: `🚀 Legal consente la partenza anticipata a ${dept}: può lavorare ma resta fucsia finché Legal non approva (contratto da firmare).` });
       closeStepClickModal();
       await saveData();
@@ -2629,7 +2635,6 @@
       const note = $('sendBackNoteInput').value.trim();
 
       activeItem.currentStepIdx = targetStepIdx;
-      // Legal è all'indice 5
       if (targetStepIdx < 5) { activeItem.earlyStart = []; activeItem.earlyRequests = []; }
 
       if (targetStepIdx <= selectedStepIdx) {
@@ -2720,7 +2725,6 @@
       if ((activeItem.currentStepIdx || 0) < ROUTE_STEPS.length - 1) {
         activeItem.currentStepIdx = (activeItem.currentStepIdx || 0) + 1;
 
-        // Legal è all'indice 5, la fase parallela parte dall'indice 6
         if (activeItem.currentStepIdx === 6) {
           activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: `✅ Approvato Legal. Avviato in parallelo su Promo, PR e Logistics.` });
           activeItem.earlyStart = [];
@@ -2804,14 +2808,14 @@
       return `
         <div style="${boxStyle} padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; word-break: break-word;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 12px; color: var(--gold-light); font-weight: bold;">${o.pinned ? '📌 FISSATO · ' : ''}${o.dept ? esc(o.dept) + ' · ' : ''}${esc(o.date)}</span>
+            <span style="font-size: 12px; color: ${o.pinned ? '#fff' : 'var(--gold-light)'}; font-weight: bold;">${o.pinned ? '📌 FISSATO · ' : ''}${o.dept ? esc(o.dept) + ' · ' : ''}${esc(o.date)}</span>
             <div style="display: flex; gap: 8px; align-items: center;">
               <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.pinCall}">${o.pinned ? '📌 Stacca' : '📌 Fissa'}</button>
               <button type="button" class="btn-secondary-outline" style="padding: 2px 8px; font-size: 12px;" onclick="${o.editCall}">✏️ Modifica</button>
               <button type="button" aria-label="Elimina messaggio" onclick="${o.delCall}" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:16px; padding: 0 4px;" title="Elimina messaggio">✕</button>
             </div>
           </div>
-          <div class="chat-msg-text" style="color: #fff; line-height: 1.4;">${linkify(o.text)}</div>
+          <div class="chat-msg-text" style="color: #fff; line-height: 1.4;${o.pinned ? ' font-weight: 700;' : ''}">${linkify(o.text)}</div>
         </div>`;
     }
 
@@ -2923,6 +2927,7 @@
       $('formTitle').value = '';
       $('formDescription').value = '';
       $('formShowDate').value = '';
+      $('formShowDateEnd').value = '';
       $('formOwnerExt').value = '';
       $('formOwnerInt').value = '';
       $('newModal').classList.remove('hidden');
@@ -2937,6 +2942,7 @@
       $('editTitle').value = item.title || '';
       $('editDescription').value = item.description || '';
       $('editShowDate').value = item.showDate || '';
+      $('editShowDateEnd').value = item.showDateEnd || '';
       $('editOwnerExt').value = item.ownerExt || '';
       $('editOwnerInt').value = item.ownerInt || '';
       $('editModal').classList.remove('hidden');
@@ -2948,11 +2954,13 @@
       e.preventDefault();
       const id = $('editId').value;
       const item = pratiche.find(p => p.id === id);
+      if (!checkShowDates($('editShowDate').value.trim(), $('editShowDateEnd').value.trim())) return;
       if (item) {
         item.client = $('editClient').value;
         item.title = $('editTitle').value;
         item.description = $('editDescription').value.trim();
         item.showDate = $('editShowDate').value.trim();
+        item.showDateEnd = $('editShowDateEnd').value.trim();
         item.ownerExt = $('editOwnerExt').value.trim();
         item.ownerInt = $('editOwnerInt').value.trim();
         if (!item.notesHistory) item.notesHistory = [];
@@ -2964,12 +2972,14 @@
 
     async function savePratica(e) {
       e.preventDefault();
+      if (!checkShowDates($('formShowDate').value.trim(), $('formShowDateEnd').value.trim())) return;
       pratiche.unshift({
         id: 'p_' + Date.now(),
         title: $('formTitle').value,
         description: $('formDescription').value.trim(),
         client: $('formClient').value,
         showDate: $('formShowDate').value.trim(),
+        showDateEnd: $('formShowDateEnd').value.trim(),
         ownerExt: $('formOwnerExt').value.trim(),
         ownerInt: $('formOwnerInt').value.trim(),
         currentStepIdx: 0,
