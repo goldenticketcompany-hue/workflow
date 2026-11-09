@@ -539,6 +539,30 @@
     </div>
   </div>
 
+  <!-- MODAL MODIFICA TASK AUTOMATICO -->
+  <div class="modal-overlay hidden" id="editAutoTaskModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Modifica Task Automatico</div>
+        <button class="close-x" aria-label="Chiudi" onclick="closeEditAutoTaskModal()">✕</button>
+      </div>
+      <form onsubmit="saveEditedAutoTask(event)">
+        <input type="hidden" id="editAutoTaskPraticaId">
+        <input type="hidden" id="editAutoTaskTaskId">
+        <div class="form-group">
+          <label for="editAutoTaskData">Dati aggiuntivi / Note per il task</label>
+          <textarea id="editAutoTaskData" class="form-control" rows="3" placeholder="Inserisci dati o note specifiche..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Elenco azioni da fare (spunta quelle fatte)</label>
+          <div id="editAutoTaskChecklistEditor"></div>
+          <button type="button" class="btn-secondary-outline btn-sm" onclick="addChecklistRow('editAutoTaskChecklistEditor')">+ Aggiungi punto</button>
+        </div>
+        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Salva Modifiche</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL LINK UTILE -->
   <div class="modal-overlay hidden" id="linkModal">
     <div class="modal-card">
@@ -683,7 +707,6 @@
       { id: 'PR', label: 'PR' },
       { id: 'LogisticsFinal', label: 'Logistics', key: 'Logistics (finale)' }
     ];
-    // blocchi, stalli, avvisi e partenze anticipate si agganciano alla "chiave", non al nome mostrato
     const stepKey = s => s.key || s.label;
     const deptName = k => { const s = ROUTE_STEPS.find(x => stepKey(x) === k); return s ? s.label : k; };
 
@@ -703,7 +726,7 @@
     let definedFolders = ['Generale'];
     let openFoldersMap = {};
     let userPickedTab = false;
-    let todoReturnState = null;   // posizione nella To-Do prima di aprire un flusso
+    let todoReturnState = null;
     let linksError = '';
     let pendingSaves = 0;
 
@@ -713,7 +736,6 @@
       set(v) { activeItemId = v ? v.id : null; }
     });
 
-    // "09/03/2027" oppure "dal 09/03/2027 al 12/03/2027"
     function formatShowDates(p) {
       const a = formatDateIt((p && p.showDate) || ''), b = formatDateIt((p && p.showDateEnd) || '');
       if (a && b && b !== a) return `dal ${a} al ${b}`;
@@ -772,7 +794,7 @@
     }
 
     function attachLinkHelpers() {
-      ['formDescription', 'editDescription', 'todoAction', 'editTodoAction', 'todoChatNewText', 'quickChatTextInput', 'sendBackNoteInput', 'statusNoteInput', 'interveneNote', 'editChatText', 'linkDescInput'].forEach(id => {
+      ['formDescription', 'editDescription', 'todoAction', 'editTodoAction', 'todoChatNewText', 'quickChatTextInput', 'sendBackNoteInput', 'statusNoteInput', 'interveneNote', 'editChatText', 'linkDescInput', 'editAutoTaskData'].forEach(id => {
         const el = $(id);
         if (!el) return;
         const wrap = document.createElement('div');
@@ -804,7 +826,7 @@
       pratiche.forEach(p => {
         if (p.owner && !p.ownerExt && !p.ownerInt) p.ownerExt = p.owner;
         if (!p.notesHistory) p.notesHistory = [];
-        // la partenza anticipata riguarda solo il Logistics finale (le vecchie registrazioni dicevano solo "Logistics")
+        if (!p.autoTaskMeta) p.autoTaskMeta = {};
         p.earlyStart = (p.earlyStart || []).map(d => d === 'Logistics' ? 'Logistics (finale)' : d);
         p.earlyRequests = (p.earlyRequests || []).map(d => d === 'Logistics' ? 'Logistics (finale)' : d);
       });
@@ -1013,7 +1035,7 @@
         const y = todoReturnState.y;
         todoReturnState = null;
         updateView();
-        setTimeout(() => window.scrollTo({ top: y, behavior: 'auto' }), 50);   // torna al punto della lista in cui eri
+        setTimeout(() => window.scrollTo({ top: y, behavior: 'auto' }), 50);
         return;
       }
       updateView();
@@ -1114,6 +1136,7 @@
         isArchived: false,
         isExpanded: false,
         todoNotes: [],
+        autoTaskMeta: {},
         notesHistory: [{ date: '30/10 09:00', dept: 'Prospect', text: 'Creata nuova pratica.' }]
       }];
     }
@@ -1547,43 +1570,54 @@
       let autoTasks = [];
 
       pratiche.filter(p => !p.isArchived).forEach(p => {
+        if (!p.autoTaskMeta) p.autoTaskMeta = {};
         const stepIdx = p.currentStepIdx || 0;
         const currentDept = ROUTE_STEPS[stepIdx].label;
         if (!p.todoNotes) p.todoNotes = [];
         if (!p.approvedSteps) p.approvedSteps = [];
+
+        const addAutoTask = (baseObj) => {
+          const meta = (p.autoTaskMeta && p.autoTaskMeta[baseObj.id]) || { customData: '', checklist: [] };
+          autoTasks.push({
+            ...baseObj,
+            customData: meta.customData || '',
+            checklist: meta.checklist || []
+          });
+        };
+
         const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || p.ownerExt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
         if (stepIdx < 6) {
           (p.earlyStart || []).forEach(d => {
-            autoTasks.push({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: deptName(d), situation: `🚀 ${deptName(d)} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
+            addAutoTask({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: deptName(d), situation: `🚀 ${deptName(d)} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
           });
         }
 
         if (p.statusMessages && p.statusMessages.length > 0) {
           p.statusMessages.forEach(st => {
-            autoTasks.push({ ...base, id: 'st_auto_' + st.id, dept: deptName(st.dept), situation: `🟣 ${deptName(st.dept)} - IN ATTESA`, action: `Motivo: ${st.text}` });
+            addAutoTask({ ...base, id: 'st_auto_' + st.id, dept: deptName(st.dept), situation: `🟣 ${deptName(st.dept)} - IN ATTESA`, action: `Motivo: ${st.text}` });
           });
         }
 
         if (p.mailDepts && p.mailDepts.length > 0) {
           p.mailDepts.forEach(dept => {
-            autoTasks.push({ ...base, id: 'mail_auto_' + dept + '_' + p.id, dept: deptName(dept), situation: `✉️ ${deptName(dept)} - POSTA IN ARRIVO`, action: `Nuovo messaggio o comunicazione ricevuta in chat.`, mailDeptName: dept });
+            addAutoTask({ ...base, id: 'mail_auto_' + dept + '_' + p.id, dept: deptName(dept), situation: `✉️ ${deptName(dept)} - POSTA IN ARRIVO`, action: `Nuovo messaggio o comunicazione ricevuta in chat.`, mailDeptName: dept });
           });
         }
 
         if (p.alertsList && p.alertsList.length > 0) {
           p.alertsList.forEach(al => {
             const isReject = al.type === 'REJECT';
-            autoTasks.push({ ...base, id: 'al_auto_' + al.id, dept: deptName(al.target), situation: isReject ? `❌ ${deptName(al.target)} - BLOCCATO` : `⚠️ ${deptName(al.target)} - DA: ${deptName(al.sender)}`, action: `Nota: ${al.text}` });
+            addAutoTask({ ...base, id: 'al_auto_' + al.id, dept: deptName(al.target), situation: isReject ? `❌ ${deptName(al.target)} - BLOCCATO` : `⚠️ ${deptName(al.target)} - DA: ${deptName(al.sender)}`, action: `Nota: ${al.text}` });
           });
         }
 
         if ((!p.statusMessages || p.statusMessages.length === 0) && (!p.alertsList || p.alertsList.length === 0) && (!p.mailDepts || p.mailDepts.length === 0)) {
           if (stepIdx >= 6) {
-            if (!p.approvedSteps.includes(6)) autoTasks.push({ ...base, id: 'wait_auto_promo_' + p.id, dept: 'Promo', situation: `⏳ Promo - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Promo.` });
-            if (!p.approvedSteps.includes(7)) autoTasks.push({ ...base, id: 'wait_auto_pr_' + p.id, dept: 'PR', situation: `⏳ PR - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da PR.` });
-            if (!p.approvedSteps.includes(8)) autoTasks.push({ ...base, id: 'wait_auto_log_' + p.id, dept: 'Logistics', situation: `⏳ Logistics - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Logistics.` });
+            if (!p.approvedSteps.includes(6)) addAutoTask({ ...base, id: 'wait_auto_promo_' + p.id, dept: 'Promo', situation: `⏳ Promo - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Promo.` });
+            if (!p.approvedSteps.includes(7)) addAutoTask({ ...base, id: 'wait_auto_pr_' + p.id, dept: 'PR', situation: `⏳ PR - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da PR.` });
+            if (!p.approvedSteps.includes(8)) addAutoTask({ ...base, id: 'wait_auto_log_' + p.id, dept: 'Logistics', situation: `⏳ Logistics - IN ATTESA (parallelo)`, action: `In attesa di conferma ESEGUITO da Logistics.` });
           } else {
-            autoTasks.push({ ...base, id: 'wait_auto_' + p.id, dept: currentDept, situation: `⏳ ${currentDept} - IN ATTESA`, action: `Pratica ferma in attesa di approvazione o avanzamento.` });
+            addAutoTask({ ...base, id: 'wait_auto_' + p.id, dept: currentDept, situation: `⏳ ${currentDept} - IN ATTESA`, action: `Pratica ferma in attesa di approvazione o avanzamento.` });
           }
         }
       });
@@ -1604,7 +1638,7 @@
       let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
 
       const filteredTasks = allTasks.filter(t => {
-        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.customData || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
         if (!matchSearch) return false;
 
         if (filterDept !== 'ALL') {
@@ -1657,19 +1691,25 @@
 
         const originalActionText = t.actionOriginal || t.action || '';
         let displayContentHTML = `<div class="todo-text-block" style="color: #fff; line-height: 1.4; margin-bottom: 6px;">${linkify(originalActionText)}</div>`;
-        let collapsedHTML = '';
-        const isExp = !t.isManual || !!t.isExpanded;
-        if (t.isManual && t.checklist && t.checklist.length > 0) {
-          collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Passaggi: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completati</div>`;
+        
+        if (t.customData) {
+          displayContentHTML += `<div class="todo-text-block" style="color: var(--gold-light); background: rgba(214,158,46,0.1); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 6px;">📋 <strong>Dati aggiuntivi:</strong><br>${linkify(t.customData)}</div>`;
         }
 
-        if (t.isManual && t.checklist && t.checklist.length > 0) {
+        let collapsedHTML = '';
+        const isExp = !t.isManual || !!t.isExpanded;
+        if (t.checklist && t.checklist.length > 0) {
+          collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Azioni: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completate</div>`;
+        }
+
+        if (t.checklist && t.checklist.length > 0) {
           const doneCount = t.checklist.filter(c => c.done).length;
           const rows = t.checklist.map((c, i) => {
             const cid = String(c.id).replace(/['"\\]/g, '');
-            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="toggleChecklistItem('${safeId}', '${cid}')"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
+            const checkFn = t.isManual ? `toggleChecklistItem('${safeId}', '${cid}')` : `toggleAutoTaskChecklistItem('${t.praticaId}', '${safeId}', '${cid}')`;
+            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="${checkFn}"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
           }).join('');
-          displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Passaggi (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
+          displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Azioni (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
         }
 
         const delFnFor = (idx) => t.isManual ? `deleteTodoMsgDirect('${safeId}', ${idx})` : `deletePraticaTodoMsgDirect('${t.praticaId}', ${idx})`;
@@ -1727,10 +1767,12 @@
               ${gotoFlussoBtnHTML}
               <button type="button" class="btn-solve-sm" onclick="${chatButtonOnClick}">💬 Chat</button>
               <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" title="${t.pinnedTask ? 'Stacca dall\'alto' : 'Fissa in alto'}" onclick="${t.isManual ? `toggleTaskPin('${safeId}')` : `toggleAutoTaskPin('${t.praticaId}')`}">${t.pinnedTask ? '📌 Stacca' : '📌 Fissa'}</button>
-              ${t.isManual && isExp ? `
+              ${t.isManual ? `
                 <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditTodoModal('${safeId}')">✏️</button>
                 <button type="button" aria-label="Elimina task" onclick="confirmDeleteManualTodo('${safeId}')" style="background:transparent; border:none; color:#fc8181; cursor:pointer; font-size:20px; padding: 4px 8px;" title="Elimina task">✕</button>
-              ` : ''}
+              ` : `
+                <button type="button" class="btn-secondary-outline btn-sm" style="padding: 6px 10px; font-size: 12px;" aria-label="Modifica task" onclick="openEditAutoTaskModal('${t.praticaId}', '${safeId}')">✏️</button>
+              `}
             </div>
           </div>
         `;
@@ -2336,6 +2378,46 @@
       const it = task.checklist.find(c => c.id === itemId);
       if (!it) return;
       it.done = !it.done;
+      await saveData();
+    }
+
+    async function toggleAutoTaskChecklistItem(praticaId, taskId, checklistItemId) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p || !p.autoTaskMeta || !p.autoTaskMeta[taskId] || !p.autoTaskMeta[taskId].checklist) return;
+      const it = p.autoTaskMeta[taskId].checklist.find(c => c.id === checklistItemId);
+      if (!it) return;
+      it.done = !it.done;
+      await saveData();
+    }
+
+    function openEditAutoTaskModal(praticaId, taskId) {
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p) return;
+      if (!p.autoTaskMeta) p.autoTaskMeta = {};
+      const meta = p.autoTaskMeta[taskId] || { customData: '', checklist: [] };
+      $('editAutoTaskPraticaId').value = praticaId;
+      $('editAutoTaskTaskId').value = taskId;
+      $('editAutoTaskData').value = meta.customData || '';
+      fillChecklist('editAutoTaskChecklistEditor', meta.checklist);
+      $('editAutoTaskModal').classList.remove('hidden');
+    }
+
+    function closeEditAutoTaskModal() {
+      $('editAutoTaskModal').classList.add('hidden');
+    }
+
+    async function saveEditedAutoTask(e) {
+      e.preventDefault();
+      const praticaId = $('editAutoTaskPraticaId').value;
+      const taskId = $('editAutoTaskTaskId').value;
+      const p = pratiche.find(x => x.id === praticaId);
+      if (!p) return;
+      if (!p.autoTaskMeta) p.autoTaskMeta = {};
+      p.autoTaskMeta[taskId] = {
+        customData: $('editAutoTaskData').value.trim(),
+        checklist: readChecklist('editAutoTaskChecklistEditor')
+      };
+      closeEditAutoTaskModal();
       await saveData();
     }
 
@@ -3016,6 +3098,7 @@
         isArchived: false,
         isExpanded: true,
         todoNotes: [],
+        autoTaskMeta: {},
         notesHistory: [{ date: getNow(), dept: 'Prospect', text: 'Creata nuova pratica.' }]
       });
 
