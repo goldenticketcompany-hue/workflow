@@ -54,7 +54,9 @@
     .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; flex-shrink: 0; }
     .step-item:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; border-radius: 8px; }
     .step-item.step-locked { opacity: 0.5; }
-    .cl-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .cl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .cl-row .cl-assignee { flex: 1 1 calc(100% - 32px); width: auto; margin-left: 32px; font-size: 14px; padding: 8px 10px; }
+    .cl-assignee-badge { margin-left: 8px; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px; background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #2563eb; white-space: nowrap; display: inline-block; }
     .cl-num { min-width: 24px; color: var(--gold-light); font-weight: bold; }
     .cl-row input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--success-green); }
     .cl-row .cl-text { flex: 1; min-width: 0; width: auto; }
@@ -127,6 +129,7 @@
 </head>
 <body>
 
+  <datalist id="assigneeSuggestions"></datalist>
   <div id="dataBanner" role="alert"></div>
   <div id="toast" role="status"></div>
   <button id="backToTodoBtn" onclick="switchTab('todo')" style="display:none;">↩️ Torna ai task</button>
@@ -1226,10 +1229,17 @@
       };
 
       manualTodos.forEach(t => addName(t.assignee));
-      pratiche.filter(p => !p.isArchived).forEach(p => { addName(p.ownerInt); });
+      manualTodos.forEach(t => (t.checklist || []).forEach(c => addName(c.assignee)));
+      pratiche.filter(p => !p.isArchived).forEach(p => {
+        addName(p.ownerInt);
+        Object.values(p.autoTaskMeta || {}).forEach(m => ((m && m.checklist) || []).forEach(c => addName(c.assignee)));
+      });
 
       select.innerHTML = '<option value="ALL">👤 Tutti i Responsabili Interni</option>';
-      Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' })).forEach(name => {
+      const sortedNames = Array.from(assigneesMap.values()).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+      const dl = $('assigneeSuggestions');
+      if (dl) { dl.innerHTML = ''; sortedNames.forEach(n => { const o = document.createElement('option'); o.value = n; dl.appendChild(o); }); }
+      sortedNames.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.innerText = '👤 ' + name;
@@ -1652,7 +1662,7 @@
       let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
 
       const filteredTasks = allTasks.filter(t => {
-        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.customData || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search));
+        const matchSearch = (t.title || '').toLowerCase().includes(search) || (t.actionOriginal || t.action || '').toLowerCase().includes(search) || (t.situation || '').toLowerCase().includes(search) || (t.assignee || '').toLowerCase().includes(search) || (t.deadline || '').toLowerCase().includes(search) || (t.customData || '').toLowerCase().includes(search) || (t.checklist || []).some(c => (c.text || '').toLowerCase().includes(search) || (c.assignee || '').toLowerCase().includes(search));
         if (!matchSearch) return false;
 
         if (filterDept !== 'ALL') {
@@ -1663,7 +1673,10 @@
         }
 
         if (filterAssignee !== 'ALL') {
-          if ((t.assignee || '').toLowerCase().trim() !== filterAssignee.toLowerCase().trim()) return false;
+          const fa = filterAssignee.toLowerCase().trim();
+          const isTaskResp = (t.assignee || '').toLowerCase().trim() === fa;
+          const isItemResp = (t.checklist || []).some(c => (c.assignee || '').toLowerCase().trim() === fa);
+          if (!isTaskResp && !isItemResp) return false;
         }
         return true;
       });
@@ -1714,6 +1727,10 @@
         const isExp = !t.isManual || !!t.isExpanded;
         if (t.checklist && t.checklist.length > 0) {
           collapsedHTML += `<div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin: 4px 0;">📝 Azioni: ${t.checklist.filter(c => c.done).length}/${t.checklist.length} completate</div>`;
+          const asgCount = {};
+          t.checklist.forEach(c => { if (c.assignee) asgCount[c.assignee] = (asgCount[c.assignee] || 0) + 1; });
+          const asgTxt = Object.entries(asgCount).map(([n, k]) => `${esc(n)} (${k})`).join(', ');
+          if (asgTxt) collapsedHTML += `<div style="font-size: 12px; color: #93c5fd; font-weight: bold; margin: 2px 0;">👤 Responsabili delle azioni: ${asgTxt}</div>`;
         }
 
         if (t.checklist && t.checklist.length > 0) {
@@ -1721,7 +1738,8 @@
           const rows = t.checklist.map((c, i) => {
             const cid = String(c.id).replace(/['"\\]/g, '');
             const checkFn = t.isManual ? `toggleChecklistItem('${safeId}', '${cid}')` : `toggleAutoTaskChecklistItem('${t.praticaId}', '${safeId}', '${cid}')`;
-            return `<div class="cl-view ${c.done ? 'done-view' : ''}"><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="${checkFn}"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}</span></div>`;
+            const mine = filterAssignee !== 'ALL' && (c.assignee || '').toLowerCase().trim() === filterAssignee.toLowerCase().trim();
+            return `<div class="cl-view ${c.done ? 'done-view' : ''}"${mine ? ' style="background: rgba(59,130,246,0.15); border-radius: 6px; padding-left: 4px;"' : ''}><input type="checkbox" ${c.done ? 'checked' : ''} aria-label="Segna come fatto" onchange="${checkFn}"><span class="cl-view-num">${i + 1}.</span><span class="todo-text-block">${linkify(c.text)}${c.assignee ? `<span class="cl-assignee-badge">👤 ${esc(c.assignee)}</span>` : ''}</span></div>`;
           }).join('');
           displayContentHTML += `<div style="margin: 8px 0; background: rgba(214, 158, 46, 0.08); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 10px;"><div style="font-size: 12px; color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">📝 Azioni (${doneCount}/${t.checklist.length})</div>${rows}</div>`;
         }
@@ -2304,9 +2322,12 @@
         <input type="text" class="form-control cl-text" aria-label="Testo del punto" placeholder="Es. Telefonare per l'approvazione...">
         <button type="button" class="cl-move-btn cl-up" aria-label="Sposta su">⬆</button>
         <button type="button" class="cl-move-btn cl-down" aria-label="Sposta giù">⬇</button>
-        <button type="button" class="cl-del" aria-label="Elimina punto">✕</button>`;
+        <button type="button" class="cl-del" aria-label="Elimina punto">✕</button>
+        <input type="text" class="form-control cl-assignee" list="assigneeSuggestions" autocomplete="off" aria-label="Responsabile di questo punto (opzionale)" placeholder="👤 Responsabile di questo punto (opzionale)">`;
       row.querySelector('.cl-done').checked = !!(item && item.done);
       row.querySelector('.cl-text').value = item ? (item.text || '') : '';
+      row.querySelector('.cl-assignee').value = item ? (item.assignee || '') : '';
+      row.querySelector('.cl-assignee').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
       row.querySelector('.cl-del').onclick = () => { row.remove(); renumberChecklist(containerId); };
       row.querySelector('.cl-up').onclick = () => { if (row.previousElementSibling) { c.insertBefore(row, row.previousElementSibling); renumberChecklist(containerId); } };
       row.querySelector('.cl-down').onclick = () => { if (row.nextElementSibling) { c.insertBefore(row.nextElementSibling, row); renumberChecklist(containerId); } };
@@ -2325,7 +2346,7 @@
 
     function readChecklist(containerId) {
       return [...$(containerId).querySelectorAll('.cl-row')]
-        .map(r => ({ id: r.dataset.id, text: r.querySelector('.cl-text').value.trim(), done: r.querySelector('.cl-done').checked }))
+        .map(r => ({ id: r.dataset.id, text: r.querySelector('.cl-text').value.trim(), done: r.querySelector('.cl-done').checked, assignee: r.querySelector('.cl-assignee').value.trim() }))
         .filter(x => x.text);
     }
 
