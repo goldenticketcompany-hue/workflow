@@ -159,7 +159,10 @@
           </div>
           <div class="form-group">
             <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" required style="flex: 1; min-width: 0;">
+              <button type="button" id="btnTogglePwd" class="btn-secondary-outline btn-sm" onclick="togglePasswordVisibility()" aria-label="Mostra password" aria-pressed="false" style="white-space: nowrap;">👁 Mostra</button>
+            </div>
           </div>
           <div id="loginError" role="alert" style="display:none; color:#fc8181; font-size:14px; font-weight:bold; margin-bottom:12px;"></div>
           <button type="submit" class="btn-gold" id="loginSubmit" style="width:100%;">Accedi</button>
@@ -1041,6 +1044,15 @@
       updateView();
     }
 
+    function togglePasswordVisibility() {
+      const inp = $('loginPassword'), btn = $('btnTogglePwd');
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈 Nascondi' : '👁 Mostra';
+      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+      btn.setAttribute('aria-label', show ? 'Nascondi password' : 'Mostra password');
+    }
+
     async function doLogin(e) {
       e.preventDefault();
       const err = $('loginError');
@@ -1057,6 +1069,7 @@
       }
       lsSet('gt_login_email', $('loginEmail').value.trim());
       $('loginPassword').value = '';
+      if ($('loginPassword').type === 'text') togglePasswordVisibility();
     }
 
     function onAuthButton() {
@@ -1289,7 +1302,7 @@
         const warnedTargets = p.alertsList.filter(a => a.type === 'WARN').map(a => a.target);
         const statusDepts = p.statusMessages.map(st => st.dept);
 
-        const isFullyDone = p.approvedSteps.includes(6) && p.approvedSteps.includes(7) && p.approvedSteps.includes(8);
+        const isFullyDone = stepIdx >= 6 && p.approvedSteps.includes(6) && p.approvedSteps.includes(7) && p.approvedSteps.includes(8);
 
         let stepperHTML = ROUTE_STEPS.map((s, idx) => {
           let cls = 'step-circle';
@@ -1364,9 +1377,10 @@
         });
         if (stepIdx < 6) {
           (p.earlyStart || []).forEach(d => {
+            const doneEarly = (p.approvedSteps || []).includes(ROUTE_STEPS.findIndex(x => stepKey(x) === d));
             bannersHTML += `
               <div class="alert-banner alert-status">
-                <span style="flex: 1;">🚀 <strong>${esc(deptName(d))}</strong> in partenza anticipata: resta fucsia finché Legal non approva</span>
+                <span style="flex: 1;">${doneEarly ? '✅' : '🚀'} <strong>${esc(deptName(d))}</strong> ${doneEarly ? 'ha completato (ESEGUITO) in partenza anticipata: il flusso resta su Legal in attesa della sua approvazione' : 'in partenza anticipata: può lavorare e confermare ESEGUITO, il flusso resta su Legal'}</span>
                 ${stepIdx === 5 ? `<button type="button" class="btn-solve-sm" style="background:#6b21a8;" onclick="revokeEarlyStart('${p.id}', '${esc(d)}')">⏹ Revoca</button>` : ''}
               </div>`;
           });
@@ -1587,6 +1601,7 @@
         const base = { praticaId: p.id, title: `${p.client} - ${p.title}`, assignee: p.ownerInt || p.ownerExt || '', deadline: p.showDate || '', isManual: false, todoNotes: p.todoNotes, pinnedTask: !!p.todoPinned };
         if (stepIdx < 6) {
           (p.earlyStart || []).forEach(d => {
+            if ((p.approvedSteps || []).includes(ROUTE_STEPS.findIndex(x => stepKey(x) === d))) return;
             addAutoTask({ ...base, id: 'early_auto_' + d + '_' + p.id, dept: deptName(d), situation: `🚀 ${deptName(d)} - PARTENZA ANTICIPATA (attesa firma contratto)`, action: `Autorizzato da Legal a partire in anticipo. Resta fucsia finché Legal non approva.` });
           });
         }
@@ -2544,7 +2559,7 @@
 
       const curIdx = activeItem.currentStepIdx || 0;
       const curLabel = ROUTE_STEPS[curIdx].label;
-      const inParallel = curIdx >= 6 && idx >= 6;
+      const inParallel = idx >= 6 && (curIdx >= 6 || isEarlyStarted(activeItem, idx));
       $('btnGoCurrent').style.display = 'none';
       $('btnResolveDept').style.display = stepHasMarker(activeItem, deptKey) ? 'block' : 'none';
       $('btnUndoAdvance').style.display = (idx < 6 && (activeItem.approvedSteps || []).includes(idx) && curIdx > idx) ? 'block' : 'none';
@@ -2558,7 +2573,7 @@
         }
       }
 
-      if (activeItem.currentStepIdx >= 6 && (idx >= 6)) {
+      if (idx >= 6 && (activeItem.currentStepIdx >= 6 || isEarlyStarted(activeItem, idx))) {
         const isAlreadyDone = activeItem.approvedSteps && activeItem.approvedSteps.includes(idx);
         btnExecuteFinal.style.display = 'block';
         btnExecuteFinal.innerText = isAlreadyDone ? `↩️ Annulla Eseguito (${deptLabel})` : `✅ ESEGUITO (${deptLabel})`;
@@ -2586,7 +2601,7 @@
         }
       }
       if (idx >= 6 && curIdx < 6 && isEarlyStarted(activeItem, idx)) {
-        $('stepClickSub').innerText = `🚀 Partenza anticipata consentita da Legal: puoi lavorare, ma il reparto resta fucsia finché Legal non approva (contratto da firmare).`;
+        $('stepClickSub').innerText = `🚀 Partenza anticipata consentita da Legal: puoi lavorare e premere ESEGUITO quando hai completato. Il flusso resta su Legal finché Legal non approva (contratto da firmare).`;
       }
       if (idx === 5 && curIdx === 5) {
         $('earlyStartBox').innerHTML = ['Promo', 'PR', 'Logistics (finale)'].map(d => {
