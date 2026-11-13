@@ -76,6 +76,11 @@
     #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: 90vw; background: #1c0507; color: var(--gold-light); border: 2px solid var(--gold-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 2000; display: none; text-align: center; }
     .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; background: #3a0d12; color: var(--text-muted); border: 2px solid var(--border-color); }
     .step-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; font-weight: bold; white-space: nowrap; }
+    .step-item { position: relative; }
+    .step-note { width: 76px; max-width: 76px; margin-top: 4px; color: #f6e05e; font-size: 9px; line-height: 1.15; text-align: center; white-space: normal; overflow-wrap: anywhere; }
+    .step-mail-badge { position: absolute; top: -5px; right: -8px; z-index: 3; border: 1px solid #93c5fd; background: #1d4ed8; color: #fff; border-radius: 10px; padding: 1px 4px; font-size: 12px; line-height: 1.2; cursor: pointer; }
+    .dept-private-msg { padding:10px 12px; border:1px solid var(--border-color); border-radius:9px; margin-bottom:8px; background:#1c0507; }
+    .dept-private-msg.unread { border:2px solid var(--gold-light); background:#302006; font-weight:800; }
 
     .step-circle.done { background: var(--success-green) !important; color: #fff !important; border: none !important; }
     .step-circle.current-fuchsia { background: var(--status-fuchsia) !important; color: #fff !important; border: 2.5px solid #f472b6 !important; }
@@ -277,28 +282,49 @@
         <button class="btn-sm stepact" id="btnSendBack" style="background: var(--warning-amber);" onclick="openSendBackModal()">↩️ Rimanda Indietro o a un Altro Reparto</button>
         <button class="btn-sm stepact" id="btnBlock" style="background: var(--danger-red);" onclick="openInterveneFromStepClick()">❌ Blocca / Annulla</button>
         <button class="btn-sm stepact" style="background: #2563eb;" onclick="openQuickChatFromStep()">💬 Scrivi in chat</button>
+        <button class="btn-sm stepact" style="background: #7c3aed;" onclick="openDepartmentChatFromStep()">✉️ Chat con reparti</button>
+        <div style="border-top:1px solid var(--border-color); margin-top:8px; padding-top:14px;">
+          <label for="deptShortNoteInput" style="display:block; color:var(--gold-light); font-size:13px; font-weight:bold; margin-bottom:6px;">Breve messaggio sotto il pallino (max 55 caratteri)</label>
+          <input id="deptShortNoteInput" class="form-control" maxlength="55" placeholder="Es. In attesa di conferma...">
+          <div style="text-align:right; margin-top:8px;"><button type="button" class="btn-secondary-outline btn-sm" onclick="saveDepartmentShortNote()">Salva messaggio breve</button></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL SCRIVI IN CHAT DA PALLINO -->
+  <!-- MODAL CHAT REPARTO: CHAT COMUNE E COMUNICAZIONI PRIVATE -->
   <div class="modal-overlay hidden" id="quickChatModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="quickChatModalTitle">Scrivi in chat</div>
+        <div class="modal-title" id="quickChatModalTitle">Comunicazioni reparto</div>
         <button class="close-x" aria-label="Chiudi" onclick="closeQuickChatModal()">✕</button>
       </div>
-      <form onsubmit="saveQuickChatFromStep(event)">
-        <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); margin-bottom: 14px;">
-          <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
-          <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+      <div id="quickCommonPanel">
+        <form onsubmit="saveQuickChatFromStep(event)">
+          <div class="form-group" style="background: rgba(214, 158, 46, 0.1); padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); margin-bottom: 14px;">
+            <div style="font-size: 13px; color: var(--text-muted);">Mittente automatico:</div>
+            <div style="font-size: 16px; font-weight: bold; color: var(--gold-light);" id="quickChatSenderLabel">...</div>
+          </div>
+          <div class="form-group">
+            <label for="quickChatTextInput">Testo del messaggio (visibile a tutti nella chat della pratica) *</label>
+            <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+          </div>
+          <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Invia Messaggio in Chat</button></div>
+        </form>
+      </div>
+      <div id="quickPrivatePanel" style="display:none;">
+        <div class="form-group">
+          <label for="privateDeptTarget">Invia al reparto</label>
+          <select id="privateDeptTarget" class="form-control"></select>
         </div>
         <div class="form-group">
-          <label for="quickChatTextInput">Testo del messaggio (Visibile a tutti nel task principale) *</label>
-          <textarea id="quickChatTextInput" class="form-control" rows="4" required placeholder="Scrivi qui il messaggio..."></textarea>
+          <label for="privateDeptText">Messaggio privato *</label>
+          <textarea id="privateDeptText" class="form-control" rows="3" maxlength="1000" placeholder="Scrivi una comunicazione per il reparto selezionato..."></textarea>
         </div>
-        <div style="text-align: right; margin-top: 18px;"><button type="submit" class="btn-gold">Invia Messaggio in Chat</button></div>
-      </form>
+        <div style="text-align:right; margin-bottom:16px;"><button type="button" class="btn-gold" onclick="sendDepartmentMessage()">✉️ Invia al reparto</button></div>
+        <div style="font-weight:bold; color:var(--gold-light); margin-bottom:10px;">Conversazione privata tra i reparti</div>
+        <div id="departmentMessagesList" style="max-height:320px; overflow-y:auto;"></div>
+      </div>
     </div>
   </div>
 
@@ -833,6 +859,8 @@
         if (p.owner && !p.ownerExt && !p.ownerInt) p.ownerExt = p.owner;
         if (!p.notesHistory) p.notesHistory = [];
         if (!p.autoTaskMeta) p.autoTaskMeta = {};
+        if (!p.deptNotes) p.deptNotes = {};
+        if (!p.departmentMessages) p.departmentMessages = [];
         p.earlyStart = (p.earlyStart || []).map(d => d === 'Logistics' ? 'Logistics (finale)' : d);
         p.earlyRequests = (p.earlyRequests || []).map(d => d === 'Logistics' ? 'Logistics (finale)' : d);
       });
@@ -1304,6 +1332,8 @@
         if (!p.alertsList) p.alertsList = [];
         if (!p.approvedSteps) p.approvedSteps = [];
         if (!p.mailDepts) p.mailDepts = [];
+        if (!p.deptNotes) p.deptNotes = {};
+        if (!p.departmentMessages) p.departmentMessages = [];
 
         const stepIdx = p.currentStepIdx || 0;
         const currentDeptLabel = ROUTE_STEPS[stepIdx].label;
@@ -1333,7 +1363,9 @@
           return `
             <div class="step-item${isStepLocked(p, idx) && !stepHasMarker(p, stepKey(s)) ? ' step-locked' : ''}" role="button" tabindex="0" aria-label="Gestisci reparto ${esc(s.label)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="openStepClickModal('${p.id}', ${idx})">
               <div class="${cls}">${symbol}</div>
+              ${(p.departmentMessages || []).some(m => m.to === stepKey(s) && !m.read) ? `<span class="step-mail-badge" title="Comunicazione non letta: clicca per aprire" onclick="event.stopPropagation();openDepartmentInbox('${p.id}', ${idx})">✉</span>` : ''}
               <div class="step-label">${esc(s.label)}</div>
+              ${(p.deptNotes && p.deptNotes[stepKey(s)]) ? `<div class="step-note">${esc(p.deptNotes[stepKey(s)])}</div>` : ''}
             </div>
           `;
         }).join('');
@@ -1594,6 +1626,8 @@
 
       pratiche.filter(p => !p.isArchived).forEach(p => {
         if (!p.autoTaskMeta) p.autoTaskMeta = {};
+        if (!p.deptNotes) p.deptNotes = {};
+        if (!p.departmentMessages) p.departmentMessages = [];
         const stepIdx = p.currentStepIdx || 0;
         const currentDept = ROUTE_STEPS[stepIdx].label;
         if (!p.todoNotes) p.todoNotes = [];
@@ -2568,6 +2602,7 @@
         saveData();
       }
 
+      $('deptShortNoteInput').value = (activeItem.deptNotes && activeItem.deptNotes[deptKey]) || '';
       $('stepClickTitle').innerText = `Gestione: "${deptLabel}"`;
       $('stepClickSub').innerText = `Seleziona l'azione da eseguire per questo reparto:`;
 
@@ -2720,14 +2755,151 @@
     function closeStepClickModal() { $('stepClickModal').classList.add('hidden'); }
 
     function openQuickChatFromStep() {
-      closeStepClickModal();
       if (!activeItem || selectedStepIdx === null) return;
+      closeStepClickModal();
+      $('quickChatModalTitle').innerText = 'Scrivi in chat';
       $('quickChatSenderLabel').innerText = ROUTE_STEPS[selectedStepIdx].label;
       $('quickChatTextInput').value = '';
+      $('quickCommonPanel').style.display = 'block';
+      $('quickPrivatePanel').style.display = 'none';
       $('quickChatModal').classList.remove('hidden');
     }
 
+    function openDepartmentChatFromStep() {
+      if (!activeItem || selectedStepIdx === null) return;
+      closeStepClickModal();
+      $('quickChatModalTitle').innerText = 'Chat con reparti';
+      $('quickChatSenderLabel').innerText = ROUTE_STEPS[selectedStepIdx].label;
+      $('privateDeptText').value = '';
+      populatePrivateDeptTargets();
+      $('quickCommonPanel').style.display = 'none';
+      $('quickPrivatePanel').style.display = 'block';
+      $('quickChatModal').classList.remove('hidden');
+      renderDepartmentMessages(true);
+    }
+
     function closeQuickChatModal() { $('quickChatModal').classList.add('hidden'); }
+
+    function populatePrivateDeptTargets() {
+      const select = $('privateDeptTarget');
+      if (!select || selectedStepIdx === null) return;
+      const senderKey = stepKey(ROUTE_STEPS[selectedStepIdx]);
+      select.innerHTML = ROUTE_STEPS.map(st => ({ key: stepKey(st), label: st.key === 'Logistics (finale)' ? 'Logistics (finale)' : st.label }))
+        .filter(st => st.key !== senderKey)
+        .map(st => `<option value="${esc(st.key)}">${esc(st.label)}</option>`).join('');
+    }
+
+    function switchQuickChatTab(tab) {
+      const isPrivate = tab === 'private';
+      $('quickChatModalTitle').innerText = isPrivate ? 'Chat con reparti' : 'Scrivi in chat';
+      $('quickCommonPanel').style.display = isPrivate ? 'none' : 'block';
+      $('quickPrivatePanel').style.display = isPrivate ? 'block' : 'none';
+      if (isPrivate) {
+        populatePrivateDeptTargets();
+        renderDepartmentMessages(true);
+      }
+    }
+
+    function openDepartmentInbox(id, idx) {
+      activeItem = pratiche.find(p => p.id === id);
+      if (!activeItem) return;
+      selectedStepIdx = idx;
+      $('quickChatSenderLabel').innerText = ROUTE_STEPS[idx].label;
+      $('quickChatTextInput').value = '';
+      populatePrivateDeptTargets();
+      $('quickChatModalTitle').innerText = 'Chat con reparti';
+      $('quickCommonPanel').style.display = 'none';
+      $('quickPrivatePanel').style.display = 'block';
+      $('quickChatModal').classList.remove('hidden');
+      renderDepartmentMessages(true);
+    }
+
+    function renderDepartmentMessages(markRead = false) {
+      const box = $('departmentMessagesList');
+      if (!box || !activeItem || selectedStepIdx === null) return;
+      const deptKey = stepKey(ROUTE_STEPS[selectedStepIdx]);
+      if (!activeItem.departmentMessages) activeItem.departmentMessages = [];
+      const unreadIds = new Set(activeItem.departmentMessages.filter(m => m.to === deptKey && !m.read).map(m => m.id));
+      let changedReadState = false;
+      const messages = activeItem.departmentMessages.filter(m => m.from === deptKey || m.to === deptKey);
+      if (!messages.length) {
+        box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px;">Nessuna comunicazione privata per questo reparto.</div>';
+      } else {
+        box.innerHTML = messages.map(m => {
+          const incoming = m.to === deptKey;
+          const unread = incoming && unreadIds.has(m.id);
+          const other = incoming ? m.fromLabel : m.toLabel;
+          return `<div class="dept-private-msg${unread ? ' unread' : ''}">
+            <div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; color:var(--gold-light); font-size:12px; margin-bottom:5px;">
+              <strong>${incoming ? 'Da' : 'A'} ${esc(other || m.from || m.to)}</strong><span>${esc(m.date || '')}</span>
+            </div><div style="white-space:pre-wrap; overflow-wrap:anywhere;">${esc(m.text)}</div>
+            ${unread ? '<div style="color:var(--gold-light); font-size:11px; margin-top:5px;">● NUOVO · non letto</div>' : ''}
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+              <button type="button" class="btn-secondary-outline btn-sm" onclick="editDepartmentMessage('${esc(m.id)}')">✏️ Modifica</button>
+              <button type="button" class="btn-sm" style="background:var(--danger-red);" onclick="deleteDepartmentMessage('${esc(m.id)}')">🗑️ Elimina</button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      const unreadCount = activeItem.departmentMessages.filter(m => m.to === deptKey && !m.read).length;
+      $('privateUnreadCount').textContent = unreadCount ? `(${unreadCount})` : '';
+      if (markRead && unreadCount) {
+        activeItem.departmentMessages.forEach(m => { if (m.to === deptKey && !m.read) { m.read = true; changedReadState = true; } });
+      }
+      if (changedReadState) saveData();
+    }
+
+    async function sendDepartmentMessage() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const text = $('privateDeptText').value.trim();
+      const target = $('privateDeptTarget').value;
+      if (!text || !target) { alert('Scrivi un messaggio e seleziona il reparto destinatario.'); return; }
+      if (!activeItem.departmentMessages) activeItem.departmentMessages = [];
+      const fromKey = stepKey(ROUTE_STEPS[selectedStepIdx]);
+      activeItem.departmentMessages.push({
+        id: 'dm_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        from: fromKey, to: target, fromLabel: ROUTE_STEPS[selectedStepIdx].label,
+        toLabel: target === 'Logistics (finale)' ? 'Logistics (finale)' : deptName(target), text, date: getNow(), read: false
+      });
+      $('privateDeptText').value = '';
+      await saveData();
+      renderDepartmentMessages(false);
+    }
+
+    async function editDepartmentMessage(messageId) {
+      if (!activeItem || !activeItem.departmentMessages) return;
+      const message = activeItem.departmentMessages.find(m => m.id === messageId);
+      if (!message) return;
+      const updated = prompt('Modifica il messaggio:', message.text || '');
+      if (updated === null) return;
+      const cleanText = updated.trim();
+      if (!cleanText) { alert('Il messaggio non può essere vuoto.'); return; }
+      message.text = cleanText.slice(0, 1000);
+      message.editedAt = getNow();
+      await saveData();
+      renderDepartmentMessages(false);
+    }
+
+    async function deleteDepartmentMessage(messageId) {
+      if (!activeItem || !activeItem.departmentMessages) return;
+      const message = activeItem.departmentMessages.find(m => m.id === messageId);
+      if (!message) return;
+      if (!confirm('Vuoi eliminare definitivamente questo messaggio?')) return;
+      activeItem.departmentMessages = activeItem.departmentMessages.filter(m => m.id !== messageId);
+      await saveData();
+      renderDepartmentMessages(false);
+    }
+
+    async function saveDepartmentShortNote() {
+      if (!activeItem || selectedStepIdx === null) return;
+      const key = stepKey(ROUTE_STEPS[selectedStepIdx]);
+      const value = $('deptShortNoteInput').value.trim().slice(0,55);
+      if (!activeItem.deptNotes) activeItem.deptNotes = {};
+      if (value) activeItem.deptNotes[key] = value;
+      else delete activeItem.deptNotes[key];
+      closeStepClickModal();
+      await saveData();
+    }
 
     async function saveQuickChatFromStep(e) {
       e.preventDefault();
@@ -2735,10 +2907,8 @@
       const deptLabel = ROUTE_STEPS[selectedStepIdx].label;
       const text = $('quickChatTextInput').value.trim();
       if (!text) return;
-
       if (!activeItem.notesHistory) activeItem.notesHistory = [];
       activeItem.notesHistory.push({ date: getNow(), dept: deptLabel, text: text });
-
       closeQuickChatModal();
       await saveData();
     }
@@ -3106,8 +3276,6 @@
         item.showDateEnd = $('editShowDateEnd').value.trim();
         item.ownerExt = $('editOwnerExt').value.trim();
         item.ownerInt = $('editOwnerInt').value.trim();
-        if (!item.notesHistory) item.notesHistory = [];
-        item.notesHistory.push({ date: getNow(), dept: 'Modifica', text: 'Aggiornati i dati della pratica.' });
         closeEditModal();
         await saveData();
       }
