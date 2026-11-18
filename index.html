@@ -1690,7 +1690,16 @@
       });
 
       const manualsAll = sortTasksByDeadline([...formattedManuals, ...resolvedManuals]);
-      sortTasksByDeadline(autoTasks);
+      // Raggruppa i task automatici per pratica/flusso, mantenendo l'ordine
+      // delle pratiche e l'ordinamento per scadenza all'interno di ciascun flusso.
+      const autoTasksByFlow = new Map();
+      autoTasks.forEach(task => {
+        const flowId = String(task.praticaId || '');
+        if (!autoTasksByFlow.has(flowId)) autoTasksByFlow.set(flowId, []);
+        autoTasksByFlow.get(flowId).push(task);
+      });
+      autoTasks = [];
+      autoTasksByFlow.forEach(flowTasks => autoTasks.push(...sortTasksByDeadline(flowTasks)));
 
       const pinnedAll = [...manualsAll.filter(t => t.pinnedTask), ...autoTasks.filter(t => t.pinnedTask)];
       let allTasks = [...pinnedAll, ...manualsAll.filter(t => !t.pinnedTask), ...autoTasks.filter(t => !t.pinnedTask)];
@@ -1722,9 +1731,11 @@
 
       container.innerHTML = '';
       let lastSection = null;
+      let lastAutoFlowId = null;
       filteredTasks.forEach((t) => {
         const section = t.pinnedTask ? 'pinned' : (t.isManual ? 'manual' : 'auto');
         if (section !== lastSection) {
+          lastAutoFlowId = null;
           const h = document.createElement('div');
           h.style.cssText = section === 'auto'
             ? 'font-size: 18px; font-weight: 900; color: var(--gold-light); margin: 30px 0 12px 4px; border-top: 2px solid var(--border-color); padding-top: 20px;'
@@ -1732,6 +1743,18 @@
           h.textContent = section === 'pinned' ? '📌 Fissati in alto' : (section === 'manual' ? '📝 Task Manuali' : '📊 Task Derivanti dai Flussi');
           container.appendChild(h);
           lastSection = section;
+        }
+        // Nei task automatici mostra il nome della pratica una sola volta
+        // come intestazione del gruppo di attività provenienti dallo stesso flusso.
+        if (!t.isManual) {
+          const flowId = String(t.praticaId || '');
+          if (flowId !== lastAutoFlowId) {
+            const flowHeader = document.createElement('div');
+            flowHeader.style.cssText = 'font-size:15px; font-weight:900; color:#ff2020; margin:18px 0 8px 4px; padding:8px 10px; border-left:3px solid var(--gold-main); background:rgba(214,158,46,0.08); border-radius:5px;';
+            flowHeader.textContent = t.title || 'Pratica';
+            container.appendChild(flowHeader);
+            lastAutoFlowId = flowId;
+          }
         }
         let badgeClass = 'todo-badge';
         if (t.isResolved) badgeClass += ' green';
@@ -1826,7 +1849,7 @@
                 </div>
                 ${isExp ? actionTabsHTML : ''}
               </div>
-              <div ${t.isManual ? `onclick="toggleTodoExpand('${safeId}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"` : `style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;"`}>${linkify(t.title)}${t.isManual ? ` <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span>` : ''}</div>
+              ${t.isManual ? `<div onclick="toggleTodoExpand('${safeId}')" style="cursor: pointer; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word;">${linkify(t.title)} <span style="font-size: 12px; color: var(--gold-light); font-weight: normal; background: rgba(214,158,46,0.15); padding: 2px 8px; border-radius: 6px; margin-left: 6px;">${isExp ? '[Clicca per chiudere ▴]' : '[Clicca per aprire ▾]'}</span></div>` : ''}
               ${isExp ? displayContentHTML : collapsedHTML}
             </div>
             <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex-wrap: wrap; max-width: 150px; flex-shrink: 0;">
